@@ -89,7 +89,7 @@ public class Registro extends AppCompatActivity {
                                     Log.d(TAG, "createUserWithEmail:success");
                                     FirebaseUser user = auth.getCurrentUser();
                                     Toast.makeText(getApplicationContext(), "Usuario creado con éxito", Toast.LENGTH_SHORT).show();
-                                    startActivity(new Intent(Registro.this, Menu_Principal.class));
+                                    startActivity(new Intent(Registro.this, MainActivity.class));
 
 //                                    updateUI(user);
                                 } else {

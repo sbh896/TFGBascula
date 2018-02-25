@@ -34,7 +34,7 @@ public class Login extends AppCompatActivity {
 
         if(auth.getCurrentUser() != null){
             Toast.makeText(getApplicationContext(), "Sesión recuperada", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(Login.this, Menu_Principal.class));
+            startActivity(new Intent(Login.this, MainActivity.class));
         }
 
         // Obtenemos elementos UI
@@ -79,6 +79,7 @@ public class Login extends AppCompatActivity {
                 if (TextUtils.isEmpty(pass)) {
                     Toast.makeText(getApplicationContext(), "Enter password!", Toast.LENGTH_SHORT).show();
                     return;
+
                 }
 
                 progressBar.setVisibility(View.VISIBLE);
@@ -91,7 +92,7 @@ public class Login extends AppCompatActivity {
                                     // Sign in success, update UI with the signed-in user's information
                                     Log.d(TAG, "signInWithEmail:success");
                                     FirebaseUser user = auth.getCurrentUser();
-                                    startActivity(new Intent(Login.this, Menu_Principal.class));
+                                    startActivity(new Intent(Login.this, MainActivity.class));
 
                                     //updateUI(user);
                                 } else {
