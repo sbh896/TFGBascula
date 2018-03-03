@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "127881345437-4fgufn85tu4hj6r9lqurhjpreas1b4sg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "tfg.sergio.bascula",
+            "certificate_hash": "39cf69678f27cdd34a551124c8a68ce92de2e478"
+          }
+        },
+        {
           "client_id": "127881345437-a0ka1kvhrf8s9lmlf9sbpt1r4qfh7djq.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
