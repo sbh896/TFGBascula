@@ -1,13 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@color/white"
+    android:id="@+id/pacientes_screen"
+    >
 
-    <LinearLayout
-        android:id="@+id/pacientes_screen"
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/btn_nuevo"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        app:srcCompat="@drawable/button_add"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:background="@color/white"
@@ -19,24 +30,29 @@
             android:id="@+id/buscador"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/black"/>
+            android:layout_alignParentTop="true"
+            android:layout_marginEnd="44dp"
+            android:layout_toStartOf="@+id/sp_centros"
+            android:textColor="@color/black" />
+
+        <Spinner
+            android:id="@+id/sp_centros"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:gravity="right" />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/lista_pacientes"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="left">
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/buscador"
+            android:layout_gravity="left"
+            android:layout_marginTop="28dp">
 
         </android.support.v7.widget.RecyclerView>
 
-    </LinearLayout>
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/btn_nuevo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@drawable/button_add"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-</android.support.constraint.ConstraintLayout>
+    </RelativeLayout>
+</FrameLayout>

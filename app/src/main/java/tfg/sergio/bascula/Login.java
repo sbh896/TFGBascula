@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -29,11 +30,14 @@ public class Login extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //Remove title bar
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_login);
         auth = FirebaseAuth.getInstance();
 
         if(auth.getCurrentUser() != null){
-            Toast.makeText(getApplicationContext(), "Sesión recuperada", Toast.LENGTH_SHORT).show();
+            FirebaseUser user = auth.getCurrentUser();
+            Toast.makeText(getApplicationContext(), "Sesión recuperada" + user.getEmail(), Toast.LENGTH_SHORT).show();
             startActivity(new Intent(Login.this, MainActivity.class));
         }
 

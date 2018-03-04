@@ -12,13 +12,13 @@
         android:background="@color/white"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="16dp">
-
+        android:padding="30dp">
 
         <ImageView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_gravity="center_horizontal"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:scaleType="fitXY"
+            android:adjustViewBounds="true"
             android:layout_marginBottom="30dp"
             android:src="@drawable/logo_aspace" />
 
@@ -33,7 +33,7 @@
                 android:layout_marginBottom="10dp"
                 android:hint="@string/hint_email"
                 android:inputType="textEmailAddress"
-                android:textColor="@android:color/white"
+                android:textColor="@android:color/black"
                 android:textColorHint="@android:color/black" />
         </android.support.design.widget.TextInputLayout>
 
@@ -48,18 +48,19 @@
                 android:layout_marginBottom="10dp"
                 android:hint="@string/hint_password"
                 android:inputType="textPassword"
-                android:textColor="@android:color/white"
+                android:textColor="@android:color/black"
                 android:textColorHint="@android:color/black" />
         </android.support.design.widget.TextInputLayout>
 
         <!-- Login Button -->
 
         <Button
+            style="@style/Widget.AppCompat.Button.Colored"
             android:id="@+id/btn_login"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dip"
-            android:background="@color/colorAccent"
+            android:background="@color/btn_forms"
             android:text="@string/btn_login"
             android:textColor="@android:color/black" />
 

@@ -16,10 +16,10 @@
     <string name="hint_password">Contraseña</string>
     <string name="hint_name">Fullname</string>
     <string name="btn_login">LOGIN</string>
-    <string name="btn_link_to_register">Not a member? Get registered in Firebase now!</string>
-    <string name="btn_link_to_login">Already registered. Login Me!</string>
+    <string name="btn_link_to_register">Registrarse</string>
+    <string name="btn_link_to_login">Ya estás resgistrado. Entrar</string>
     <string name="title_activity_reset_password">ResetPasswordActivity</string>
-    <string name="btn_forgot_password">Forgot your password?</string>
+    <string name="btn_forgot_password">Recuperar contraseña</string>
     <string name="btn_reset_password">Reset Password</string>
     <string name="btn_back"><![CDATA[<< Back]]></string>
     <string name="hint_new_email">New Email</string>
@@ -27,8 +27,8 @@
     <string name="btn_send">Send</string>
     <string name="btn_remove">Remove</string>
     <string name="btn_sign_out">Sign Out</string>
-    <string name="lbl_forgot_password">Forgot password?</string>
-    <string name="forgot_password_msg">We just need your registered Email Id to sent you password reset instructions.</string>
+    <string name="lbl_forgot_password">Recuperar contraseña</string>
+    <string name="forgot_password_msg">Introuduce el Email con el que te registraste y te enviaremos las instrucciones de recuperación.</string>
     <string name="menu_principal">Menú Principal</string>
     <string name="logout">Log Out </string>
     <string name="title_activity_main">MainActivity</string>
