@@ -7,14 +7,15 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
-        <ImageView
+        <de.hdodenhof.circleimageview.CircleImageView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/iamgen_perfil"
-            android:layout_width="100dp"
-            android:layout_height="120dp"
-            android:layout_alignParentLeft="true"
-            android:layout_marginLeft="20dp"
-            app:srcCompat="@drawable/logo_aspace" />
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:src="@drawable/logo_aspace"
+            app:civ_border_width="2dp"
+            app:civ_border_color="#FF000000"/>
+
 
         <TextView
             android:id="@+id/nombre"
@@ -37,6 +38,17 @@
             android:layout_alignBottom="@+id/nombre"
             android:layout_marginStart="25dp"
             android:layout_toEndOf="@+id/nombre"
+            android:text="TextView"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/centro"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@+id/nombre"
+            android:layout_below="@+id/nombre"
+            android:layout_marginTop="14dp"
             android:text="TextView"
             android:textColor="@color/black"
             android:textSize="18sp" />

@@ -18,6 +18,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -190,6 +192,7 @@ public class PacientesFragment extends Fragment {
     }
 
     private void FireBasePacientesSearch(String search){
+       final Centro c = (Centro)mSpinner.getSelectedItem();
 
         Query firebaseSearchQuery = DBPacientes.orderByChild("nombre").startAt(search).endAt(search + "\uf8ff");
 
@@ -202,12 +205,14 @@ public class PacientesFragment extends Fragment {
             @Override
             protected void populateViewHolder(PacientesViewHolder viewHolder, Paciente model, int position) {
                 //obtenemos el id del paciente en firebase
+
                 final String paciente_key = getRef(position).getKey();
-                viewHolder.setDetails(getActivity().getApplicationContext(), model.getNombre(),model.getApellidos(), model.getUrlImagen());
+                viewHolder.setDetails(getActivity().getApplicationContext(), model.getNombre(),model.getApellidos(), model.getUrlImagen(), model.getCentro(), c);
                 viewHolder.mView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Toast.makeText(getActivity(), paciente_key, Toast.LENGTH_SHORT).show();
+
+//                        Toast.makeText(getActivity(), paciente_key, Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -218,21 +223,32 @@ public class PacientesFragment extends Fragment {
     {
         View mView;
 
+
         public PacientesViewHolder(View itemView) {
             super(itemView);
             mView = itemView;
         }
 
-        public void setDetails(Context ctx, String pNombre, String pApellidos,String imagen){
+        public void setDetails(Context ctx, String pNombre, String pApellidos,String imagen,String centro, Centro c){
             TextView paciente_nombre =  (TextView) mView.findViewById(R.id.nombre);
             TextView paciente_ape = (TextView) mView.findViewById(R.id.apellidos);
+            TextView paciente_centro = (TextView) mView.findViewById(R.id.centro);
             paciente_nombre.setText(pNombre);
             paciente_ape.setText(pApellidos);
+            paciente_centro.setText(centro);
+
             //cargar Imagen
             ImageView foto_paciente = (ImageView) mView.findViewById(R.id.iamgen_perfil);
             Picasso.with(ctx).load(imagen).into(foto_paciente);
 
+            if(c!= null && !centro.equals(c.getId())){
+                //Si no pertenece al centro del filtro de búsqueda, se quita la vista de pantalla.l
+                mView.setVisibility(View.GONE);
+                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(0,0);
+                params.height = 0;
+                mView.setLayoutParams(params);
 
+            }
         }
     }
 }
