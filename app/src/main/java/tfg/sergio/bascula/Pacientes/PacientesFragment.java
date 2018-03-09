@@ -18,7 +18,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -44,7 +43,7 @@ import tfg.sergio.bascula.R;
  */
 
 public class PacientesFragment extends Fragment {
-    DatabaseReference DBPacientes;
+    DatabaseReference dbpacientes;
     private RecyclerView listaPacientes;
     private EditText buscador;
 
@@ -62,7 +61,7 @@ public class PacientesFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        DBPacientes = FirebaseDatabase.getInstance().getReference("pacientes");
+        dbpacientes = FirebaseDatabase.getInstance().getReference("pacientes");
         listaPacientes = (RecyclerView) view.findViewById(R.id.lista_pacientes);
         mSpinner = (Spinner) view.findViewById(R.id.sp_centros);
         mDatabaseCentros = FirebaseDatabase.getInstance().getReference("centros");
@@ -194,7 +193,7 @@ public class PacientesFragment extends Fragment {
     private void FireBasePacientesSearch(String search){
        final Centro c = (Centro)mSpinner.getSelectedItem();
 
-        Query firebaseSearchQuery = DBPacientes.orderByChild("nombre").startAt(search).endAt(search + "\uf8ff");
+        Query firebaseSearchQuery = dbpacientes.orderByChild("nombre").startAt(search).endAt(search + "\uf8ff");
 
         FirebaseRecyclerAdapter<Paciente,PacientesViewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Paciente, PacientesViewHolder>(
                 Paciente.class,
@@ -211,7 +210,15 @@ public class PacientesFragment extends Fragment {
                 viewHolder.mView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-
+                        FragmentManager fm = getFragmentManager();
+                        FragmentTransaction ft = fm.beginTransaction();
+                        ft.addToBackStack("pacientes");
+                        Bundle bundle = new Bundle();
+                        bundle.putString("key",paciente_key);
+                        DetallePacienteFragment fragment = new DetallePacienteFragment();
+                        fragment.setArguments(bundle);
+                        ft.replace(R.id.pacientes_screen,fragment);
+                        ft.commit();
 //                        Toast.makeText(getActivity(), paciente_key, Toast.LENGTH_SHORT).show();
                     }
                 });
