@@ -15,18 +15,20 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 
 import tfg.sergio.bascula.Pacientes.PacientesFragment;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    private Button btn_logout;
     private FirebaseAuth auth;
-    private Button fireBaseDB;
     private FirebaseDatabase database;
+    private TextView navName;
+    private TextView navMail;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,25 +45,13 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        View header=navigationView.getHeaderView(0);
+        navName = (TextView)header.findViewById(R.id.user_name);
+        navMail = (TextView)header.findViewById(R.id.email);
         auth = FirebaseAuth.getInstance();
-        btn_logout = (Button) findViewById(R.id.btn_logout);
-        fireBaseDB = (Button) findViewById(R.id.add_firebase);
-
-        btn_logout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                auth.signOut();
-                startActivity(new Intent(MainActivity.this, Login.class));
-
-            }
-        });
-        fireBaseDB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
+        FirebaseUser user = auth.getCurrentUser();
+        navMail.setText(user.getEmail());
+        navName.setText(user.getDisplayName());
     }
 
     @Override
@@ -74,28 +64,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -106,18 +74,19 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_camera) {
             fragment = new PacientesFragment();
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        } else if (id == R.id.nav_logout) {
+            auth.signOut();
 
-        } else if (id == R.id.nav_slideshow) {
+            FragmentManager manager = getSupportFragmentManager();
+            if (manager.getBackStackEntryCount() > 0) {
+                FragmentManager.BackStackEntry first = manager.getBackStackEntryAt(0);
+                manager.popBackStack(first.getId(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            }
 
+            startActivity(new Intent(MainActivity.this, Login.class));
         } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
         }
+
         if(fragment != null){
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction ft = fragmentManager.beginTransaction();

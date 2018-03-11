@@ -39,6 +39,7 @@ public class Login extends AppCompatActivity {
             FirebaseUser user = auth.getCurrentUser();
             Toast.makeText(getApplicationContext(), "Sesión recuperada" + user.getEmail(), Toast.LENGTH_SHORT).show();
             startActivity(new Intent(Login.this, MainActivity.class));
+            finish();
         }
 
         // Obtenemos elementos UI
@@ -97,6 +98,9 @@ public class Login extends AppCompatActivity {
                                     Log.d(TAG, "signInWithEmail:success");
                                     FirebaseUser user = auth.getCurrentUser();
                                     startActivity(new Intent(Login.this, MainActivity.class));
+                                    finish();
+
+
 
                                     //updateUI(user);
                                 } else {

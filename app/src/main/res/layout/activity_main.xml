@@ -20,20 +20,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/menu_principal"/>
-
-        <Button
-            android:id="@+id/btn_logout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/logout"
-            tools:layout_editor_absoluteX="279dp"
-            tools:layout_editor_absoluteY="16dp" />
-
-        <Button
-            android:id="@+id/add_firebase"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Add_DB" />
     </LinearLayout>
     <include
         layout="@layout/app_bar_main"

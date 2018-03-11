@@ -11,7 +11,7 @@
         android:background="@color/white"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="50dp">
 
         <ImageButton
             android:id="@+id/imagen_paciente"
@@ -46,14 +46,45 @@
                 android:textColor="@android:color/black"
                 android:textColorHint="@android:color/black" />
         </android.support.design.widget.TextInputLayout>
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/date_pick"
+
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:hint="Fecha de nacimiento"
+                android:clickable="false"
+                android:focusable="false"
+                android:cursorVisible="false"
+                android:focusableInTouchMode="false"
+                android:inputType="text"
+                android:textColor="@android:color/black"
+                android:textColorHint="@android:color/black" />
+                />
+        </android.support.design.widget.TextInputLayout>
+
         <Switch
+            android:layout_gravity="left"
+            android:id="@+id/sw_dieta"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="Dieta hipocalórica "
+            android:textOff="No"
+            android:textOn="Sí"
+            android:textSize="18sp" />
+
         <Spinner
             android:id="@+id/sp_centros"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            />
+
+            android:layout_marginTop="21dp" />
+
         <Button
             android:id="@+id/btn_guardar"
             android:text="@string/guardar"

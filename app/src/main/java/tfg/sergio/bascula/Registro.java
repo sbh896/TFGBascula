@@ -17,11 +17,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 
 
 public class Registro extends AppCompatActivity {
 
-    private EditText inputEmail, inputPassword;
+    private EditText inputEmail, inputPassword, inputUser;
     private Button btnSignIn, btnSignUp, btnResetPassword;
     private ProgressBar progressBar;
     private FirebaseAuth auth;
@@ -39,6 +40,7 @@ public class Registro extends AppCompatActivity {
         btnSignUp = (Button) findViewById(R.id.sign_up_button);
         inputEmail = (EditText) findViewById(R.id.email);
         inputPassword = (EditText) findViewById(R.id.password);
+        inputUser = (EditText) findViewById(R.id.user_name);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         btnResetPassword = (Button) findViewById(R.id.btn_recuperar_pwd);
 
@@ -46,6 +48,7 @@ public class Registro extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(Registro.this, Recuperar_pwd.class));
+                finish();
             }
         });
 
@@ -53,6 +56,7 @@ public class Registro extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(Registro.this, Login.class));
+                finish();
             }
         });
 
@@ -62,6 +66,7 @@ public class Registro extends AppCompatActivity {
 
                 String email = inputEmail.getText().toString().trim();
                 String password = inputPassword.getText().toString().trim();
+                final String userName = inputUser.getText().toString();
 
                 if (TextUtils.isEmpty(email)) {
                     Toast.makeText(getApplicationContext(), "Introduzca su Email", Toast.LENGTH_SHORT).show();
@@ -73,10 +78,16 @@ public class Registro extends AppCompatActivity {
                     return;
                 }
 
+                if(TextUtils.isEmpty(userName)){
+                    Toast.makeText(getApplicationContext(), "Introduzca su nombre de usuario.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 if (password.length() < 8) {
                     Toast.makeText(getApplicationContext(), "La contraseña debe tener al menos 8 caracteres", Toast.LENGTH_SHORT).show();
                     return;
                 }
+
 
                 progressBar.setVisibility(View.VISIBLE);
                 //create user
@@ -88,8 +99,12 @@ public class Registro extends AppCompatActivity {
                                     // Sign in success, update UI with the signed-in user's information
                                     Log.d(TAG, "createUserWithEmail:success");
                                     FirebaseUser user = auth.getCurrentUser();
+                                    UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                            .setDisplayName(userName).build();
+                                    user.updateProfile(profileUpdates);
                                     Toast.makeText(getApplicationContext(), "Usuario creado con éxito", Toast.LENGTH_SHORT).show();
                                     startActivity(new Intent(Registro.this, MainActivity.class));
+                                    finish();
 
 //                                    updateUI(user);
                                 } else {

@@ -1,11 +1,14 @@
 package tfg.sergio.bascula.Pacientes;
 
+import android.Manifest;
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -13,22 +16,21 @@ import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,31 +46,46 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 import android.text.format.Time;
 
 import tfg.sergio.bascula.Models.Centro;
 import tfg.sergio.bascula.Models.Paciente;
 import tfg.sergio.bascula.R;
+import tfg.sergio.bascula.Resources.FixedDatePicker;
 
 /**
  * Created by sergio on 27/02/2018.
  */
 
 public class AniadirPacienteFragment extends Fragment {
+
     private EditText inputNombre,inputApellido;
-    private ImageButton foto;
+    private ImageButton inputFoto;
     private Uri uriImagenAltaCalidad = null;
     private static final int CAMERA_REQUEST_CODE = 1;
+    private TextView mDisplayDate;
+    private DatePickerDialog.OnDateSetListener mDateSetListener;
+    private Switch inputDieta;
+    private Spinner mSpinner;
+    private ArrayList<Centro>centros = new ArrayList<>();
+    private Date fechaNacimiento;
     //almacenamiento firebase
     private StorageReference mStorage;
     DatabaseReference mDatabase;
     private DatabaseReference mDatabaseCentros;
-
-    private Spinner mSpinner;
-    private ArrayList<Centro>centros = new ArrayList<>();
-
     private ProgressDialog progreso;
+
+
+    // Permiso de almacenamiento
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -84,13 +101,14 @@ public class AniadirPacienteFragment extends Fragment {
         mDatabase = FirebaseDatabase.getInstance().getReference("pacientes");
         mDatabaseCentros = FirebaseDatabase.getInstance().getReference("centros");
         mSpinner = (Spinner) view.findViewById(R.id.sp_centros);
-
+        mDisplayDate = (TextView) view.findViewById(R.id.date_pick);
         inputNombre = (EditText) view.findViewById(R.id.nombre);
         inputApellido = (EditText) view.findViewById(R.id.apellidos);
-        foto = (ImageButton) view.findViewById(R.id.imagen_paciente);
-
+        inputFoto = (ImageButton) view.findViewById(R.id.imagen_paciente);
+        inputDieta = (Switch) view.findViewById(R.id.sw_dieta);
         progreso = new ProgressDialog(getActivity());
 
+        //Guardado
         view.findViewById(R.id.btn_guardar).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -117,9 +135,12 @@ public class AniadirPacienteFragment extends Fragment {
             }
         });
 
-        foto.setOnClickListener(new View.OnClickListener() {
+        //Botón foto
+        inputFoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //Verificación de permisos
+                verifyStoragePermissions(getActivity());
                 uriImagenAltaCalidad = generateTimeStampPhotoFileUri();
 
                 Intent camera_intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -128,31 +149,75 @@ public class AniadirPacienteFragment extends Fragment {
             }
         });
 
+        //seleccion de centro
         mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
                 Centro c = (Centro)mSpinner.getSelectedItem();
-                Toast.makeText(getActivity(), c.getId(), Toast.LENGTH_SHORT).show();
-
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
-
             }
         });
-        this.obtenerCentros();
 
+        //Seleccion de fecha
+        mDisplayDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Calendar cal = Calendar.getInstance();
+                int anio = cal.get(Calendar.YEAR);
+                int mes = cal.get(Calendar.MONTH);
+                int dia = cal.get(Calendar.DAY_OF_MONTH);
+                Context ctx = new ContextThemeWrapper(
+                        getActivity(),
+                        android.R.style.Theme_Holo_Light_Dialog_MinWidth
+                );
+                DatePickerDialog dialog = new FixedDatePicker(
+                        ctx,
+                        mDateSetListener,
+                        anio,mes,dia
+                );
+                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                dialog.show();
+            }
+        });
+
+        mDateSetListener = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker datePicker, int anio, int mes, int dia) {
+                fechaNacimiento=new Date(anio,mes,dia);
+                mes = mes +1;
+                String fecha = dia+"/" + mes + "/" + anio;
+                mDisplayDate.setText(fecha);
+            }
+        };
+        this.obtenerCentros();
     }
 
+    //Verificador de permisos de la app para usar almacenamiento interno
+    public static void verifyStoragePermissions(Activity activity) {
+        // Check if we have write permission
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
+        }
+    }
+
+    //region Firebase
+    //Obtención de centros a cargar en el selector
     private void obtenerCentros(){
+        //Se establece el array centros como fuente del selector.
         ArrayAdapter<Centro> arrayAdapter = new ArrayAdapter<Centro>(getActivity(),android.R.layout.simple_spinner_dropdown_item,centros){
             @Override
             public boolean isEnabled(int position) {
                 if(position == 0)
-                {
-                    // Disable the first item from Spinner
-                    // First item will be use for hint
+                {// Primer item será hint
                     return false;
                 }
                 else
@@ -167,7 +232,7 @@ public class AniadirPacienteFragment extends Fragment {
                 View view = super.getDropDownView(position, convertView, parent);
                 TextView tv = (TextView) view;
                 if(position == 0){
-                    // Set the hint text color gray
+                    // Hint color
                     tv.setTextColor(Color.GRAY);
                 }
                 else {
@@ -182,7 +247,7 @@ public class AniadirPacienteFragment extends Fragment {
                 View view = super.getDropDownView(position, convertView, parent);
                 TextView tv = (TextView) view;
                 if(position == 0){
-                    // Set the hint text color gray
+                    // Hint color
                     tv.setTextColor(Color.GRAY);
                 }
                 else {
@@ -190,45 +255,38 @@ public class AniadirPacienteFragment extends Fragment {
                 }
                 return view;
             }
-
-
         };
         centros.add(new Centro("-1","Seleccionar centro..."));
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
+        //Se establece el adapter para el selector de centros
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mSpinner.setAdapter(arrayAdapter);
         mDatabaseCentros.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                //Se carga cada uno de los centros
                 String value = dataSnapshot.getValue(String.class);
                 String key = dataSnapshot.getKey();
                 centros.add(new Centro(key,value));
-
             }
-
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
             }
-
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-
             }
-
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
             }
-
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
             }
         });
     }
 
     private void  guardarPaciente(final String nombre,final String apellidos){
+
+        //Guardado del paciente en Firebase
         progreso.setMessage("Guardando paciente ...");
         progreso.show();
         StorageReference path = mStorage.child("Fotos_pacientes").child(uriImagenAltaCalidad.getLastPathSegment());
@@ -237,9 +295,8 @@ public class AniadirPacienteFragment extends Fragment {
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 Uri downloadUri = taskSnapshot.getDownloadUrl();
                 Centro c = (Centro)mSpinner.getSelectedItem();
-
                 String id = mDatabase.push().getKey();
-                Paciente paciente = new Paciente(nombre,apellidos,id,downloadUri.toString(),c.getId());
+                Paciente paciente = new Paciente(nombre,apellidos,id,downloadUri.toString(),c.getId(),fechaNacimiento,inputDieta.isChecked());
                 mDatabase.child(id).setValue(paciente);
                 progreso.dismiss();
 
@@ -248,9 +305,10 @@ public class AniadirPacienteFragment extends Fragment {
 
         FragmentManager fm = getFragmentManager();
         fm.popBackStackImmediate();
-
     }
+    //endregion
 
+    //region Camara y guardado de imágenes
     private Uri generateTimeStampPhotoFileUri() {
 
         Uri photoFileUri = null;
@@ -286,9 +344,8 @@ public class AniadirPacienteFragment extends Fragment {
         if(requestCode == CAMERA_REQUEST_CODE && resultCode == Activity.RESULT_OK){
 
             //imagen alta calidad
-            foto.setImageURI(uriImagenAltaCalidad);
-
-
+            inputFoto.setImageURI(uriImagenAltaCalidad);
         }
     }
+    //endregion
 }

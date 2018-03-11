@@ -204,7 +204,9 @@ public class PacientesFragment extends Fragment {
             @Override
             protected void populateViewHolder(PacientesViewHolder viewHolder, Paciente model, int position) {
                 //obtenemos el id del paciente en firebase
-
+                if (model == null){
+                    return;
+                }
                 final String paciente_key = getRef(position).getKey();
                 viewHolder.setDetails(getActivity().getApplicationContext(), model.getNombre(),model.getApellidos(), model.getUrlImagen(), model.getCentro(), c);
                 viewHolder.mView.setOnClickListener(new View.OnClickListener() {

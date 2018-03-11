@@ -1,5 +1,7 @@
 package tfg.sergio.bascula.Models;
 
+import java.util.Date;
+
 /**
  * Created by sergio on 27/02/2018.
  */
@@ -10,6 +12,13 @@ public class Paciente {
     private String Id;
     private String UrlImagen;
     private String Centro;
+    private Date FechaNacimiento;
+
+    public void setEsDietaHipocalorica(boolean esDietaHipocalorica) {EsDietaHipocalorica = esDietaHipocalorica;}
+
+    private boolean EsDietaHipocalorica;
+
+    public void setFechaNacimiento(Date fechaNacimiento) {this.FechaNacimiento = fechaNacimiento;}
 
     public void setCentro(String centro) {
         Centro = centro;
@@ -31,13 +40,19 @@ public class Paciente {
     public String getNombre() {return Nombre;}
     public String getApellidos() {return Apellidos;}
     public String getCentro() {return Centro;}
+    public Date getFechaNacimiento() {return FechaNacimiento;}
+    public boolean getEsDietaHipocalorica() {return EsDietaHipocalorica;}
 
-    public Paciente(String n, String a, String id, String url, String centro){
+
+
+    public Paciente(String n, String a, String id, String url, String centro, Date fecha, boolean dieta){
         this.Nombre=n;
         this.Apellidos = a;
         this.Id = id;
         this.UrlImagen = url;
         this.Centro = centro;
+        this.FechaNacimiento = fecha;
+        this.EsDietaHipocalorica = dieta;
     }
     public Paciente(){
 
