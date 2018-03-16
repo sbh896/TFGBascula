@@ -9,6 +9,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -17,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -51,7 +53,7 @@ public class PacientesFragment extends Fragment {
     private Spinner mSpinner;
     private ArrayList<Centro> centros = new ArrayList<>();
     private DatabaseReference mDatabaseCentros;
-    private FloatingActionButton btnadd;
+    private Button btnadd;
 
 
     @Nullable
@@ -71,7 +73,7 @@ public class PacientesFragment extends Fragment {
 
 
         //listaPacientes.setHasFixedSize(true);
-        listaPacientes.setLayoutManager(new LinearLayoutManager(this.getActivity()));
+        listaPacientes.setLayoutManager(new GridLayoutManager(this.getActivity(),2));
 
         this.FireBasePacientesSearch("");
         this.obtenerCentros();
@@ -97,7 +99,6 @@ public class PacientesFragment extends Fragment {
 
         view.findViewById(R.id.btn_nuevo).setOnClickListener(new View.OnClickListener(){
             public void onClick(View view){
-                btnadd.hide();
                 FragmentManager fm = getFragmentManager();
                 FragmentTransaction ft = fm.beginTransaction();
                 ft.addToBackStack("pacientes");
@@ -244,15 +245,15 @@ public class PacientesFragment extends Fragment {
 
         public void setDetails(Context ctx, String pNombre, String pApellidos,String imagen,String centro, Centro c){
             TextView paciente_nombre =  (TextView) mView.findViewById(R.id.nombre);
-            TextView paciente_ape = (TextView) mView.findViewById(R.id.apellidos);
-            TextView paciente_centro = (TextView) mView.findViewById(R.id.centro);
-            paciente_nombre.setText(pNombre);
-            paciente_ape.setText(pApellidos);
-            paciente_centro.setText(centro);
+            //TextView paciente_ape = (TextView) mView.findViewById(R.id.apellidos);
+           // TextView paciente_centro = (TextView) mView.findViewById(R.id.centro);
+            paciente_nombre.setText(pNombre + " " + pApellidos);
+          //  paciente_ape.setText(pApellidos);
+          //  paciente_centro.setText(centro);
 
             //cargar Imagen
             ImageView foto_paciente = (ImageView) mView.findViewById(R.id.iamgen_perfil);
-            Picasso.with(ctx).load(imagen).into(foto_paciente);
+            Picasso.with(ctx).load(imagen).resize(200,200).into(foto_paciente);
 
             if(c!= null && !centro.equals(c.getId())){
                 //Si no pertenece al centro del filtro de búsqueda, se quita la vista de pantalla.l

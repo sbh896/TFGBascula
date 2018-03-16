@@ -17,8 +17,10 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.LineChart;
@@ -38,6 +40,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
@@ -48,6 +51,7 @@ import tfg.sergio.bascula.Models.Centro;
 import tfg.sergio.bascula.Models.Paciente;
 import tfg.sergio.bascula.Models.RegistroPaciente;
 import tfg.sergio.bascula.R;
+import tfg.sergio.bascula.bascula.basculaFragment;
 
 /**
  * Created by yeyo on 05/03/2018.
@@ -61,7 +65,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
     private ImageView out_perfil;
     private DatabaseReference mDatabase;
     private DatabaseReference mDatabaseRegs;
-    private FloatingActionButton btn_add;
+    private Button pesarButton;
     AlertDialog.Builder builder;
     private ArrayList<RegistroPaciente> registros = new ArrayList<>();
 
@@ -102,6 +106,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         mDatabaseRegs = FirebaseDatabase.getInstance().getReference("registros");
         out_nombre = view.findViewById(R.id.txt_nombre);
         out_perfil = view.findViewById(R.id.foto_perfil);
+        pesarButton = view.findViewById(R.id.btn_pesar);
         mChart = (LineChart) view.findViewById(R.id.peso_grafica);
         mChart.setOnChartGestureListener(this);
         mChart.setOnChartValueSelectedListener(this);
@@ -112,7 +117,22 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         mChart2.setDrawGridBackground(false);
         obtenerRegistros();
 
-
+        pesarButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                registros.clear();
+                FragmentManager fm = getFragmentManager();
+                FragmentTransaction ft = fm.beginTransaction();
+                ft.addToBackStack("detalle");
+                Bundle bundle = new Bundle();
+                bundle.putString("key",key);
+                Fragment fragment = new basculaFragment();
+                fragment.setArguments(bundle);
+                ft.replace(R.id.pacientes_screen,fragment);
+                ft.commit();
+                Toast.makeText(getActivity(), "new one", Toast.LENGTH_SHORT).show();
+            }
+        });
 
 
         mDatabase.child(key).addValueEventListener(new ValueEventListener() {
@@ -125,7 +145,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                 }
                 out_nombre.setText(paciente.getNombre() +" "+paciente.getApellidos());
                 //cargar Imagen
-                Picasso.with(getActivity()).load(paciente.getUrlImagen()).into(out_perfil);
+                Picasso.with(getActivity()).load(paciente.getUrlImagen()).resize(200,200).into(out_perfil);
 
 
 
@@ -166,12 +186,24 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
     }
 
     private void obtenerRegistros(){
-        mDatabaseRegs.addChildEventListener(new ChildEventListener() {
+        Query firebaseSearchQuery = mDatabaseRegs.orderByChild("codigoPaciente").equalTo(key);
+
+        firebaseSearchQuery.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 //Se carga cada uno de los centros
                 RegistroPaciente value = dataSnapshot.getValue(RegistroPaciente.class);
+                value.setCodigoRegistro(dataSnapshot.getKey());
+                boolean insert = true;
+                for(RegistroPaciente reg :registros){
+                    if(reg.getCodigoRegistro() == value.getCodigoRegistro()){
+                        insert = false;
+                    }
+                }
+                if(insert){
+
                 registros.add(value);
+                }
                 setData();
             }
             @Override
@@ -246,6 +278,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
     }
 
     private void setData() {
+
         ArrayList<String> xVals = setXAxisValues();
 
         ArrayList<Entry> yVals = setYAxisValues();

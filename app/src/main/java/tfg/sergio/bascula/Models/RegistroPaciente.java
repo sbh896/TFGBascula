@@ -7,6 +7,15 @@ import java.util.Date;
  */
 
 public class RegistroPaciente {
+    public String getCodigoRegistro() {
+        return codigoRegistro;
+    }
+
+    public void setCodigoRegistro(String codigoRegistro) {
+        this.codigoRegistro = codigoRegistro;
+    }
+
+    private String codigoRegistro;
     private String CodigoPaciente;
     private double Peso;
     private double Altura;
