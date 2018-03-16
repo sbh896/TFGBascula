@@ -9,7 +9,7 @@
             android:icon="@drawable/ic_pacientes"
             android:title="Pacientes" />
         <item
-            android:id="@+id/nav_gallery"
+            android:id="@+id/nav_bascula"
             android:icon="@drawable/ic_menu_gallery"
             android:title="Báscula" />
     </group>

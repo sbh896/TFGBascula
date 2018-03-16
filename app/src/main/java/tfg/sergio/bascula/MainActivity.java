@@ -22,6 +22,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 
 import tfg.sergio.bascula.Pacientes.PacientesFragment;
+import tfg.sergio.bascula.bascula.basculaFragment;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -85,7 +86,10 @@ public class MainActivity extends AppCompatActivity
 
             startActivity(new Intent(MainActivity.this, Login.class));
         } else if (id == R.id.nav_manage) {
+        } else if (id== R.id.nav_bascula){
+            fragment = new basculaFragment();
         }
+
 
         if(fragment != null){
             FragmentManager fragmentManager = getSupportFragmentManager();

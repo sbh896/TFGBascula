@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -50,6 +51,7 @@ public class PacientesFragment extends Fragment {
     private Spinner mSpinner;
     private ArrayList<Centro> centros = new ArrayList<>();
     private DatabaseReference mDatabaseCentros;
+    private FloatingActionButton btnadd;
 
 
     @Nullable
@@ -64,6 +66,7 @@ public class PacientesFragment extends Fragment {
         dbpacientes = FirebaseDatabase.getInstance().getReference("pacientes");
         listaPacientes = (RecyclerView) view.findViewById(R.id.lista_pacientes);
         mSpinner = (Spinner) view.findViewById(R.id.sp_centros);
+        btnadd = view.findViewById(R.id.btn_nuevo);
         mDatabaseCentros = FirebaseDatabase.getInstance().getReference("centros");
 
 
@@ -94,6 +97,7 @@ public class PacientesFragment extends Fragment {
 
         view.findViewById(R.id.btn_nuevo).setOnClickListener(new View.OnClickListener(){
             public void onClick(View view){
+                btnadd.hide();
                 FragmentManager fm = getFragmentManager();
                 FragmentTransaction ft = fm.beginTransaction();
                 ft.addToBackStack("pacientes");

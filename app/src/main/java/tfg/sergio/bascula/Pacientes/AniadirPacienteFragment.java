@@ -74,7 +74,7 @@ public class AniadirPacienteFragment extends Fragment {
     private Date fechaNacimiento;
     //almacenamiento firebase
     private StorageReference mStorage;
-    DatabaseReference mDatabase;
+    private DatabaseReference mDatabase;
     private DatabaseReference mDatabaseCentros;
     private ProgressDialog progreso;
 
