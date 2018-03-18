@@ -1,12 +1,14 @@
 package tfg.sergio.bascula.Models;
 
+import android.support.annotation.NonNull;
+
 import java.util.Date;
 
 /**
  * Created by sergio on 12/03/2018.
  */
 
-public class RegistroPaciente {
+public class RegistroPaciente implements Comparable<RegistroPaciente>{
     public String getCodigoRegistro() {
         return codigoRegistro;
     }
@@ -17,8 +19,8 @@ public class RegistroPaciente {
 
     private String codigoRegistro;
     private String CodigoPaciente;
-    private double Peso;
-    private double Altura;
+    private double Peso=0;
+    private double Altura=0;
     private Date Fecha;
 
     public void setCodigoPaciente(String codigoPaciente) {
@@ -64,4 +66,18 @@ public class RegistroPaciente {
         this.Fecha = fecha;
     }
 
+    @Override
+    public int compareTo(@NonNull RegistroPaciente registroPaciente) {
+        if(this.Fecha == null || registroPaciente.getFecha() == null){
+            return 0;
+        }
+        return this.Fecha.compareTo(registroPaciente.getFecha());
+    }
+
+    public float getIMC(){
+        if (this.Altura == 0 ){
+            return 0;
+        }
+        return (float) (this.Peso/Math.pow(this.Altura,2));
+    }
 }

@@ -32,7 +32,7 @@ import tfg.sergio.bascula.Registro;
 
 public class basculaFragment extends Fragment {
     private Button add;
-    private DatabaseReference mDatabase;
+    private DatabaseReference mDatabase, mDatabase2;
     private String key = "";
 
     @Nullable
@@ -44,6 +44,8 @@ public class basculaFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         mDatabase = FirebaseDatabase.getInstance().getReference("registros");
+        mDatabase2 = FirebaseDatabase.getInstance().getReference("pacientes");
+
         Bundle bundle = getArguments();
         key = bundle.getString("key");
 
@@ -58,9 +60,16 @@ public class basculaFragment extends Fragment {
 
                 final RegistroPaciente regis = new RegistroPaciente(key,n,m, Calendar.getInstance().getTime());
 
-                //Guardado del paciente en Firebase
+                //Guardado del registro en Firebase
                 String id = mDatabase.push().getKey();
                 mDatabase.child(id).setValue(regis);
+
+                //Actualización de referencia de último registro de paciente
+                try {
+                    mDatabase2.child(key).child("ultimoRegistro").setValue(id);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
                 FragmentManager fm = getFragmentManager();
                 fm.popBackStackImmediate();

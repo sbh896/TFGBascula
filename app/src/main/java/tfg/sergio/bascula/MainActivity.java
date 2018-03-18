@@ -30,13 +30,14 @@ public class MainActivity extends AppCompatActivity
     private FirebaseDatabase database;
     private TextView navName;
     private TextView navMail;
+    private NavigationView mDrawerLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity
         FirebaseUser user = auth.getCurrentUser();
         navMail.setText(user.getEmail());
         navName.setText(user.getDisplayName());
+        mDrawerLayout = findViewById(R.id.nav_view);
     }
 
     @Override
@@ -85,9 +87,6 @@ public class MainActivity extends AppCompatActivity
             }
 
             startActivity(new Intent(MainActivity.this, Login.class));
-        } else if (id == R.id.nav_manage) {
-        } else if (id== R.id.nav_bascula){
-            fragment = new basculaFragment();
         }
 
 
@@ -103,4 +102,5 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
 }

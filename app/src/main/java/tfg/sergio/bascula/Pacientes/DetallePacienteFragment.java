@@ -1,6 +1,7 @@
 package tfg.sergio.bascula.Pacientes;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.support.design.widget.FloatingActionButton;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -26,6 +28,7 @@ import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.LimitLine;
+import com.github.mikephil.charting.components.MarkerView;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
@@ -35,6 +38,7 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
+import com.github.mikephil.charting.utils.MPPointD;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -45,12 +49,17 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.lang.reflect.Array;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+
 
 import tfg.sergio.bascula.Models.Centro;
 import tfg.sergio.bascula.Models.Paciente;
 import tfg.sergio.bascula.Models.RegistroPaciente;
 import tfg.sergio.bascula.R;
+import tfg.sergio.bascula.Resources.CustomMarkerView;
 import tfg.sergio.bascula.bascula.basculaFragment;
 
 /**
@@ -61,7 +70,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         OnChartValueSelectedListener {
     private String key = "";
     private LineChart mChart, mChart2;
-    private TextView out_nombre;
+    private TextView out_nombre, out_Fecha, out_IMC;
     private ImageView out_perfil;
     private DatabaseReference mDatabase;
     private DatabaseReference mDatabaseRegs;
@@ -95,7 +104,6 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
             default:
                 return super.onOptionsItemSelected(item);
         }
-
     }
 
     @Override
@@ -105,6 +113,8 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         mDatabase = FirebaseDatabase.getInstance().getReference("pacientes");
         mDatabaseRegs = FirebaseDatabase.getInstance().getReference("registros");
         out_nombre = view.findViewById(R.id.txt_nombre);
+        out_Fecha = view.findViewById(R.id.txt_fecha);
+        out_IMC = view.findViewById(R.id.txt_imc);
         out_perfil = view.findViewById(R.id.foto_perfil);
         pesarButton = view.findViewById(R.id.btn_pesar);
         mChart = (LineChart) view.findViewById(R.id.peso_grafica);
@@ -130,7 +140,6 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                 fragment.setArguments(bundle);
                 ft.replace(R.id.pacientes_screen,fragment);
                 ft.commit();
-                Toast.makeText(getActivity(), "new one", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -146,9 +155,6 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                 out_nombre.setText(paciente.getNombre() +" "+paciente.getApellidos());
                 //cargar Imagen
                 Picasso.with(getActivity()).load(paciente.getUrlImagen()).resize(200,200).into(out_perfil);
-
-
-
             }
 
             @Override
@@ -163,7 +169,6 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 mDatabase.child(key).removeValue();
-
                 dialogInterface.dismiss();
                 FragmentManager fm = getFragmentManager();
                 FragmentTransaction ft = fm.beginTransaction();
@@ -177,7 +182,6 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
-
                 dialogInterface.dismiss();
             }
         });
@@ -186,6 +190,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
     }
 
     private void obtenerRegistros(){
+        final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
         Query firebaseSearchQuery = mDatabaseRegs.orderByChild("codigoPaciente").equalTo(key);
 
         firebaseSearchQuery.addChildEventListener(new ChildEventListener() {
@@ -201,9 +206,11 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                     }
                 }
                 if(insert){
-
-                registros.add(value);
+                    registros.add(value);
                 }
+                Collections.sort(registros);
+                out_Fecha.setText(formatter.format(registros.get(registros.size()-1).getFecha()));
+                out_IMC.setText(Float.toString(value.getIMC()));
                 setData();
             }
             @Override
@@ -249,6 +256,10 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         leftAxis.enableGridDashedLine(10f, 10f, 0f);
         leftAxis.setDrawZeroLine(false);
         leftAxis.setDrawLimitLinesBehindData(true);
+
+        CustomMarkerView mv = new CustomMarkerView(getActivity(), R.layout.marker_layout);
+
+        mChart.setMarkerView(mv);
         mChart.getAxisRight().setEnabled(false);
         mChart.animateX(2500, Easing.EasingOption.EaseInOutQuart);
         mChart.invalidate();
@@ -266,6 +277,9 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         // enable scaling and dragging
         mChart2.setDragEnabled(true);
         mChart2.setScaleEnabled(true);
+        CustomMarkerView mv2 = new CustomMarkerView(getActivity(), R.layout.marker_layout);
+        mChart2.setMarkerView(mv2);
+
         YAxis leftAxis2 = mChart2.getAxisLeft();
         leftAxis2.removeAllLimitLines(); // reset all limit lines to avoid overlapping lines
         leftAxis2.enableGridDashedLine(10f, 10f, 0f);
@@ -278,7 +292,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
     }
 
     private void setData() {
-
+        Collections.sort(registros);
         ArrayList<String> xVals = setXAxisValues();
 
         ArrayList<Entry> yVals = setYAxisValues();
@@ -379,7 +393,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                                     ChartTouchListener.ChartGesture
                                             lastPerformedGesture) {
 
-        Log.i("Gesture", "START, x: " + me.getX() + ", y: " + me.getY());
+       // Log.i("Gesture", "START, x: " + me.getX() + ", y: " + me.getY());
     }
 
     public void onChartGestureEnd(MotionEvent me,
@@ -407,6 +421,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
     @Override
     public void onChartSingleTapped(MotionEvent me) {
 
+
     }
 
     @Override
@@ -426,7 +441,6 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
 
     @Override
     public void onValueSelected(Entry e, Highlight h) {
-
     }
 
     @Override
@@ -435,6 +449,5 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
     }
     //endregion
 
-    //endregion
 }
 

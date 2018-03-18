@@ -33,9 +33,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import tfg.sergio.bascula.Models.Centro;
 import tfg.sergio.bascula.Models.Paciente;
@@ -46,13 +49,11 @@ import tfg.sergio.bascula.R;
  */
 
 public class PacientesFragment extends Fragment {
-    DatabaseReference dbpacientes;
     private RecyclerView listaPacientes;
     private EditText buscador;
-
     private Spinner mSpinner;
     private ArrayList<Centro> centros = new ArrayList<>();
-    private DatabaseReference mDatabaseCentros;
+    private DatabaseReference mDatabaseCentros, mDatabaseRegistros,dbpacientes;
     private Button btnadd;
 
 
@@ -66,14 +67,15 @@ public class PacientesFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         dbpacientes = FirebaseDatabase.getInstance().getReference("pacientes");
+        mDatabaseCentros = FirebaseDatabase.getInstance().getReference("centros");
+        mDatabaseRegistros = FirebaseDatabase.getInstance().getReference("registros");
         listaPacientes = (RecyclerView) view.findViewById(R.id.lista_pacientes);
         mSpinner = (Spinner) view.findViewById(R.id.sp_centros);
         btnadd = view.findViewById(R.id.btn_nuevo);
-        mDatabaseCentros = FirebaseDatabase.getInstance().getReference("centros");
 
 
         //listaPacientes.setHasFixedSize(true);
-        listaPacientes.setLayoutManager(new GridLayoutManager(this.getActivity(),2));
+        listaPacientes.setLayoutManager(new GridLayoutManager(this.getActivity(),3));
 
         this.FireBasePacientesSearch("");
         this.obtenerCentros();
@@ -107,11 +109,13 @@ public class PacientesFragment extends Fragment {
                 ft.commit();
                 Toast.makeText(getActivity(), "new one", Toast.LENGTH_SHORT).show();
 
+
             }
         });
 
     }
 
+    //region centros
     private void obtenerCentros(){
         ArrayAdapter<Centro> arrayAdapter = new ArrayAdapter<Centro>(getActivity(),android.R.layout.simple_spinner_dropdown_item,centros){
             @Override
@@ -194,9 +198,13 @@ public class PacientesFragment extends Fragment {
             }
         });
     }
+    //endregion
 
+    //region pacientes
     private void FireBasePacientesSearch(String search){
        final Centro c = (Centro)mSpinner.getSelectedItem();
+        final Date[] fechaUltimoRegistro = {null};
+
 
         Query firebaseSearchQuery = dbpacientes.orderByChild("nombre").startAt(search).endAt(search + "\uf8ff");
 
@@ -207,32 +215,53 @@ public class PacientesFragment extends Fragment {
                 firebaseSearchQuery
         ) {
             @Override
-            protected void populateViewHolder(PacientesViewHolder viewHolder, Paciente model, int position) {
+            protected void populateViewHolder(final PacientesViewHolder viewHolder, final Paciente model, int position) {
                 //obtenemos el id del paciente en firebase
+
                 if (model == null){
                     return;
                 }
                 final String paciente_key = getRef(position).getKey();
-                viewHolder.setDetails(getActivity().getApplicationContext(), model.getNombre(),model.getApellidos(), model.getUrlImagen(), model.getCentro(), c);
-                viewHolder.mView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        FragmentManager fm = getFragmentManager();
-                        FragmentTransaction ft = fm.beginTransaction();
-                        ft.addToBackStack("pacientes");
-                        Bundle bundle = new Bundle();
-                        bundle.putString("key",paciente_key);
-                        DetallePacienteFragment fragment = new DetallePacienteFragment();
-                        fragment.setArguments(bundle);
-                        ft.replace(R.id.pacientes_screen,fragment);
-                        ft.commit();
-//                        Toast.makeText(getActivity(), paciente_key, Toast.LENGTH_SHORT).show();
-                    }
-                });
+                if(model.getUltimoRegistro() != null){
+                   mDatabaseRegistros.child(model.getUltimoRegistro()).child("fecha").addListenerForSingleValueEvent(new ValueEventListener() {
+                       @Override
+                       public void onDataChange(DataSnapshot dataSnapshot) {
+                           Date fecha =  (Date) dataSnapshot.getValue(Date.class);
+                           CallViewHolder(viewHolder,model,fecha,paciente_key,c);
+
+                       }
+
+                       @Override
+                       public void onCancelled(DatabaseError databaseError) {
+
+                       }
+                   });
+                }
+                CallViewHolder(viewHolder,model,null,paciente_key,c);
             }
         };
         listaPacientes.setAdapter(firebaseRecyclerAdapter);
     }
+
+    public void CallViewHolder(PacientesViewHolder viewHolder, Paciente model, Date fecha, final String paciente_key, Centro centro){
+
+        viewHolder.setDetails(getActivity().getApplicationContext(), model.getNombre(),model.getApellidos(), model.getUrlImagen(), model.getCentro(), centro , fecha);
+        viewHolder.mView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FragmentManager fm = getFragmentManager();
+                FragmentTransaction ft = fm.beginTransaction();
+                ft.addToBackStack("pacientes");
+                Bundle bundle = new Bundle();
+                bundle.putString("key",paciente_key);
+                DetallePacienteFragment fragment = new DetallePacienteFragment();
+                fragment.setArguments(bundle);
+                ft.replace(R.id.pacientes_screen,fragment);
+                ft.commit();
+            }
+        });
+    }
+
     public static class PacientesViewHolder extends RecyclerView.ViewHolder
     {
         View mView;
@@ -243,26 +272,27 @@ public class PacientesFragment extends Fragment {
             mView = itemView;
         }
 
-        public void setDetails(Context ctx, String pNombre, String pApellidos,String imagen,String centro, Centro c){
+        public void setDetails(Context ctx, String pNombre, String pApellidos,String imagen,String centro, Centro c, Date ultimoRegistro){
+            final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yy");
             TextView paciente_nombre =  (TextView) mView.findViewById(R.id.nombre);
-            //TextView paciente_ape = (TextView) mView.findViewById(R.id.apellidos);
-           // TextView paciente_centro = (TextView) mView.findViewById(R.id.centro);
+            TextView paciente_fecha = mView.findViewById(R.id.fecha);
+
             paciente_nombre.setText(pNombre + " " + pApellidos);
-          //  paciente_ape.setText(pApellidos);
-          //  paciente_centro.setText(centro);
+
+            paciente_fecha.setText(ultimoRegistro == null ? "-":formatter.format(ultimoRegistro));
 
             //cargar Imagen
             ImageView foto_paciente = (ImageView) mView.findViewById(R.id.iamgen_perfil);
             Picasso.with(ctx).load(imagen).resize(200,200).into(foto_paciente);
 
-            if(c!= null && !centro.equals(c.getId())){
+            if(c!= null && !centro.equals(c.getId()) && c.getId() != "-1"){
                 //Si no pertenece al centro del filtro de búsqueda, se quita la vista de pantalla.l
                 mView.setVisibility(View.GONE);
                 RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(0,0);
                 params.height = 0;
                 mView.setLayoutParams(params);
-
             }
         }
     }
+    //endregion
 }

@@ -2,12 +2,16 @@
  <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    app:cardElevation="5dp" android:layout_margin="7dp">
+    app:cardElevation="5dp" android:layout_margin="7dp"
+    app:cardCornerRadius="6dp"
+    app:contentPadding="25dp"
+    app:cardMaxElevation="6dp">
 <RelativeLayout
     android:layout_width="wrap_content" android:layout_height="wrap_content">
     <ImageView android:id="@+id/iamgen_perfil" android:layout_width="match_parent"
         android:layout_height="155dp"
-        android:scaleType="fitXY" />
+        android:scaleType="fitXY"
+        android:src="@drawable/logo_aspace"/>
     <View android:id="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
@@ -16,9 +20,33 @@
         android:layout_alignParentLeft="true" android:layout_below="@id/divider"
         android:layout_toLeftOf="@+id/image_overflow"
         android:maxLines="2"
-        android:padding="10dp"
-        android:text="Empty for now"
+        android:paddingTop="10dp"
+        android:text="Nombre"
         android:textSize="16sp"/>
+
+    <TextView
+        android:id="@+id/title_fecha"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/nombre"
+        android:maxLines="2"
+        android:paddingRight="0dp"
+        android:text="Ult. registro: "
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/fecha"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/title_fecha"
+        android:layout_alignBottom="@+id/title_fecha"
+        android:layout_toEndOf="@+id/title_fecha"
+        android:maxLines="2"
+        android:paddingLeft="0dp"
+        android:text="Empty for now"
+        android:textSize="16sp" />
+
     <ImageView android:id="@+id/image_overflow" android:layout_width="20dp"
         android:layout_height="wrap_content" android:layout_alignBottom="@+id/nombre" android:layout_alignParentRight="true" android:layout_below="@id/divider"
         android:layout_marginRight="7dp" android:src="@drawable/ic_pacientes"/>

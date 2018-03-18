@@ -13,28 +13,26 @@ public class Paciente {
     private String UrlImagen;
     private String Centro;
     private Date FechaNacimiento;
+    private boolean EsDietaHipocalorica;
+    private String UltimoRegistro = null;
+
 
     public void setEsDietaHipocalorica(boolean esDietaHipocalorica) {EsDietaHipocalorica = esDietaHipocalorica;}
-
-    private boolean EsDietaHipocalorica;
-
     public void setFechaNacimiento(Date fechaNacimiento) {this.FechaNacimiento = fechaNacimiento;}
-
     public void setCentro(String centro) {
         Centro = centro;
     }
-
     public void setUrlImagen(String urlImagen) {
         UrlImagen = urlImagen;
     }
-
     public void setNombre(String nombre) {
         Nombre = nombre;
     }
-
     public void setApellidos(String apellidos) {
         Apellidos = apellidos;
     }
+    public void setUltimoRegistro(String ultimoRegistro) {UltimoRegistro = ultimoRegistro;}
+
 
     public String getUrlImagen() { return UrlImagen; }
     public String getNombre() {return Nombre;}
@@ -42,6 +40,7 @@ public class Paciente {
     public String getCentro() {return Centro;}
     public Date getFechaNacimiento() {return FechaNacimiento;}
     public boolean getEsDietaHipocalorica() {return EsDietaHipocalorica;}
+    public String getUltimoRegistro() {return UltimoRegistro;}
 
 
 
@@ -57,4 +56,5 @@ public class Paciente {
     public Paciente(){
 
     }
+
 }

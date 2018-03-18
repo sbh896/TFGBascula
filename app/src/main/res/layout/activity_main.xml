@@ -46,6 +46,7 @@
         app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/activity_main_drawer"
         tools:visibility="invisible"
+        android:theme="@style/NavigationTheme"
         />
 
 </android.support.v4.widget.DrawerLayout>
