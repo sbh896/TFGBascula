@@ -53,13 +53,17 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 
 
 import tfg.sergio.bascula.Models.Centro;
 import tfg.sergio.bascula.Models.Paciente;
 import tfg.sergio.bascula.Models.RegistroPaciente;
 import tfg.sergio.bascula.R;
+import tfg.sergio.bascula.Registro;
 import tfg.sergio.bascula.Resources.CustomMarkerView;
+import tfg.sergio.bascula.Resources.EnumIMC;
+import tfg.sergio.bascula.Resources.IMCCalculator;
 import tfg.sergio.bascula.bascula.basculaFragment;
 
 /**
@@ -70,7 +74,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         OnChartValueSelectedListener {
     private String key = "";
     private LineChart mChart, mChart2;
-    private TextView out_nombre, out_Fecha, out_IMC;
+    private TextView out_nombre, out_peso, out_IMC, out_edad, out_altura;
     private ImageView out_perfil;
     private DatabaseReference mDatabase;
     private DatabaseReference mDatabaseRegs;
@@ -113,8 +117,10 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         mDatabase = FirebaseDatabase.getInstance().getReference("pacientes");
         mDatabaseRegs = FirebaseDatabase.getInstance().getReference("registros");
         out_nombre = view.findViewById(R.id.txt_nombre);
-        out_Fecha = view.findViewById(R.id.txt_fecha);
+        out_peso = view.findViewById(R.id.txt_peso);
+        out_edad = view.findViewById(R.id.txt_edad);
         out_IMC = view.findViewById(R.id.txt_imc);
+        out_altura = view.findViewById(R.id.txt_altura);
         out_perfil = view.findViewById(R.id.foto_perfil);
         pesarButton = view.findViewById(R.id.btn_pesar);
         mChart = (LineChart) view.findViewById(R.id.peso_grafica);
@@ -145,14 +151,37 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
 
 
         mDatabase.child(key).addValueEventListener(new ValueEventListener() {
+            final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+            IMCCalculator imcCalculator = new IMCCalculator();
+
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                Paciente paciente = (Paciente) dataSnapshot.getValue(Paciente.class);
+                final Paciente paciente = (Paciente) dataSnapshot.getValue(Paciente.class);
                 if(paciente == null){
                     return;
                 }
                 out_nombre.setText(paciente.getNombre() +" "+paciente.getApellidos());
+                if(paciente.getUltimoRegistro() != null){
+                    mDatabaseRegs.child(paciente.getUltimoRegistro()).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            RegistroPaciente reg =  (RegistroPaciente) dataSnapshot.getValue(RegistroPaciente.class);
+                            int IMC = IMCCalculator.Calcular(paciente.monthsBetweenDates(),reg.getIMC(),0);
+                            out_IMC.setText(EnumIMC.values()[IMC].toString());
+                            out_edad.setText(""+paciente.monthsBetweenDates());
+                            out_altura.setText(String.format("%.2f",reg.getAltura()));
+                            out_peso.setText(String.format("%.2f",reg.getPeso()));
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+                out_edad.setText(formatter.format(paciente.getFechaNacimiento()));
+
                 //cargar Imagen
                 Picasso.with(getActivity()).load(paciente.getUrlImagen()).resize(200,200).into(out_perfil);
             }
@@ -209,8 +238,6 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                     registros.add(value);
                 }
                 Collections.sort(registros);
-                out_Fecha.setText(formatter.format(registros.get(registros.size()-1).getFecha()));
-                out_IMC.setText(Float.toString(value.getIMC()));
                 setData();
             }
             @Override
@@ -403,9 +430,9 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         Log.i("Gesture", "END, lastGesture: " + lastPerformedGesture);
 
         // un-highlight values after the gesture is finished and no single-tap
-        if(lastPerformedGesture != ChartTouchListener.ChartGesture.SINGLE_TAP)
-            // or highlightTouch(null) for callback to onNothingSelected(...)
-            mChart.highlightValues(null);
+//        if(lastPerformedGesture != ChartTouchListener.ChartGesture.SINGLE_TAP)
+//            // or highlightTouch(null) for callback to onNothingSelected(...)
+//            mChart.highlightValues(null);
     }
 
     @Override

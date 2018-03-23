@@ -21,16 +21,23 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_marginEnd="44dp"
-            android:layout_toStartOf="@+id/sp_centros"
             android:textColor="@color/black" />
 
         <Spinner
             android:id="@+id/sp_centros"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"
-            android:gravity="right" />
+            android:gravity="left"
+            android:layout_below="@+id/buscador"
+            />
+
+        <Spinner
+            android:id="@+id/sp_estado_imc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/sp_centros"
+            android:layout_alignTop="@+id/sp_centros"
+            />
         <Button
             android:id="@+id/btn_nuevo"
             android:layout_width="wrap_content"
@@ -46,10 +53,9 @@
             android:layout_width="fill_parent"
             android:layout_height="match_parent"
             android:layout_alignParentStart="true"
-            android:layout_below="@+id/buscador"
+            android:layout_below="@+id/sp_centros"
             android:layout_gravity="left"
             android:layout_marginTop="28dp">
-
         </android.support.v7.widget.RecyclerView>
 
     </RelativeLayout>

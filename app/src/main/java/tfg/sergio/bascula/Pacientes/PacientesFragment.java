@@ -5,18 +5,17 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -43,6 +42,7 @@ import java.util.Date;
 import tfg.sergio.bascula.Models.Centro;
 import tfg.sergio.bascula.Models.Paciente;
 import tfg.sergio.bascula.R;
+import tfg.sergio.bascula.Resources.EnumIMC;
 
 /**
  * Created by yeyo on 25/02/2018.
@@ -51,7 +51,7 @@ import tfg.sergio.bascula.R;
 public class PacientesFragment extends Fragment {
     private RecyclerView listaPacientes;
     private EditText buscador;
-    private Spinner mSpinner;
+    private Spinner sp_centros, sp_imc;
     private ArrayList<Centro> centros = new ArrayList<>();
     private DatabaseReference mDatabaseCentros, mDatabaseRegistros,dbpacientes;
     private Button btnadd;
@@ -70,12 +70,15 @@ public class PacientesFragment extends Fragment {
         mDatabaseCentros = FirebaseDatabase.getInstance().getReference("centros");
         mDatabaseRegistros = FirebaseDatabase.getInstance().getReference("registros");
         listaPacientes = (RecyclerView) view.findViewById(R.id.lista_pacientes);
-        mSpinner = (Spinner) view.findViewById(R.id.sp_centros);
+        sp_imc = view.findViewById(R.id.sp_estado_imc);
+        sp_centros = (Spinner) view.findViewById(R.id.sp_centros);
         btnadd = view.findViewById(R.id.btn_nuevo);
 
 
         //listaPacientes.setHasFixedSize(true);
         listaPacientes.setLayoutManager(new GridLayoutManager(this.getActivity(),3));
+        sp_imc.setAdapter(new ArrayAdapter<EnumIMC>(getActivity(), android.R.layout.simple_spinner_dropdown_item, EnumIMC.values()));
+
 
         this.FireBasePacientesSearch("");
         this.obtenerCentros();
@@ -109,6 +112,18 @@ public class PacientesFragment extends Fragment {
                 ft.commit();
                 Toast.makeText(getActivity(), "new one", Toast.LENGTH_SHORT).show();
 
+
+            }
+        });
+
+        sp_centros.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                FireBasePacientesSearch("");
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
 
             }
         });
@@ -167,7 +182,7 @@ public class PacientesFragment extends Fragment {
         centros.add(new Centro("-1","Seleccionar centro..."));
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        mSpinner.setAdapter(arrayAdapter);
+        sp_centros.setAdapter(arrayAdapter);
         mDatabaseCentros.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -202,7 +217,9 @@ public class PacientesFragment extends Fragment {
 
     //region pacientes
     private void FireBasePacientesSearch(String search){
-       final Centro c = (Centro)mSpinner.getSelectedItem();
+       final Centro c = (Centro) sp_centros.getSelectedItem();
+       final int estado = ((EnumIMC) sp_imc.getSelectedItem()).getId();
+
         final Date[] fechaUltimoRegistro = {null};
 
 
@@ -290,7 +307,7 @@ public class PacientesFragment extends Fragment {
                 mView.setVisibility(View.GONE);
                 RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(0,0);
                 params.height = 0;
-                mView.setLayoutParams(params);
+               // mView.setLayoutParams(params);
             }
         }
     }
