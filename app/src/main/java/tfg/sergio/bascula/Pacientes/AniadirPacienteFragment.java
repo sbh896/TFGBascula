@@ -265,9 +265,9 @@ public class AniadirPacienteFragment extends Fragment {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 //Se carga cada uno de los centros
-                String value = dataSnapshot.getValue(String.class);
+                Centro c= dataSnapshot.getValue(Centro.class);
                 String key = dataSnapshot.getKey();
-                centros.add(new Centro(key,value));
+                centros.add(c);
             }
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
@@ -296,7 +296,7 @@ public class AniadirPacienteFragment extends Fragment {
                 Uri downloadUri = taskSnapshot.getDownloadUrl();
                 Centro c = (Centro)mSpinner.getSelectedItem();
                 String id = mDatabase.push().getKey();
-                Paciente paciente = new Paciente(nombre,apellidos,id,downloadUri.toString(),c.getId(),fechaNacimiento,inputDieta.isChecked());
+                Paciente paciente = new Paciente(nombre,apellidos,id,downloadUri.toString(),c.Id,fechaNacimiento,inputDieta.isChecked());
                 mDatabase.child(id).setValue(paciente);
                 progreso.dismiss();
 

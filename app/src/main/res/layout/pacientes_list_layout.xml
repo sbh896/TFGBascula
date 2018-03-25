@@ -47,9 +47,16 @@
         android:text="Empty for now"
         android:textSize="16sp" />
 
-    <ImageView android:id="@+id/image_overflow" android:layout_width="20dp"
-        android:layout_height="wrap_content" android:layout_alignBottom="@+id/nombre" android:layout_alignParentRight="true" android:layout_below="@id/divider"
-        android:layout_marginRight="7dp" android:src="@drawable/ic_pacientes"/>
+
+    <!--<ImageView-->
+        <!--android:id="@+id/imagen_estado"-->
+        <!--android:layout_width="20dp"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignBottom="@+id/nombre"-->
+        <!--android:layout_alignParentRight="true"-->
+        <!--android:layout_below="@id/divider"-->
+        <!--android:layout_marginRight="7dp"-->
+        <!--android:src="@drawable/circulo"/>-->
 </RelativeLayout>
 </android.support.v7.widget.CardView>
 

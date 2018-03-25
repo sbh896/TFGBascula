@@ -1,8 +1,11 @@
 package tfg.sergio.bascula.Pacientes;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.service.autofill.Dataset;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -15,10 +18,12 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
@@ -38,11 +43,16 @@ import com.squareup.picasso.Picasso;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import tfg.sergio.bascula.Models.AdapterPaciente;
 import tfg.sergio.bascula.Models.Centro;
+import tfg.sergio.bascula.Models.ElementoListadoPaciente;
 import tfg.sergio.bascula.Models.Paciente;
+import tfg.sergio.bascula.Models.RegistroPaciente;
 import tfg.sergio.bascula.R;
 import tfg.sergio.bascula.Resources.EnumIMC;
+import tfg.sergio.bascula.Resources.IMCCalculator;
 
 /**
  * Created by yeyo on 25/02/2018.
@@ -54,7 +64,10 @@ public class PacientesFragment extends Fragment {
     private Spinner sp_centros, sp_imc;
     private ArrayList<Centro> centros = new ArrayList<>();
     private DatabaseReference mDatabaseCentros, mDatabaseRegistros,dbpacientes;
-    private Button btnadd;
+    private ImageButton btnadd;
+
+    RecyclerView.Adapter adapter;
+    List<ElementoListadoPaciente> elementos = new ArrayList<>();
 
 
     @Nullable
@@ -73,6 +86,7 @@ public class PacientesFragment extends Fragment {
         sp_imc = view.findViewById(R.id.sp_estado_imc);
         sp_centros = (Spinner) view.findViewById(R.id.sp_centros);
         btnadd = view.findViewById(R.id.btn_nuevo);
+        btnadd.bringToFront();
 
 
         //listaPacientes.setHasFixedSize(true);
@@ -116,17 +130,17 @@ public class PacientesFragment extends Fragment {
             }
         });
 
-        sp_centros.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                FireBasePacientesSearch("");
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
+//        sp_centros.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+//                FireBasePacientesSearch("");
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> adapterView) {
+//
+//            }
+//        });
 
     }
 
@@ -186,10 +200,9 @@ public class PacientesFragment extends Fragment {
         mDatabaseCentros.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                String value = dataSnapshot.getValue(String.class);
+                Centro c= dataSnapshot.getValue(Centro.class);
                 String key = dataSnapshot.getKey();
-                centros.add(new Centro(key,value));
-
+                centros.add(c);
             }
 
             @Override
@@ -219,33 +232,37 @@ public class PacientesFragment extends Fragment {
     private void FireBasePacientesSearch(String search){
        final Centro c = (Centro) sp_centros.getSelectedItem();
        final int estado = ((EnumIMC) sp_imc.getSelectedItem()).getId();
+       elementos.removeAll(elementos);
 
         final Date[] fechaUltimoRegistro = {null};
 
 
         Query firebaseSearchQuery = dbpacientes.orderByChild("nombre").startAt(search).endAt(search + "\uf8ff");
 
-        FirebaseRecyclerAdapter<Paciente,PacientesViewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Paciente, PacientesViewHolder>(
-                Paciente.class,
-                R.layout.pacientes_list_layout,
-                PacientesViewHolder.class,
-                firebaseSearchQuery
-        ) {
-            @Override
-            protected void populateViewHolder(final PacientesViewHolder viewHolder, final Paciente model, int position) {
-                //obtenemos el id del paciente en firebase
+        adapter = new AdapterPaciente(elementos, getActivity());
 
-                if (model == null){
-                    return;
-                }
-                final String paciente_key = getRef(position).getKey();
-                if(model.getUltimoRegistro() != null){
-                   mDatabaseRegistros.child(model.getUltimoRegistro()).child("fecha").addListenerForSingleValueEvent(new ValueEventListener() {
+        listaPacientes.setAdapter(adapter);
+
+        firebaseSearchQuery.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                final Paciente paciente = dataSnapshot.getValue(Paciente.class);
+                final String paciente_key = dataSnapshot.getKey();
+
+                ElementoListadoPaciente elp = new ElementoListadoPaciente();
+                final RegistroPaciente regis;
+                elp.paciente=paciente;
+                if(paciente.getUltimoRegistro() != null){
+
+                   mDatabaseRegistros.child(paciente.getUltimoRegistro()).addListenerForSingleValueEvent(new ValueEventListener() {
                        @Override
                        public void onDataChange(DataSnapshot dataSnapshot) {
-                           Date fecha =  (Date) dataSnapshot.getValue(Date.class);
-                           CallViewHolder(viewHolder,model,fecha,paciente_key,c);
-
+                           RegistroPaciente reg = dataSnapshot.getValue(RegistroPaciente.class);
+                           if(reg != null){
+                               IMCCalculator imcCalculator = new IMCCalculator();
+                               int IMC = IMCCalculator.Calcular(paciente.monthsBetweenDates(),reg.getIMC(),0);
+                           }
+                               addElement(paciente,reg, paciente_key);
                        }
 
                        @Override
@@ -254,62 +271,165 @@ public class PacientesFragment extends Fragment {
                        }
                    });
                 }
-                CallViewHolder(viewHolder,model,null,paciente_key,c);
+                else if (paciente.getUltimoRegistro()==null){
+                    addElement(paciente,null, paciente_key);
+                }
             }
-        };
-        listaPacientes.setAdapter(firebaseRecyclerAdapter);
-    }
 
-    public void CallViewHolder(PacientesViewHolder viewHolder, Paciente model, Date fecha, final String paciente_key, Centro centro){
-
-        viewHolder.setDetails(getActivity().getApplicationContext(), model.getNombre(),model.getApellidos(), model.getUrlImagen(), model.getCentro(), centro , fecha);
-        viewHolder.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                FragmentManager fm = getFragmentManager();
-                FragmentTransaction ft = fm.beginTransaction();
-                ft.addToBackStack("pacientes");
-                Bundle bundle = new Bundle();
-                bundle.putString("key",paciente_key);
-                DetallePacienteFragment fragment = new DetallePacienteFragment();
-                fragment.setArguments(bundle);
-                ft.replace(R.id.pacientes_screen,fragment);
-                ft.commit();
-            }
-        });
-    }
-
-    public static class PacientesViewHolder extends RecyclerView.ViewHolder
-    {
-        View mView;
-
-
-        public PacientesViewHolder(View itemView) {
-            super(itemView);
-            mView = itemView;
-        }
-
-        public void setDetails(Context ctx, String pNombre, String pApellidos,String imagen,String centro, Centro c, Date ultimoRegistro){
-            final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yy");
-            TextView paciente_nombre =  (TextView) mView.findViewById(R.id.nombre);
-            TextView paciente_fecha = mView.findViewById(R.id.fecha);
-
-            paciente_nombre.setText(pNombre + " " + pApellidos);
-
-            paciente_fecha.setText(ultimoRegistro == null ? "-":formatter.format(ultimoRegistro));
-
-            //cargar Imagen
-            ImageView foto_paciente = (ImageView) mView.findViewById(R.id.iamgen_perfil);
-            Picasso.with(ctx).load(imagen).resize(200,200).into(foto_paciente);
-
-            if(c!= null && !centro.equals(c.getId()) && c.getId() != "-1"){
-                //Si no pertenece al centro del filtro de búsqueda, se quita la vista de pantalla.l
-                mView.setVisibility(View.GONE);
-                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(0,0);
-                params.height = 0;
+            public void addElement(Paciente pac , RegistroPaciente reg, String key){
+            if(c!= null && !pac.getCentro().equals(c.Id) && c.Id != "-1"){
+                //Si no pertenece al centro del filtro de búsqueda, se quita
+                return;
                // mView.setLayoutParams(params);
             }
-        }
+                ElementoListadoPaciente elp = new ElementoListadoPaciente();
+                elp.paciente = pac;
+                elp.registroPaciente = reg;
+                elp.key = key;
+                if(!elementos.contains(elp)){
+                    elementos.add(elp);
+                    adapter.notifyDataSetChanged();
+                }
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+//        FirebaseRecyclerAdapter<Paciente,PacientesViewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Paciente, PacientesViewHolder>(
+//                Paciente.class,
+//                R.layout.pacientes_list_layout,
+//                PacientesViewHolder.class,
+//                firebaseSearchQuery
+//        ) {
+//            @Override
+//            protected void populateViewHolder(final PacientesViewHolder viewHolder, final Paciente model, int position) {
+//                //obtenemos el id del paciente en firebase
+//
+//                if (model == null){
+//                    return;
+//                }
+//                final String paciente_key = getRef(position).getKey();
+//                if(model.getUltimoRegistro() != null){
+//                   mDatabaseRegistros.child(model.getUltimoRegistro()).addListenerForSingleValueEvent(new ValueEventListener() {
+//                       @Override
+//                       public void onDataChange(DataSnapshot dataSnapshot) {
+//                           RegistroPaciente reg = dataSnapshot.getValue(RegistroPaciente.class);
+//                           Date fecha =  reg.getFecha();
+//                           IMCCalculator imcCalculator = new IMCCalculator();
+//                           int IMC = IMCCalculator.Calcular(model.monthsBetweenDates(),reg.getIMC(),0);
+//
+//                           CallViewHolder(viewHolder,model,fecha,paciente_key,c, IMC);
+//
+//                       }
+//
+//                       @Override
+//                       public void onCancelled(DatabaseError databaseError) {
+//
+//                       }
+//                   });
+//                }
+//                CallViewHolder(viewHolder,model,null,paciente_key,c,0);
+//            }
+//        };
+//        listaPacientes.setAdapter(firebaseRecyclerAdapter);
     }
+
+//    public void CallViewHolder(PacientesViewHolder viewHolder, Paciente model, Date fecha, final String paciente_key, Centro centro, int estado){
+//
+//        viewHolder.setDetails(getActivity().getApplicationContext(), model.getNombre(),model.getApellidos(), model.getUrlImagen(), model.getCentro(), centro , fecha, estado);
+//        viewHolder.mView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                FragmentManager fm = getFragmentManager();
+//                FragmentTransaction ft = fm.beginTransaction();
+//                ft.addToBackStack("pacientes");
+//                Bundle bundle = new Bundle();
+//                bundle.putString("key",paciente_key);
+//                DetallePacienteFragment fragment = new DetallePacienteFragment();
+//                fragment.setArguments(bundle);
+//                ft.replace(R.id.pacientes_screen,fragment);
+//                ft.commit();
+//            }
+//        });
+//    }
+
+//    public static class PacientesViewHolder extends RecyclerView.ViewHolder
+//    {
+//        View mView;
+//
+//
+//        public PacientesViewHolder(View itemView) {
+//            super(itemView);
+//            mView = itemView;
+//        }
+//
+//        public void setDetails(Context ctx, String pNombre, String pApellidos,String imagen,String centro, Centro c, Date ultimoRegistro, int estado){
+//            final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yy");
+//            TextView paciente_nombre =  (TextView) mView.findViewById(R.id.nombre);
+//            TextView paciente_fecha = mView.findViewById(R.id.fecha);
+//            ImageView estadoPaciente = mView.findViewById(R.id.imagen_estado);
+//            GradientDrawable bgShape = (GradientDrawable)estadoPaciente.getDrawable();
+//            Resources res = ctx.getResources();
+//            switch (estado){
+//                case 0:
+//                    bgShape.setColor(Color.RED);
+//                    break;
+//                case 1:
+//                    bgShape.setColor(res.getColor(R.color.OrangeRed));
+//                    break;
+//                case 2:
+//                    bgShape.setColor(res.getColor(R.color.Green));
+//                    break;
+//                case 3:
+//                    bgShape.setColor(res.getColor(R.color.LightGreen));
+//                    break;
+//                case 4:
+//                    bgShape.setColor(res.getColor(R.color.OrangeRed));
+//                    break;
+//                case 5:
+//                    bgShape.setColor(Color.RED);
+//                    break;
+//
+//            }
+//            bgShape.setColor(Color.BLACK);
+//
+//
+//            paciente_nombre.setText(pNombre + " " + pApellidos);
+//
+//            paciente_fecha.setText(ultimoRegistro == null ? "-":formatter.format(ultimoRegistro));
+//
+//            //cargar Imagen
+//            ImageView foto_paciente = (ImageView) mView.findViewById(R.id.iamgen_perfil);
+//            Picasso.with(ctx).load(imagen).resize(200,200).into(foto_paciente);
+//
+//            if(c!= null && !centro.equals(c.getId()) && c.getId() != "-1"){
+//                //Si no pertenece al centro del filtro de búsqueda, se quita la vista de pantalla.l
+//                mView.setVisibility(View.GONE);
+//                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(0,0);
+//                params.height = 0;
+//               // mView.setLayoutParams(params);
+//            }
+//        }
+//    }
     //endregion
 }

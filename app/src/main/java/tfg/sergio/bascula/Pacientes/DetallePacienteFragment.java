@@ -54,6 +54,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 import tfg.sergio.bascula.Models.Centro;
@@ -81,6 +84,10 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
     private Button pesarButton;
     AlertDialog.Builder builder;
     private ArrayList<RegistroPaciente> registros = new ArrayList<>();
+    int estado;
+    String centro;
+    Paciente paciente_final;
+
 
 
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -142,6 +149,8 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                 ft.addToBackStack("detalle");
                 Bundle bundle = new Bundle();
                 bundle.putString("key",key);
+                bundle.putInt("estado",estado);
+                bundle.putString("centro",centro);
                 Fragment fragment = new basculaFragment();
                 fragment.setArguments(bundle);
                 ft.replace(R.id.pacientes_screen,fragment);
@@ -161,17 +170,22 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                 if(paciente == null){
                     return;
                 }
+                paciente_final = paciente;
+                centro = paciente.getCentro();
                 out_nombre.setText(paciente.getNombre() +" "+paciente.getApellidos());
                 if(paciente.getUltimoRegistro() != null){
                     mDatabaseRegs.child(paciente.getUltimoRegistro()).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             RegistroPaciente reg =  (RegistroPaciente) dataSnapshot.getValue(RegistroPaciente.class);
-                            int IMC = IMCCalculator.Calcular(paciente.monthsBetweenDates(),reg.getIMC(),0);
-                            out_IMC.setText(EnumIMC.values()[IMC].toString());
-                            out_edad.setText(""+paciente.monthsBetweenDates());
-                            out_altura.setText(String.format("%.2f",reg.getAltura()));
-                            out_peso.setText(String.format("%.2f",reg.getPeso()));
+                            if(reg!=null){
+                                int IMC = IMCCalculator.Calcular(paciente.monthsBetweenDates(),reg.getIMC(),0);
+                                estado = IMC;
+                                out_IMC.setText(EnumIMC.values()[IMC].toString());
+                                out_edad.setText(""+paciente.monthsBetweenDates());
+                                out_peso.setText(String.format("%.2f",reg.getPeso()));
+                                out_altura.setText(String.format("%.2f",reg.getAltura()));
+                            }
                         }
 
                         @Override
@@ -314,6 +328,9 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         leftAxis2.setDrawLimitLinesBehindData(true);
         mChart2.getAxisRight().setEnabled(false);
         mChart2.animateX(2500, Easing.EasingOption.EaseInOutQuart);
+
+
+
         mChart2.invalidate();
 
     }

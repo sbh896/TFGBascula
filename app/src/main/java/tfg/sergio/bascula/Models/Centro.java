@@ -5,24 +5,9 @@ package tfg.sergio.bascula.Models;
  */
 
 public class Centro {
-    private String Id,Nombre;
+    public String Id;
+    public String Nombre;
 
-    public String getId() {
-        return Id;
-    }
-
-    public String getNombre() {
-        return Nombre;
-    }
-
-
-    public void setId(String id) {
-        this.Id = id;
-    }
-
-    public void setNombre(String nombre) {
-        this.Nombre = nombre;
-    }
     public Centro(){
 
     }
@@ -34,4 +19,6 @@ public class Centro {
     public String toString(){
         return Nombre;
     }
+
+
 }

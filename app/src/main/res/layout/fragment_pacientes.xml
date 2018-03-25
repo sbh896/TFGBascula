@@ -21,7 +21,9 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_marginEnd="44dp"
-            android:textColor="@color/black" />
+            android:textColor="@color/black"
+            android:inputType="textNoSuggestions"
+            />
 
         <Spinner
             android:id="@+id/sp_centros"
@@ -38,14 +40,17 @@
             android:layout_toRightOf="@+id/sp_centros"
             android:layout_alignTop="@+id/sp_centros"
             />
-        <Button
+        <ImageButton
+            android:src="@drawable/button_add"
             android:id="@+id/btn_nuevo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="60dp"
+            android:scaleType="fitCenter"
+            android:layout_height="60dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
             android:layout_marginBottom="15dp"
             android:layout_marginRight="15dp"
+            android:background="@null"
             android:text="Button" />
 
         <android.support.v7.widget.RecyclerView
