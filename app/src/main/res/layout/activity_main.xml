@@ -30,14 +30,28 @@
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:id="@+id/title_grafica"
                 android:textSize="20dp"
                 android:text="Estadísticas globales"
                 android:padding="20dp"
                 android:textColor="@color/black"/>
+
+                <Spinner
+                    android:id="@+id/sp_centros"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="21dp"
+                    android:layout_below="@+id/title_grafica"/>
+            </RelativeLayout>
+
         </LinearLayout>
         <LinearLayout
             android:background="@color/white"

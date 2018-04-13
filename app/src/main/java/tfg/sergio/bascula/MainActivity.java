@@ -19,9 +19,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.Legend;
@@ -48,6 +51,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import tfg.sergio.bascula.Centros.AniadirCentroFragment;
 import tfg.sergio.bascula.Models.Centro;
@@ -64,8 +68,12 @@ public class MainActivity extends AppCompatActivity
     private TextView navName;
     private TextView navMail;
     private NavigationView mDrawerLayout;
+    private Spinner mSpinner;
     private BarChart mChart;
     private DatabaseReference mDatabaseCentros, mDatabaseDatosMes;
+    private List<PacientesMesCentro> pmCentros = new ArrayList<>();
+
+
     private ArrayList<Centro> centros = new ArrayList<>();
     private int NumObesidad = 0;
     private int NumSobrepeso = 0;
@@ -98,6 +106,8 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         View header=navigationView.getHeaderView(0);
         navName = (TextView)header.findViewById(R.id.user_name);
+        mSpinner = (Spinner) findViewById(R.id.sp_centros);
+
         navMail = (TextView)header.findViewById(R.id.email);
         auth = FirebaseAuth.getInstance();
         FirebaseUser user = auth.getCurrentUser();
@@ -108,7 +118,19 @@ public class MainActivity extends AppCompatActivity
         mDatabaseCentros = FirebaseDatabase.getInstance().getReference("centros");
         mDatabaseDatosMes = FirebaseDatabase.getInstance().getReference("pacientesMes");
 
+        //seleccion de centro
+        mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
 
+                Centro c = (Centro)mSpinner.getSelectedItem();
+                Toast.makeText(getApplicationContext(), c.Id, Toast.LENGTH_SHORT).show();
+
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
         obtenerCentros();
     }
 
@@ -275,16 +297,7 @@ public class MainActivity extends AppCompatActivity
         ArrayAdapter<Centro> arrayAdapter = new ArrayAdapter<Centro>(this,android.R.layout.simple_spinner_dropdown_item,centros){
             @Override
             public boolean isEnabled(int position) {
-                if(position == 0)
-                {
-                    // Disable the first item from Spinner
-                    // First item will be use for hint
-                    return false;
-                }
-                else
-                {
-                    return true;
-                }
+                return true;
             }
 
             @NonNull
@@ -316,18 +329,27 @@ public class MainActivity extends AppCompatActivity
                 }
                 return view;
             }
-
-
         };
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
         centros.add(new Centro("-1","Seleccionar centro..."));
+
+        //Se establece el adapter para el selector de centros
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSpinner.setAdapter(arrayAdapter);
 
         mDatabaseCentros.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Centro selectedCentro = (Centro)mSpinner.getSelectedItem();
+                if(selectedCentro!= null){
+                    Toast.makeText(getApplicationContext(), selectedCentro.Id, Toast.LENGTH_SHORT).show();
+                }
                 Centro c= dataSnapshot.getValue(Centro.class);
-                String key = dataSnapshot.getKey();
+                if(selectedCentro != null && selectedCentro.Id != "-1" && selectedCentro.Id != c.Id){
+                    return;
+                }
+
+
+                    String key = dataSnapshot.getKey();
                 centros.add(c);
                 DateFormat dateFormat = new SimpleDateFormat("YYYYMM");
                 Date date = new Date();
@@ -335,7 +357,7 @@ public class MainActivity extends AppCompatActivity
                 Query firebaseSearchQuery = mDatabaseDatosMes.orderByChild("id").startAt(ident).endAt(ident);
 
                 //actualización recuento por centros
-                firebaseSearchQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+                firebaseSearchQuery.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         PacientesMesCentro pmc = null;
@@ -344,12 +366,23 @@ public class MainActivity extends AppCompatActivity
                             System.out.println(child.getKey());
                             pmc = child.getValue(PacientesMesCentro.class);
                         }
-                        NumObesidad += pmc.NumObesidad;
-                        NumSobrepeso += pmc.NumSobrepeso;
-                        NumNormal += pmc.NumNormal;
-                        NumDesnutricion += pmc.NumDesnutricion;
-                        NumDesnutricionMod += pmc.NumDesnutricionMod;
-                        NumDesnutricionSev += pmc.NumDesnutricionSev;
+                        PacientesMesCentro temp = null;
+                        for (PacientesMesCentro pmc2: pmCentros
+                             ) {
+                            if(pmc2.id.equals(pmc.id)){
+                                temp = pmc2;
+                            }
+                        }
+
+                        NumObesidad = NumObesidad + pmc.NumObesidad - (temp == null ?  0 : temp.NumObesidad);
+                        NumSobrepeso = NumSobrepeso + pmc.NumSobrepeso - (temp == null ? 0 : temp.NumSobrepeso);
+                        NumNormal = pmc.NumNormal + NumNormal - (temp == null ? 0 : temp.NumNormal);
+                        NumDesnutricion = pmc.NumDesnutricion + NumDesnutricion - (temp == null ? 0 : temp.NumDesnutricion);
+                        NumDesnutricionMod = pmc.NumDesnutricionMod + NumDesnutricionMod - (temp == null ? 0 : temp.NumDesnutricionMod);
+                        NumDesnutricionSev = pmc.NumDesnutricionSev + NumDesnutricionSev - (temp == null ? 0 : temp.NumDesnutricionSev);
+                        pmCentros.remove(temp);
+                        pmCentros.add(pmc);
+
                         inicializarGrafica();
 
                     }

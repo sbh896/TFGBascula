@@ -61,6 +61,7 @@ import java.util.stream.Stream;
 
 import tfg.sergio.bascula.Models.Centro;
 import tfg.sergio.bascula.Models.Paciente;
+import tfg.sergio.bascula.Models.PacientesMesCentro;
 import tfg.sergio.bascula.Models.RegistroPaciente;
 import tfg.sergio.bascula.R;
 import tfg.sergio.bascula.Registro;

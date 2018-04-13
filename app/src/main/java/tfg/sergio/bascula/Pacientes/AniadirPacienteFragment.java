@@ -153,6 +153,7 @@ public class AniadirPacienteFragment extends Fragment {
         mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+
                 Centro c = (Centro)mSpinner.getSelectedItem();
             }
             @Override
