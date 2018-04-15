@@ -7,6 +7,8 @@ package tfg.sergio.bascula.Models;
 public class Centro {
     public String Id;
     public String Nombre;
+    public String Direccion;
+    public String UrlImagen;
 
     public Centro(){
 

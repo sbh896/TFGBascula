@@ -2,11 +2,14 @@ package tfg.sergio.bascula.Centros;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -19,6 +22,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
 import android.text.format.Time;
 import android.view.ContextThemeWrapper;
@@ -35,6 +39,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -45,7 +50,9 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -55,6 +62,7 @@ import java.util.Date;
 import tfg.sergio.bascula.Models.Centro;
 import tfg.sergio.bascula.Models.Paciente;
 import tfg.sergio.bascula.Models.PacientesMesCentro;
+import tfg.sergio.bascula.Pacientes.PacientesFragment;
 import tfg.sergio.bascula.R;
 import tfg.sergio.bascula.Resources.FixedDatePicker;
 
@@ -64,7 +72,7 @@ import tfg.sergio.bascula.Resources.FixedDatePicker;
 
 public class AniadirCentroFragment extends Fragment {
 
-    private EditText inputCentro;
+    private EditText inputCentro, inputDireccion;
     private ImageButton inputFoto;
     private Uri uriImagenAltaCalidad = null;
     private static final int CAMERA_REQUEST_CODE = 1;
@@ -73,8 +81,9 @@ public class AniadirCentroFragment extends Fragment {
     private DatabaseReference mDatabase;
     private DatabaseReference mDatabaseCentros, mDatabaseDatosMes;
     private ProgressDialog progreso;
+    AlertDialog.Builder alert;
 
-
+    private int PICK_IMAGE_REQUEST = 1;
     // Permiso de almacenamiento
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
@@ -99,24 +108,75 @@ public class AniadirCentroFragment extends Fragment {
         mDatabaseDatosMes = FirebaseDatabase.getInstance().getReference("pacientesMes");
 
         inputCentro = (EditText) view.findViewById(R.id.nombre);
+        inputDireccion = view.findViewById(R.id.direccion);
         inputFoto = (ImageButton) view.findViewById(R.id.imagen_paciente);
         progreso = new ProgressDialog(getActivity());
+        alert = new AlertDialog.Builder(getActivity());
+        alert.setTitle("Añadir centro");
+        alert.setMessage("¿Desea añadir el centro sin dirección?");
+        alert.setPositiveButton("Sí", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                guardarCentro();
+            }
+        });
+        alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
 
+                dialogInterface.dismiss();
+            }
+        });
         //Guardado
         view.findViewById(R.id.btn_guardar).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String nombre = inputCentro.getText().toString();
-
-                if (TextUtils.isEmpty(nombre)) {
+                if (TextUtils.isEmpty(inputCentro.getText().toString())) {
                     Toast.makeText(getActivity(), "Introduzca un nombre.", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
-                guardarCentro(nombre);
+                if(TextUtils.isEmpty(inputDireccion.getText().toString())){
+                    AlertDialog alertar = alert.create();
+                    alertar.show();
+                }
+                else{
+                    guardarCentro();
+                }
             }
         });
 
+        //Botón foto
+        inputFoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent();
+                // Show only images, no videos or anything else
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                // Always show the chooser (if there are multiple options available)
+                startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+            }
+        });
+
+
+
+    }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
+
+            Uri uri = data.getData();
+
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
+                // Log.d(TAG, String.valueOf(bitmap));
+                inputFoto.setImageBitmap(bitmap);
+                uriImagenAltaCalidad = uri;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     //Verificador de permisos de la app para usar almacenamiento interno
@@ -135,25 +195,58 @@ public class AniadirCentroFragment extends Fragment {
     }
 
     //region Firebase
-    //Obtención de centros a cargar en el selector
+    private void  guardarCentro(){
+        final String nombre = inputCentro.getText().toString();
+        final String direccion = inputDireccion.getText().toString();
 
-    private void  guardarCentro(final String nombre){
-        DateFormat dateFormat = new SimpleDateFormat("YYYYMM");
-        Date date = new Date();
 
-        //Guardado del paciente en Firebase
-        progreso.setMessage("Guardando centro ...");
-        progreso.show();
+        Bitmap bmp = null;
+        try {
+            bmp = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uriImagenAltaCalidad);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bmp.compress(Bitmap.CompressFormat.JPEG, 25, baos);
+            byte[] data = baos.toByteArray();
+            //uploading the image
+            StorageReference path = mStorage.child("Fotos_centros").child(uriImagenAltaCalidad.getLastPathSegment());
+            UploadTask uploadTask2 = path.putBytes(data);
+            uploadTask2.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-        String id = mDatabaseCentros.push().getKey();
-        String id2 = mDatabaseDatosMes.push().getKey();
-        Centro centro = new Centro(id,nombre);
+                    DateFormat dateFormat = new SimpleDateFormat("YYYYMM");
+                    Date date = new Date();
 
-        String ident = id + dateFormat.format(date);
-        PacientesMesCentro pmc= new PacientesMesCentro(ident);
+                    //Guardado del centro en Firebase
+                    progreso.setMessage("Guardando centro ...");
+                    progreso.show();
 
-        mDatabaseDatosMes.child(id2).setValue(pmc);
-        mDatabaseCentros.child(id).setValue(centro);
+                    String id = mDatabaseCentros.push().getKey();
+                    String id2 = mDatabaseDatosMes.push().getKey();
+                    Centro centro = new Centro(id,nombre);
+                    centro.Direccion = direccion;
+                    centro.UrlImagen = taskSnapshot.getDownloadUrl().toString();
+                    String ident = id + dateFormat.format(date);
+                    PacientesMesCentro pmc= new PacientesMesCentro(ident);
+
+                    mDatabaseDatosMes.child(id2).setValue(pmc);
+                    mDatabaseCentros.child(id).setValue(centro);
+                    progreso.dismiss();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    progreso.dismiss();
+                }
+            });
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+
+
         progreso.dismiss();
 
 

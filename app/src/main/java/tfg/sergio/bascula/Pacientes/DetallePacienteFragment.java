@@ -152,6 +152,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                 bundle.putString("key",key);
                 bundle.putInt("estado",estado);
                 bundle.putString("centro",centro);
+                bundle.putString("nombre", paciente_final.getNombre());
                 Fragment fragment = new basculaFragment();
                 fragment.setArguments(bundle);
                 ft.replace(R.id.pacientes_screen,fragment);

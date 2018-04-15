@@ -48,8 +48,22 @@
                     android:id="@+id/sp_centros"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="21dp"
+                    android:padding="10dp"
                     android:layout_below="@+id/title_grafica"/>
+                <Spinner
+                    android:id="@+id/sp_anios"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:layout_below="@+id/title_grafica"
+                    android:layout_toRightOf="@id/sp_centros"/>
+                <Spinner
+                    android:id="@+id/sp_meses"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:layout_below="@+id/title_grafica"
+                    android:layout_toRightOf="@id/sp_anios"/>
             </RelativeLayout>
 
         </LinearLayout>
@@ -71,7 +85,7 @@
 
     <android.support.design.widget.NavigationView
         android:id="@+id/nav_view"
-        android:layout_width="200dp"
+        android:layout_width="280dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
