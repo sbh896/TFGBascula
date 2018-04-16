@@ -6,9 +6,19 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Grapes"
+        android:text="Peso"
         android:textSize="40dp"
         android:textStyle="bold"
-        android:layout_centerInParent="true"/>
+        android:layout_centerHorizontal="true"
+        android:paddingTop="40dp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Peso"
+        android:id="@+id/txt_imc"
+        android:textSize="100dp"
+        android:textStyle="bold"
+        android:layout_centerInParent="true"
+        android:paddingTop="40dp"/>
 
 </RelativeLayout>

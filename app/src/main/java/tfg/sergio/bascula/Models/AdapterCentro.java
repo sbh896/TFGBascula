@@ -54,15 +54,15 @@ public class AdapterCentro extends RecyclerView.Adapter<AdapterCentro.CentrosVie
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FragmentManager fm =  ((AppCompatActivity)ctx).getSupportFragmentManager();
-                FragmentTransaction ft = fm.beginTransaction();
-                ft.addToBackStack("centros");
-                Bundle bundle = new Bundle();
-               // bundle.putString("key",centro.key);
-                DetallePacienteFragment fragment = new DetallePacienteFragment();
-                fragment.setArguments(bundle);
-                ft.replace(R.id.pacientes_screen,fragment);
-                ft.commit();
+//                FragmentManager fm =  ((AppCompatActivity)ctx).getSupportFragmentManager();
+//                FragmentTransaction ft = fm.beginTransaction();
+//                ft.addToBackStack("centros");
+//                Bundle bundle = new Bundle();
+//                bundle.putString("key",);
+//                DetallePacienteFragment fragment = new DetallePacienteFragment();
+//                fragment.setArguments(bundle);
+//                ft.replace(R.id.pacientes_screen,fragment);
+//                ft.commit();
             }
         });
 

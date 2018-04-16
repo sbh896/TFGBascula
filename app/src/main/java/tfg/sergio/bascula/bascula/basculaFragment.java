@@ -105,72 +105,7 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
                 Double m = rand.nextDouble() * (1.90);
 
                 final RegistroPaciente regis = new RegistroPaciente(key,n,m, Calendar.getInstance().getTime());
-//
-//                //Guardado del registro en Firebase
-//                final String id = mDatabase.push().getKey();
-//                mDatabase.child(id).setValue(regis);
-//
-//                //Actualización de referencia de último registro de paciente
-//                try {
-//                    mDatabase2.child(key).child("ultimoRegistro").setValue(id);
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//                mDatabase2.child(key).addListenerForSingleValueEvent(new ValueEventListener() {
-//                    @Override
-//                    public void onDataChange(DataSnapshot dataSnapshot) {
-//                        paciente = dataSnapshot.getValue(Paciente.class);
-//                    }
-//
-//                    @Override
-//                    public void onCancelled(DatabaseError databaseError) {
-//
-//                    }
-//                });
-//                DateFormat dateFormat = new SimpleDateFormat("YYYYMM");
-//                Date date = new Date();
-//                final String ident = centro +dateFormat.format(date);
-//                Query firebaseSearchQuery = mDatabaseDatosMes.orderByChild("id").startAt(ident).endAt(ident);
-//
-//                //actualización recuento por centros
-//                firebaseSearchQuery.addListenerForSingleValueEvent(new ValueEventListener() {
-//                    @Override
-//                    public void onDataChange(DataSnapshot dataSnapshot) {
-//                        PacientesMesCentro pmc = null;
-//                        String Key="";
-//                        for (DataSnapshot child: dataSnapshot.getChildren()) {
-//                            System.out.println(child.getKey());
-//                            pmc = child.getValue(PacientesMesCentro.class);
-//                            Key = child.getRef().getKey();
-//                        }
-//
-//                        if(pmc.obtenerNumPacientes(estado) == 0){
-//
-//                        }
-//                        else{
-//                            try {
-//                                mDatabaseDatosMes.child(Key).child(EnumIMCFirebase.values()[estado].toString()).setValue(pmc.obtenerNumPacientes(estado)-1);
-//                                pmc.ActualizarNumPacientes(estado,0);
-//                            } catch (Exception e) {
-//                                e.printStackTrace();
-//                            }
-//
-//                        }
-//
-//                        IMCCalculator imcCalculator = new IMCCalculator();
-//                        int imcNuevo = imcCalculator.Calcular(paciente.monthsBetweenDates(),regis.getIMC(),0);
-//                        try {
-//                            mDatabaseDatosMes.child(Key).child(EnumIMCFirebase.values()[imcNuevo].toString()).setValue(pmc.obtenerNumPacientes(imcNuevo)+1);
-//                        } catch (Exception e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onCancelled(DatabaseError databaseError) {
-//
-//                    }
-//                });
+
                 progressBar.setVisibility(View.INVISIBLE);
                 FragmentManager fm = getFragmentManager();
                 FragmentTransaction ft = fm.beginTransaction();

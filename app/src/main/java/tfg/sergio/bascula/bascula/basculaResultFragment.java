@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -28,6 +29,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -59,7 +61,9 @@ public class basculaResultFragment extends Fragment{
     private Double peso,altura;
     private DatabaseReference mDatabase, mDatabase2, mDatabaseCentros, mDatabaseDatosMes;
     private Paciente paciente;
-    private Button aceptar;
+    private Button aceptar,cancelar;
+    private TextView textIMC,textPeso;
+    private static DecimalFormat df2 = new DecimalFormat(".##");
 
     @Nullable
     @Override
@@ -69,20 +73,22 @@ public class basculaResultFragment extends Fragment{
     }
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-        aceptar = view.findViewById(R.id.btn_aceptar);
-        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
-
-
-        viewPager = (ViewPager) view.findViewById(R.id.viewpager);
-        addTabs(viewPager);
-
-        tabLayout = (TabLayout) view.findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(viewPager);
+//        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+//        aceptar = view.findViewById(R.id.btn_aceptar);
+//        cancelar = view.findViewById(R.id.btn_cancelar);
+//
+//        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
+//
+//        addTabs(viewPager);
+//
+//        tabLayout = (TabLayout) view.findViewById(R.id.tabs);
+//        tabLayout.setupWithViewPager(viewPager);
         mDatabase = FirebaseDatabase.getInstance().getReference("registros");
         mDatabase2 = FirebaseDatabase.getInstance().getReference("pacientes");
         mDatabaseCentros = FirebaseDatabase.getInstance().getReference("centros");
         mDatabaseDatosMes = FirebaseDatabase.getInstance().getReference("pacientesMes");
+        textIMC = view.findViewById(R.id.txt_imc);
+        textPeso = view.findViewById(R.id.txt_peso);
         bundle = getArguments();
         key = bundle.getString("key");
         estado = bundle.getInt("estado");
@@ -90,14 +96,22 @@ public class basculaResultFragment extends Fragment{
         nombre = bundle.getString("nombre");
         peso = bundle.getDouble("peso");
         altura = bundle.getDouble("altura");
+
+        IMCCalculator imcCalc = new IMCCalculator();
+        double imc = IMCCalculator.CalcularIMC(peso,altura);
+        textIMC.setText(""+df2.format(imc));
+        textPeso.setText(""+df2.format(peso) + " Kg");
+
+
     }
     private void addTabs(ViewPager viewPager) {
-        final ViewPagerAdapter adapter = new ViewPagerAdapter(getFragmentManager());
-        adapter.addFrag(new PesoPageFragment(), "Peso");
-        adapter.addFrag(new ImcPageFragment(), "IMC");
-        viewPager.setAdapter(adapter);
 
-
+        cancelar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getFragmentManager().popBackStack();
+            }
+        });
         aceptar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -174,6 +188,8 @@ public class basculaResultFragment extends Fragment{
 
                     }
                 });
+                getFragmentManager().popBackStackImmediate();
+
             }
         });
 
@@ -197,6 +213,11 @@ public class basculaResultFragment extends Fragment{
         }
 
         public void addFrag(Fragment fragment, String title) {
+            Bundle bnd = getArguments();
+            Bundle myBundle = new Bundle();
+            myBundle.putDouble( "peso", bnd.getDouble("peso"));
+            myBundle.putDouble("altura", bnd.getDouble("altura"));
+            fragment.setArguments( myBundle  );
             mFragmentList.add(fragment);
             mFragmentTitleList.add(title);
         }

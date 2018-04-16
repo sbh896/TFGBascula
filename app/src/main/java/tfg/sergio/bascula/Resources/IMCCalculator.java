@@ -45,4 +45,12 @@ public class IMCCalculator {
         }
         return -1;
     }
+
+    public static double CalcularIMC(Double peso, Double altura){
+        if(altura == 0){
+            return 0;
+        }
+        return (peso/Math.pow(altura,2));
+    }
+
 }

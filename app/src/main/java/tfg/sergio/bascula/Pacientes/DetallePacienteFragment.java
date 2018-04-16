@@ -20,6 +20,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -82,7 +83,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
     private ImageView out_perfil;
     private DatabaseReference mDatabase;
     private DatabaseReference mDatabaseRegs;
-    private Button pesarButton;
+    private ImageButton pesarButton;
     AlertDialog.Builder builder;
     private ArrayList<RegistroPaciente> registros = new ArrayList<>();
     int estado;
