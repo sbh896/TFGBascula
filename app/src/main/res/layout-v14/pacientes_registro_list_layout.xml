@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+ <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent"
+    android:layout_height="150dp"
+    app:cardElevation="5dp" android:layout_margin="7dp"
+    app:cardCornerRadius="6dp"
+    app:contentPadding="25dp"
+    app:cardMaxElevation="6dp">
+<LinearLayout
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:weightSum="2">
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.5">
+        <ImageView android:id="@+id/iamgen_perfil" android:layout_width="150dp"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY"
+            android:src="@drawable/logo_aspace"/>
+    </LinearLayout>
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1.45"
+        android:orientation="horizontal"
+        >
+        <TextView android:id="@+id/title_nombre"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Nombre:"
+            android:paddingLeft="15dp"/>
+        <TextView android:id="@+id/nombre"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Nombre:"
+            android:layout_toRightOf="@id/title_nombre"
+            android:layout_alignTop="@id/title_nombre"
+            android:paddingLeft="15dp"/>
+
+        <TextView
+            android:id="@+id/title_fecha"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Fecha: "
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_below="@+id/title_nombre"
+            android:paddingLeft="15dp"/>
+        <TextView
+            android:id="@+id/txt_fecha"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Fecha"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_toRightOf="@id/title_fecha"
+            android:layout_alignTop="@id/title_fecha"
+            android:paddingLeft="15dp"/>
+
+
+        <TextView
+            android:id="@+id/title_peso"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Peso: "
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_below="@+id/title_fecha"
+            android:paddingLeft="15dp"/>
+
+        <TextView
+            android:id="@+id/title_imc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="IMC: "
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_below="@+id/title_peso"
+            android:paddingLeft="15dp"/>
+
+
+    </RelativeLayout>
+</LinearLayout>
+</android.support.v7.widget.CardView>
+

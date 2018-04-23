@@ -335,6 +335,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
 
 
         mChart2.invalidate();
+        mChart2.notifyDataSetChanged();
 
     }
 
@@ -397,7 +398,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         ArrayList<String> xVals = new ArrayList<String>();
         int x =0 ;
         for(RegistroPaciente r : registros){
-            xVals.add(xVals.toString());
+            xVals.add(r.getFecha().toString());
             x+=60;
         }
 

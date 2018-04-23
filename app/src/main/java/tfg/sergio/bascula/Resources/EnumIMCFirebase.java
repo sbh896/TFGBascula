@@ -8,7 +8,7 @@ public enum EnumIMCFirebase {
     OBESIDAD("NumObesidad", 0),
     SOBREPESO("NumSobrepeso", 1),
     NORMAL("NumNormal", 2),
-    DESN("NumDesnutrición", 3),
+    DESN("NumDesnutricion", 3),
     DESNMOD("NumDesnutricionMod", 4),
     DESNSEV("NumDesnutricionSev", 5);
 

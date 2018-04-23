@@ -29,53 +29,71 @@
                 android:gravity="center"/>
         </LinearLayout>
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/title_grafica"
-                android:textSize="20dp"
-                android:text="Estadísticas globales"
-                android:padding="20dp"
-                android:textColor="@color/black"/>
-
-                <Spinner
-                    android:id="@+id/sp_centros"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="10dp"
-                    android:layout_below="@+id/title_grafica"/>
-                <Spinner
-                    android:id="@+id/sp_anios"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="10dp"
-                    android:layout_below="@+id/title_grafica"
-                    android:layout_toRightOf="@id/sp_centros"/>
-                <Spinner
-                    android:id="@+id/sp_meses"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="10dp"
-                    android:layout_below="@+id/title_grafica"
-                    android:layout_toRightOf="@id/sp_anios"/>
-            </RelativeLayout>
-
-        </LinearLayout>
-        <LinearLayout
             android:background="@color/white"
             android:layout_height="0dp"
             android:layout_width="match_parent"
-            android:layout_weight="2.5" >
-            <com.github.mikephil.charting.charts.BarChart
-                android:id="@+id/chart"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+            android:layout_weight="2.5"
+            android:weightSum="2">
+            <LinearLayout
+                android:layout_weight="1"
+                android:layout_height="fill_parent"
+                android:layout_width="0dp"
+                android:orientation="vertical"
+                android:weightSum="2"
+                android:layout_marginLeft="10dp"
+                >
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/dgrafica_filtros"
+                        android:orientation="vertical"
+                        >
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/title_grafica"
+                            android:textSize="20dp"
+                            android:text="Estadísticas globales"
+                            android:padding="20dp"
+                            android:textColor="@color/black"/>
+                    </RelativeLayout>
+                    <LinearLayout
+                        android:layout_marginTop="10dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        >
+
+                        <com.github.mikephil.charting.charts.BarChart
+                            android:id="@+id/chart"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" />
+                    </LinearLayout>
+            </LinearLayout>
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginRight="10dp"
+                android:layout_marginLeft="10dp">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/titleRecicler"
+                    android:textSize="20dp"
+                    android:text="Últimos registros"
+                    android:padding="20dp"
+                    android:textColor="@color/black"/>
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/lista_registros"
+                    android:layout_width="fill_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@+id/titleRecicler"
+                    android:layout_gravity="left"
+                    android:layout_marginTop="28dp">
+                </android.support.v7.widget.RecyclerView>
+
+            </RelativeLayout>
+
         </LinearLayout>
     </LinearLayout>
     <include

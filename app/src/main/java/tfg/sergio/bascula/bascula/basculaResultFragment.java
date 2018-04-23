@@ -74,12 +74,12 @@ public class basculaResultFragment extends Fragment{
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
 //        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-//        aceptar = view.findViewById(R.id.btn_aceptar);
-//        cancelar = view.findViewById(R.id.btn_cancelar);
+        aceptar = view.findViewById(R.id.btn_aceptar);
+        cancelar = view.findViewById(R.id.btn_cancelar);
 //
 //        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
 //
-//        addTabs(viewPager);
+        addTabs();
 //
 //        tabLayout = (TabLayout) view.findViewById(R.id.tabs);
 //        tabLayout.setupWithViewPager(viewPager);
@@ -101,10 +101,11 @@ public class basculaResultFragment extends Fragment{
         double imc = IMCCalculator.CalcularIMC(peso,altura);
         textIMC.setText(""+df2.format(imc));
         textPeso.setText(""+df2.format(peso) + " Kg");
+        final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yy");
 
 
     }
-    private void addTabs(ViewPager viewPager) {
+    private void addTabs() {
 
         cancelar.setOnClickListener(new View.OnClickListener() {
             @Override

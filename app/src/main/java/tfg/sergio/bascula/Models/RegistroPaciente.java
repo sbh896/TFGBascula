@@ -2,6 +2,7 @@ package tfg.sergio.bascula.Models;
 
 import android.support.annotation.NonNull;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -22,6 +23,15 @@ public class RegistroPaciente implements Comparable<RegistroPaciente>{
     private double Peso=0;
     private double Altura=0;
     private Date Fecha;
+    private String StrFecha;
+
+    public void setStrFecha(String strFecha) {
+        StrFecha = strFecha;
+    }
+
+    public String getStrFecha() {
+        return StrFecha;
+    }
 
     public void setCodigoPaciente(String codigoPaciente) {
         CodigoPaciente = codigoPaciente;
@@ -64,6 +74,8 @@ public class RegistroPaciente implements Comparable<RegistroPaciente>{
         this.Peso = peso;
         this.Altura = altura;
         this.Fecha = fecha;
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yy");
+        this.StrFecha = formatter.format(fecha);
     }
 
     @Override
