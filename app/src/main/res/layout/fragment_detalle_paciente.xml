@@ -207,6 +207,18 @@
                 android:layout_marginRight="15dp"
                 android:background="@null"
                 android:text="Button" />
+            <ImageButton
+                android:src="@drawable/ic_add_alert"
+                android:id="@+id/btn_alert"
+                android:layout_width="60dp"
+                android:scaleType="fitCenter"
+                android:layout_height="60dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_marginBottom="15dp"
+                android:layout_marginRight="15dp"
+                android:background="@null"
+                android:text="Button" />
         </LinearLayout>
     </ScrollView>
 </FrameLayout>

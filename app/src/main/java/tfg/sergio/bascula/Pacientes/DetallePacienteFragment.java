@@ -1,9 +1,11 @@
 package tfg.sergio.bascula.Pacientes;
 
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -12,6 +14,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,8 +23,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,6 +59,7 @@ import com.squareup.picasso.Picasso;
 import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -60,6 +68,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
+import tfg.sergio.bascula.Models.Alerta;
 import tfg.sergio.bascula.Models.Centro;
 import tfg.sergio.bascula.Models.Paciente;
 import tfg.sergio.bascula.Models.PacientesMesCentro;
@@ -68,6 +77,7 @@ import tfg.sergio.bascula.R;
 import tfg.sergio.bascula.Registro;
 import tfg.sergio.bascula.Resources.CustomMarkerView;
 import tfg.sergio.bascula.Resources.EnumIMC;
+import tfg.sergio.bascula.Resources.FixedDatePicker;
 import tfg.sergio.bascula.Resources.IMCCalculator;
 import tfg.sergio.bascula.bascula.basculaFragment;
 
@@ -82,14 +92,23 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
     private TextView out_nombre, out_peso, out_IMC, out_edad, out_altura;
     private ImageView out_perfil;
     private DatabaseReference mDatabase;
-    private DatabaseReference mDatabaseRegs;
-    private ImageButton pesarButton;
-    AlertDialog.Builder builder;
+    private DatabaseReference mDatabaseRegs, mDatabaseAlertas;
+    private ImageButton pesarButton, configAlertButton;
     private ArrayList<RegistroPaciente> registros = new ArrayList<>();
     int estado;
     String centro;
     Paciente paciente_final;
 
+    //variables para creación de alerta
+    private DatePickerDialog.OnDateSetListener mDateSetListener;
+    private LayoutInflater inflater;
+    private View alertLayout;
+    private TextView fechaAlerta, inputComent;
+    private AlertDialog.Builder builder;
+    private RadioGroup radioPeriodo;
+    private Date alertDate;
+    private int periodico = 0;
+    private AlertDialog Alertadialog;
 
 
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -121,10 +140,13 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+
+
         Bundle bundle = getArguments();
         key = bundle.getString("key");
         mDatabase = FirebaseDatabase.getInstance().getReference("pacientes");
         mDatabaseRegs = FirebaseDatabase.getInstance().getReference("registros");
+        mDatabaseAlertas = FirebaseDatabase.getInstance().getReference("alertas");
         out_nombre = view.findViewById(R.id.txt_nombre);
         out_peso = view.findViewById(R.id.txt_peso);
         out_edad = view.findViewById(R.id.txt_edad);
@@ -132,6 +154,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         out_altura = view.findViewById(R.id.txt_altura);
         out_perfil = view.findViewById(R.id.foto_perfil);
         pesarButton = view.findViewById(R.id.btn_pesar);
+        configAlertButton = view.findViewById(R.id.btn_alert);
         mChart = (LineChart) view.findViewById(R.id.peso_grafica);
         mChart.setOnChartGestureListener(this);
         mChart.setOnChartValueSelectedListener(this);
@@ -158,6 +181,93 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                 fragment.setArguments(bundle);
                 ft.replace(R.id.pacientes_screen,fragment);
                 ft.commit();
+            }
+        });
+        mDateSetListener = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker datePicker, int anio, int mes, int dia) {
+                alertDate=new Date(anio,mes,dia);
+                mes = mes +1;
+                String fecha = dia+"/" + mes + "/" + anio;
+                ((AlertDialog) Alertadialog).getButton(
+                        AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+                fechaAlerta.setText(fecha);
+            }
+        };
+        configAlertButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                inflater = getLayoutInflater();
+                alertLayout = inflater.inflate(R.layout.dialog_alert, null);
+                inputComent = alertLayout.findViewById(R.id.txt_coment);
+                fechaAlerta = alertLayout.findViewById(R.id.date_pick);
+                radioPeriodo = alertLayout.findViewById(R.id.radioGroup);
+
+                //Seleccion de fecha
+                fechaAlerta.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Calendar cal = Calendar.getInstance();
+                        int anio = cal.get(Calendar.YEAR);
+                        int mes = cal.get(Calendar.MONTH);
+                        int dia = cal.get(Calendar.DAY_OF_MONTH);
+                        Context ctx = new ContextThemeWrapper(
+                                getActivity(),
+                                android.R.style.Theme_Holo_Light_Dialog_MinWidth
+                        );
+                        DatePickerDialog dialog = new FixedDatePicker(
+                                ctx,
+                                mDateSetListener,
+                                anio,mes,dia
+                        );
+                        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                        dialog.show();
+
+
+                    }
+                });
+                radioPeriodo.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                        RadioButton checkedRadioButton = (RadioButton)radioGroup.findViewById(i);
+                        boolean isChecked = checkedRadioButton.isChecked();
+                        if (isChecked)
+                        {
+                            periodico = radioGroup.indexOfChild(checkedRadioButton);                        }
+                    }
+                });
+                AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
+                alert.setTitle("Crear alerta de paciente");
+
+                alert.setView(alertLayout);
+                // disallow cancel of AlertDialog on click of back button and outside touch
+                alert.setCancelable(false);
+                alert.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+
+                alert.setPositiveButton("Guardar", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Alerta al = new Alerta();
+                        al.fechaInicio = alertDate;
+                        al.mail = 0;
+                        al.periodica = periodico;
+                        al.comentario = inputComent.getText() != null ? inputComent.getText().toString() : "";
+                        String id = mDatabaseAlertas.push().getKey();
+                        mDatabaseAlertas.child(id).setValue(al);
+                        dialog.dismiss();
+                    }
+                });
+                Alertadialog = alert.create();
+                Alertadialog.show();
+                ((AlertDialog) Alertadialog).getButton(AlertDialog.BUTTON_POSITIVE)
+                        .setEnabled(false);
             }
         });
 

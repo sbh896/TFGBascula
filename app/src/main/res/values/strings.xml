@@ -43,4 +43,9 @@
     <string name="delete">Eliminar</string>
     <string name="update">Modificar</string>
     <string name="estadisticas">Estadísticas centros</string>
+    <string-array name="perioicidad">
+        <item>No repetir</item>
+        <item>Alerta semanal</item>
+        <item>Alerta mensual</item>
+    </string-array>
 </resources>

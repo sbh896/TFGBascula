@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="420dp"
+    android:layout_height="wrap_content"
+    android:padding="10dp">
+
+    <View android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/nombre"
+        android:layout_marginTop="10dp"
+        android:background="@android:color/darker_gray"
+        android:paddingBottom="10dp"
+        android:layout_marginBottom="10dp"/>
+
+    <ImageView
+        android:id="@+id/imagen_estado"
+        android:layout_width="30dp"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/dateinput"
+        android:layout_below="@+id/divider"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:src="@drawable/item_calendario" />
+        <!--android:layout_alignBottom="@+id/nombre"-->
+        <!--android:layout_alignParentLeft="true"-->
+        <!--android:layout_below="@id/divider"-->
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/divider"
+        android:id="@+id/dateinput"
+        android:layout_toRightOf="@id/imagen_estado"
+        android:paddingBottom="15dp">
+
+        <EditText
+            android:id="@+id/date_pick"
+
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:hint="Fecha"
+            android:clickable="false"
+            android:focusable="false"
+            android:cursorVisible="false"
+            android:focusableInTouchMode="false"
+            android:inputType="text"
+
+            android:textColor="@android:color/black"
+            android:textColorHint="@android:color/darker_gray" />
+    </android.support.design.widget.TextInputLayout>
+
+    <ImageView
+        android:id="@+id/imagen_periodico"
+        android:layout_width="30dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/dateinput"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:src="@drawable/ic_periodico"
+        />
+    <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/dateinput"
+        android:layout_toRightOf="@id/imagen_periodico"
+        android:id="@+id/radioGroup">
+        <RadioButton android:id="@+id/radio_unica"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Única"
+            android:textSize="18dp"
+            android:layout_weight="1"/>
+        <RadioButton android:id="@+id/radio_semanal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Semanal"
+            android:textSize="18dp"
+            android:layout_weight="1"/>
+        <RadioButton android:id="@+id/radio_mensual"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Mensual"
+            android:textSize="18dp"
+            android:layout_weight="1"/>
+    </RadioGroup>
+
+    <ImageView
+        android:id="@+id/imagen_mail"
+        android:layout_width="30dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/radioGroup"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:src="@drawable/ic_mail"/>
+    <Switch
+        android:layout_gravity="left"
+        android:id="@+id/sw_enviar_mail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:text="Enviar correo"
+        android:textOff="No"
+        android:textOn="Sí"
+        android:layout_toRightOf="@+id/imagen_mail"
+        android:layout_toEndOf="@id/imagen_mail"
+        android:layout_below="@id/radioGroup"
+        android:textSize="18sp"
+        android:layout_marginTop="10dp"/>
+
+    <View android:id="@+id/divider3"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/imagen_mail"
+        android:layout_marginTop="10dp"
+        android:background="@android:color/darker_gray"
+        android:paddingBottom="10dp"
+        android:layout_marginBottom="10dp"/>
+
+    <ImageView
+        android:id="@+id/imagen_coment"
+        android:layout_width="30dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/divider3"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:src="@drawable/ic_create"/>
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/divider3"
+        android:id="@+id/comentinput"
+        android:layout_toRightOf="@id/imagen_coment"
+        android:paddingBottom="15dp">
+
+        <EditText
+            android:id="@+id/txt_coment"
+
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:hint="Comentario"
+            android:clickable="false"
+            android:focusable="false"
+            android:cursorVisible="false"
+            android:focusableInTouchMode="false"
+            android:inputType="text"
+
+            android:textColor="@android:color/black"
+            android:textColorHint="@android:color/darker_gray" />
+    </android.support.design.widget.TextInputLayout>
+
+
+
+</RelativeLayout>

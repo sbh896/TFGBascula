@@ -56,10 +56,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import tfg.sergio.bascula.Calendario.CalendarioFragment;
 import tfg.sergio.bascula.Centros.AniadirCentroFragment;
 import tfg.sergio.bascula.Centros.CentrosFragment;
 import tfg.sergio.bascula.Models.AdapterPaciente;
 import tfg.sergio.bascula.Models.AdapterRegistro;
+import tfg.sergio.bascula.Models.Alerta;
 import tfg.sergio.bascula.Models.Centro;
 import tfg.sergio.bascula.Models.ElementoListadoPaciente;
 import tfg.sergio.bascula.Models.Mes;
@@ -75,13 +77,14 @@ import tfg.sergio.bascula.bascula.basculaFragment;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
     private FirebaseAuth auth;
     private FirebaseDatabase database;
     private TextView navName;
     private TextView navMail;
     private NavigationView mDrawerLayout;
     private BarChart mChart;
-    private DatabaseReference mDatabaseCentros, mDatabaseDatosMes, mDatabaseRegistros, mDatabasePacientes;
+    private DatabaseReference mDatabaseCentros, mDatabaseDatosMes, mDatabaseRegistros, mDatabasePacientes, mDatabaseAlertas;
     private List<PacientesMesCentro> pmCentros = new ArrayList<>();
     private RecyclerView listaRegistros;
 
@@ -94,6 +97,8 @@ public class MainActivity extends AppCompatActivity
     private int NumDesnutricionSev = 0;
     private List<ElementoListadoPaciente> elementos = new ArrayList<>();
     private RecyclerView.Adapter adapter;
+
+    private List<Alerta> listaAlertas = new ArrayList<>();
 
 
     @Override
@@ -141,8 +146,6 @@ public class MainActivity extends AppCompatActivity
         obtenerUltimosRegistros();
     }
 
-
-
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -158,8 +161,158 @@ public class MainActivity extends AppCompatActivity
                 getFragmentManager().popBackStack();
             }
         }
-
     }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        Fragment fragment = null;
+        // Handle navigation view item clicks here.
+
+        int id = item.getItemId();
+
+        if (id == R.id.nav_camera) {
+            fragment = new PacientesFragment();
+        } else if (id == R.id.nav_logout) {
+            auth.signOut();
+
+            FragmentManager manager = getSupportFragmentManager();
+            if (manager.getBackStackEntryCount() > 0) {
+                FragmentManager.BackStackEntry first = manager.getBackStackEntryAt(0);
+                manager.popBackStack(first.getId(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            }
+
+            startActivity(new Intent(MainActivity.this, Login.class));
+        }
+        else if(id == R.id.nav_tools){
+            fragment = new CentrosFragment();
+        }
+        else if(id == R.id.nav_clendar){
+            fragment = new CalendarioFragment();
+        }
+
+
+        if(fragment != null){
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction ft = fragmentManager.beginTransaction();
+            ft.addToBackStack("Main");
+            ft.replace(R.id.screen_area, fragment);
+            ft.commit();
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    public void obtenerAlertas(){
+        elementos.removeAll(elementos);
+
+        final Date[] fechaUltimoRegistro = {null};
+
+
+
+        adapter = new AdapterRegistro(elementos, this);
+
+        listaRegistros.setAdapter(adapter);
+
+        mDatabaseAlertas.addValueEventListener(new ValueEventListener() {
+
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (final DataSnapshot child: dataSnapshot.getChildren()) {
+
+                    final RegistroPaciente registro = child.getValue(RegistroPaciente.class);
+                    //final String paciente_key = dataSnapshot.getKey();
+
+
+                    if (registro.getCodigoPaciente() != null) {
+                        Query firebaseSearchQuery = mDatabaseRegistros.orderByChild("StrFecha");//.startAt(search).endAt(search + "\uf8ff");
+
+                        mDatabasePacientes.child(registro.getCodigoPaciente()).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                Paciente pac = dataSnapshot.getValue(Paciente.class);
+                                ElementoListadoPaciente elp = new ElementoListadoPaciente();
+                                String key = child.getKey();
+                                elp.registroPaciente = registro;
+                                if (pac != null) {
+                                    elp.paciente = pac;
+                                }
+                                elp.key = key;
+                                addElement(elp);
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                }
+            }
+            public void addElement(ElementoListadoPaciente elp){
+
+                if(!elementos.contains(elp)){
+                    elementos.add(elp);
+                    adapter.notifyDataSetChanged();
+                }
+
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    //region Grafica
+    private void obtenerRegistroPacientes(){
+        final DateFormat dateFormat = new SimpleDateFormat("YYYYMM");
+
+        final Date date = new Date();
+
+        final String ident;
+        Query firebaseSearchQuery;
+        firebaseSearchQuery  = mDatabaseDatosMes.orderByChild("id").endAt(dateFormat.format(date));
+
+
+        //actualización recuento por centros
+        firebaseSearchQuery.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                int prueba = 1;
+                PacientesMesCentro pmc = null;
+                String Key="";
+                for (DataSnapshot child: dataSnapshot.getChildren()) {
+                    System.out.println(child.getKey());
+                    pmc = child.getValue(PacientesMesCentro.class);
+                    prueba = prueba + 1;
+
+
+                    PacientesMesCentro temp = null;
+
+                    if (pmc != null && pmc.id.contains(dateFormat.format(date))) {
+                        NumObesidad = NumObesidad + pmc.NumObesidad;
+                        NumSobrepeso = NumSobrepeso + pmc.NumSobrepeso;
+                        NumNormal = pmc.NumNormal + NumNormal;
+                        NumDesnutricion = pmc.NumDesnutricion + NumDesnutricion;
+                        NumDesnutricionMod = pmc.NumDesnutricionMod + NumDesnutricionMod;
+                        NumDesnutricionSev = pmc.NumDesnutricionSev + NumDesnutricionSev;
+                    }
+                }
+                inicializarGrafica();
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     private void inicializarGrafica(){
       //  mChart.setOnChartValueSelectedListener(this);
 
@@ -268,90 +421,11 @@ public class MainActivity extends AppCompatActivity
         }
 
     }
-
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        Fragment fragment = null;
-        // Handle navigation view item clicks here.
-
-        int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
-            fragment = new PacientesFragment();
-        } else if (id == R.id.nav_logout) {
-            auth.signOut();
-
-            FragmentManager manager = getSupportFragmentManager();
-            if (manager.getBackStackEntryCount() > 0) {
-                FragmentManager.BackStackEntry first = manager.getBackStackEntryAt(0);
-                manager.popBackStack(first.getId(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
-            }
-
-            startActivity(new Intent(MainActivity.this, Login.class));
-        }
-        else if(id == R.id.nav_tools){
-            fragment = new CentrosFragment();
-        }
+    //endregion
 
 
-        if(fragment != null){
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            FragmentTransaction ft = fragmentManager.beginTransaction();
-            ft.addToBackStack("Main");
-            ft.replace(R.id.screen_area, fragment);
-            ft.commit();
-        }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }
-
-    private void obtenerRegistroPacientes(){
-        final DateFormat dateFormat = new SimpleDateFormat("YYYYMM");
-
-        final Date date = new Date();
-
-        final String ident;
-        Query firebaseSearchQuery;
-            firebaseSearchQuery  = mDatabaseDatosMes.orderByChild("id").endAt(dateFormat.format(date));
 
 
-        //actualización recuento por centros
-        firebaseSearchQuery.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                int prueba = 1;
-                PacientesMesCentro pmc = null;
-                String Key="";
-                for (DataSnapshot child: dataSnapshot.getChildren()) {
-                    System.out.println(child.getKey());
-                    pmc = child.getValue(PacientesMesCentro.class);
-                    prueba = prueba + 1;
-
-
-                    PacientesMesCentro temp = null;
-
-                    if (pmc != null && pmc.id.contains(dateFormat.format(date))) {
-                        NumObesidad = NumObesidad + pmc.NumObesidad;
-                        NumSobrepeso = NumSobrepeso + pmc.NumSobrepeso;
-                        NumNormal = pmc.NumNormal + NumNormal;
-                        NumDesnutricion = pmc.NumDesnutricion + NumDesnutricion;
-                        NumDesnutricionMod = pmc.NumDesnutricionMod + NumDesnutricionMod;
-                        NumDesnutricionSev = pmc.NumDesnutricionSev + NumDesnutricionSev;
-                    }
-                }
-                inicializarGrafica();
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
     //region centros
     private void obtenerCentros(){
 
@@ -390,6 +464,8 @@ public class MainActivity extends AppCompatActivity
         });
     }
     //endregion
+
+    //region Últimos registros
 
     public void obtenerUltimosRegistros(){
 
@@ -454,5 +530,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
+    //endregion
 
 }
