@@ -59,10 +59,12 @@ import java.util.List;
 import tfg.sergio.bascula.Calendario.CalendarioFragment;
 import tfg.sergio.bascula.Centros.AniadirCentroFragment;
 import tfg.sergio.bascula.Centros.CentrosFragment;
+import tfg.sergio.bascula.Models.AdapterAlerta;
 import tfg.sergio.bascula.Models.AdapterPaciente;
 import tfg.sergio.bascula.Models.AdapterRegistro;
 import tfg.sergio.bascula.Models.Alerta;
 import tfg.sergio.bascula.Models.Centro;
+import tfg.sergio.bascula.Models.ElementoListadoAlerta;
 import tfg.sergio.bascula.Models.ElementoListadoPaciente;
 import tfg.sergio.bascula.Models.Mes;
 import tfg.sergio.bascula.Models.MesesAnno;
@@ -97,8 +99,10 @@ public class MainActivity extends AppCompatActivity
     private int NumDesnutricionSev = 0;
     private List<ElementoListadoPaciente> elementos = new ArrayList<>();
     private RecyclerView.Adapter adapter;
+    private RecyclerView.Adapter adapterAlertas;
 
-    private List<Alerta> listaAlertas = new ArrayList<>();
+    private RecyclerView recyclerAlertas;
+    private List<ElementoListadoAlerta> listaAlertas = new ArrayList<>();
 
 
     @Override
@@ -137,13 +141,19 @@ public class MainActivity extends AppCompatActivity
         mDatabaseDatosMes = FirebaseDatabase.getInstance().getReference("pacientesMes");
         mDatabaseRegistros = FirebaseDatabase.getInstance().getReference("registros");
         mDatabasePacientes = FirebaseDatabase.getInstance().getReference("pacientes");
+        mDatabaseAlertas = FirebaseDatabase.getInstance().getReference("alertas");
+
         listaRegistros = findViewById(R.id.lista_registros);
         listaRegistros.setLayoutManager(new GridLayoutManager(this,1));
+
+        recyclerAlertas = findViewById(R.id.lista_alertas);
+        recyclerAlertas.setLayoutManager(new GridLayoutManager(this,1));
 
 
 
         obtenerCentros();
         obtenerUltimosRegistros();
+        obtenerAlertas();
     }
 
     @Override
@@ -206,15 +216,15 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void obtenerAlertas(){
-        elementos.removeAll(elementos);
+        listaAlertas.removeAll(listaAlertas);
 
         final Date[] fechaUltimoRegistro = {null};
 
 
 
-        adapter = new AdapterRegistro(elementos, this);
+        adapterAlertas = new AdapterAlerta(listaAlertas, this);
 
-        listaRegistros.setAdapter(adapter);
+        recyclerAlertas.setAdapter(adapterAlertas);
 
         mDatabaseAlertas.addValueEventListener(new ValueEventListener() {
 
@@ -223,25 +233,48 @@ public class MainActivity extends AppCompatActivity
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (final DataSnapshot child: dataSnapshot.getChildren()) {
 
-                    final RegistroPaciente registro = child.getValue(RegistroPaciente.class);
-                    //final String paciente_key = dataSnapshot.getKey();
+                    final Alerta alerta = child.getValue(Alerta.class);
+                    final String alertaKey = child.getKey();
 
 
-                    if (registro.getCodigoPaciente() != null) {
+                    if (alerta.codigoPaciente != null) {
                         Query firebaseSearchQuery = mDatabaseRegistros.orderByChild("StrFecha");//.startAt(search).endAt(search + "\uf8ff");
-
-                        mDatabasePacientes.child(registro.getCodigoPaciente()).addListenerForSingleValueEvent(new ValueEventListener() {
+                        mDatabasePacientes.child(alerta.codigoPaciente).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                Paciente pac = dataSnapshot.getValue(Paciente.class);
-                                ElementoListadoPaciente elp = new ElementoListadoPaciente();
+                                final Paciente pac = dataSnapshot.getValue(Paciente.class);
+                                ElementoListadoAlerta ela = new ElementoListadoAlerta();
                                 String key = child.getKey();
-                                elp.registroPaciente = registro;
                                 if (pac != null) {
-                                    elp.paciente = pac;
+                                    ela.alerta = alerta;
+                                    ela.paciente = pac;
+                                    if(pac.getUltimoRegistro() != null){
+                                        mDatabaseRegistros.child(pac.getUltimoRegistro()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshotR) {
+                                                RegistroPaciente rp = dataSnapshotR.getValue(RegistroPaciente.class);
+                                                ElementoListadoAlerta ela2 = new ElementoListadoAlerta();
+                                                ela2.ultimoRegistro = rp;
+                                                ela2.alerta = alerta;
+                                                ela2.paciente = pac;
+                                                ela2.key = alertaKey;
+                                                addElementAlerta(ela2);
+
+                                            }
+
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) {
+
+                                            }
+                                        });
+                                    }else{
+                                        ela.key = alertaKey;
+                                        addElementAlerta(ela);
+                                    }
                                 }
-                                elp.key = key;
-                                addElement(elp);
+                                else{
+                                }
+                                //ela.key = key;
                             }
 
                             @Override
@@ -252,11 +285,11 @@ public class MainActivity extends AppCompatActivity
                     }
                 }
             }
-            public void addElement(ElementoListadoPaciente elp){
+            public void addElementAlerta(ElementoListadoAlerta ela){
 
-                if(!elementos.contains(elp)){
-                    elementos.add(elp);
-                    adapter.notifyDataSetChanged();
+                if(!listaAlertas.contains(ela)){
+                    listaAlertas.add(ela);
+                    adapterAlertas.notifyDataSetChanged();
                 }
 
             }
@@ -422,9 +455,6 @@ public class MainActivity extends AppCompatActivity
 
     }
     //endregion
-
-
-
 
     //region centros
     private void obtenerCentros(){

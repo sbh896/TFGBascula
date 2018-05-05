@@ -259,6 +259,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                         al.mail = 0;
                         al.periodica = periodico;
                         al.comentario = inputComent.getText() != null ? inputComent.getText().toString() : "";
+                        al.codigoPaciente = key;
                         String id = mDatabaseAlertas.push().getKey();
                         mDatabaseAlertas.child(id).setValue(al);
                         dialog.dismiss();
