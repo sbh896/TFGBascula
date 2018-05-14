@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -75,6 +76,8 @@ import tfg.sergio.bascula.Pacientes.PacientesFragment;
 import tfg.sergio.bascula.Resources.EnumIMC;
 import tfg.sergio.bascula.Resources.EnumIMCFirebase;
 import tfg.sergio.bascula.Resources.IMCCalculator;
+import tfg.sergio.bascula.Resources.SwipeController;
+import tfg.sergio.bascula.Resources.SwipeControllerActions;
 import tfg.sergio.bascula.bascula.basculaFragment;
 
 public class MainActivity extends AppCompatActivity
@@ -225,6 +228,18 @@ public class MainActivity extends AppCompatActivity
         adapterAlertas = new AdapterAlerta(listaAlertas, this);
 
         recyclerAlertas.setAdapter(adapterAlertas);
+
+        SwipeController swipeController = new SwipeController(new SwipeControllerActions() {
+            @Override
+            public void onRightClicked(int position) {
+                listaAlertas.remove(position);
+                adapterAlertas.notifyDataSetChanged();
+//                mAdapter.players.remove(position);
+//                mAdapter.notifyItemRemoved(position);
+//                mAdapter.notifyItemRangeChanged(position, mAdapter.getItemCount());
+            }
+        });        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeController);
+        itemTouchHelper.attachToRecyclerView(recyclerAlertas);
 
         mDatabaseAlertas.addValueEventListener(new ValueEventListener() {
 

@@ -29,6 +29,7 @@ import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -345,6 +346,7 @@ public class AniadirPacienteFragment extends Fragment {
         if(requestCode == CAMERA_REQUEST_CODE && resultCode == Activity.RESULT_OK){
 
             //imagen alta calidad
+            inputFoto.setScaleType(ImageView.ScaleType.FIT_XY);
             inputFoto.setImageURI(uriImagenAltaCalidad);
         }
     }

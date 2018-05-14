@@ -25,6 +25,16 @@ public class RegistroPaciente implements Comparable<RegistroPaciente>{
     private Date Fecha;
     private String StrFecha;
 
+    public String getUrlFoto() {
+        return UrlFoto;
+    }
+
+    public void setUrlFoto(String urlFoto) {
+        UrlFoto = urlFoto;
+    }
+
+    private String UrlFoto;
+
     public void setStrFecha(String strFecha) {
         StrFecha = strFecha;
     }

@@ -18,27 +18,31 @@
         android:background="@color/white"
         android:weightSum="4">
         <LinearLayout
-            android:background="@color/LightYellow"
+            android:background="@drawable/degradado_gris"
             android:layout_height="0dp"
             android:layout_width="match_parent"
             android:layout_weight="1.5" >
             <RelativeLayout
+                android:layout_marginTop="80dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 >
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Alertas"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
                     android:id="@+id/title_alertas"
-                    />
+                    android:textSize="24dp"
+                    android:text="Próximas alertas"
+                    android:paddingLeft="15dp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"/>
+
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/lista_alertas"
                     android:layout_width="fill_parent"
                     android:layout_height="match_parent"
                     android:layout_below="@+id/title_alertas"
                     android:layout_gravity="left"
-                    android:layout_marginTop="28dp"
                     android:padding="10dp">
                 </android.support.v7.widget.RecyclerView>
             </RelativeLayout>
@@ -90,7 +94,6 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:layout_marginRight="10dp"
                 android:layout_marginLeft="10dp">
                 <TextView
                     android:layout_width="match_parent"

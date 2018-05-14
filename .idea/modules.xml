@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/TFG.iml" filepath="$PROJECT_DIR$/TFG.iml" />
       <module fileurl="file://C:\Users\sergio\Desktop\TFGBascula\TFG.iml" filepath="C:\Users\sergio\Desktop\TFGBascula\TFG.iml" />
-      <module fileurl="file://$PROJECT_DIR$/TFGBascula.iml" filepath="$PROJECT_DIR$/TFGBascula.iml" />
       <module fileurl="file://C:\Users\yeyo\Desktop\TFG\TFGBascula.iml" filepath="C:\Users\yeyo\Desktop\TFG\TFGBascula.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>

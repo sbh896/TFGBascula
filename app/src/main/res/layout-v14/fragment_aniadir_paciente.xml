@@ -5,22 +5,45 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
     android:background="@color/white">
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:background="@color/white"
         android:gravity="center"
         android:orientation="vertical"
         android:padding="50dp">
-
+        <!--<View android:id="@+id/divider"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="1dp"-->
+            <!--android:layout_below="@id/nombre"-->
+            <!--android:layout_marginTop="10dp"-->
+            <!--android:background="@android:color/darker_gray"-->
+            <!--android:paddingBottom="10dp"-->
+            <!--android:layout_marginBottom="10dp"/>-->
         <ImageButton
             android:id="@+id/imagen_paciente"
             android:layout_width="200dp"
             android:layout_height="200dp"
-            android:scaleType="fitXY"/>
+            android:src="@drawable/ic_add_pic"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            />
+        <ImageView
+            android:id="@+id/imagen_estado"
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/dateinput"
+            android:layout_below="@+id/imagen_paciente"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:src="@drawable/ic_perfil"/>
+
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/imagen_paciente"
+            android:id="@+id/container_nombre"
+            android:layout_toRightOf="@id/imagen_estado">
 
             <EditText
                 android:id="@+id/nombre"
@@ -34,7 +57,10 @@
         </android.support.design.widget.TextInputLayout>
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:id="@+id/container_ape"
+            android:layout_toRightOf="@id/imagen_estado"
+            android:layout_below="@id/container_nombre">
 
             <EditText
                 android:id="@+id/apellidos"
@@ -46,8 +72,21 @@
                 android:textColor="@android:color/black"
                 android:textColorHint="@android:color/black" />
         </android.support.design.widget.TextInputLayout>
+        <ImageView
+            android:id="@+id/imagen_cumple"
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/dateinput"
+            android:layout_below="@+id/container_ape"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:src="@drawable/ic_cumple"/>
+
         <android.support.design.widget.TextInputLayout
+            android:layout_toRightOf="@id/imagen_cumple"
+            android:id="@+id/container_fecha"
             android:layout_width="match_parent"
+            android:layout_below="@id/container_ape"
             android:layout_height="wrap_content">
 
             <EditText
@@ -63,13 +102,27 @@
                 android:focusableInTouchMode="false"
                 android:inputType="text"
                 android:textColor="@android:color/black"
-                android:textColorHint="@android:color/black" />
+                android:textColorHint="@android:color/black"
+                />
                 />
         </android.support.design.widget.TextInputLayout>
+        <ImageView
+            android:id="@+id/imagen_dieta"
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/dateinput"
+            android:layout_below="@+id/container_fecha"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:src="@drawable/ic_comida"
+            />
 
         <Switch
+            android:paddingTop="10dp"
+            android:layout_below="@id/container_fecha"
             android:layout_gravity="left"
             android:id="@+id/sw_dieta"
+            android:layout_toRightOf="@id/imagen_dieta"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="false"
@@ -77,18 +130,29 @@
             android:textOff="No"
             android:textOn="Sí"
             android:textSize="18sp" />
+        <ImageView
+            android:id="@+id/imagen_centro"
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/dateinput"
+            android:layout_below="@+id/imagen_dieta"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:src="@drawable/item_centros"/>
 
         <Spinner
             android:id="@+id/sp_centros"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-
+            android:layout_below="@id/sw_dieta"
+            android:layout_toRightOf="@id/imagen_centro"
             android:layout_marginTop="21dp" />
 
         <Button
             android:id="@+id/btn_guardar"
             android:text="@string/guardar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
+            android:layout_height="wrap_content"
+            android:layout_below="@id/imagen_centro"/>
+    </RelativeLayout>
 </android.support.constraint.ConstraintLayout>

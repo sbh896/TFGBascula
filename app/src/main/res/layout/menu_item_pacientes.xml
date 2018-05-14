@@ -5,18 +5,22 @@
     android:layout_height="150dp"
     app:cardElevation="2dp"
     android:layout_margin="7dp"
-    android:layout_gravity="center">
+    android:layout_gravity="center"
+    android:background="@drawable/degradado_rojo">
+
 
     <LinearLayout
         android:layout_gravity="center_horizontal|center_vertical"
-        android:layout_margin="16dp"
         android:orientation="vertical"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/degradado_rojo">
 
-        <ImageView
+
+    <ImageView
             android:src="@drawable/item_pacientes"
-            android:layout_gravity="center_horizontal"
+            android:layout_gravity="center"
+        android:scaleType="fitXY"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
@@ -26,6 +30,7 @@
             android:textColor="@android:color/black"
             android:textSize="18sp"
             android:textStyle="bold"
+            android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
