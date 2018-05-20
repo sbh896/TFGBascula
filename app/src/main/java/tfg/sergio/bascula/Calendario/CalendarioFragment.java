@@ -8,11 +8,13 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.github.sundeepk.compactcalendarview.CompactCalendarView;
 import com.github.sundeepk.compactcalendarview.domain.Event;
@@ -33,6 +35,7 @@ import java.util.List;
 import java.util.Locale;
 
 import tfg.sergio.bascula.Models.AdapterAlerta;
+import tfg.sergio.bascula.Models.AdapterAlertaCalendadrio;
 import tfg.sergio.bascula.Models.Alerta;
 import tfg.sergio.bascula.Models.ElementoListadoAlerta;
 import tfg.sergio.bascula.Models.Paciente;
@@ -52,6 +55,12 @@ public class CalendarioFragment extends Fragment {
     private SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/mm/yyyy", Locale.getDefault());
     private DatabaseReference mDatabaseCentros, mDatabaseRegistros, mDatabasePacientes, mDatabaseAlertas;
     private List<ElementoListadoAlerta> listaAlertas = new ArrayList<>();
+    private RecyclerView recyclerAlertas;
+    private List<ElementoListadoAlerta> listaAlertaasAux = new ArrayList<>();
+    private RecyclerView.Adapter adapterAlertas;
+    private SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yy");
+    private TextView tituloCalendario, alertaSinEventos;
+
 
     @Nullable
     @Override
@@ -73,7 +82,12 @@ public class CalendarioFragment extends Fragment {
         mDatabaseRegistros = FirebaseDatabase.getInstance().getReference("registros");
         mDatabasePacientes = FirebaseDatabase.getInstance().getReference("pacientes");
         mDatabaseAlertas = FirebaseDatabase.getInstance().getReference("alertas");
-
+        recyclerAlertas = view.findViewById(R.id.lista_alertas);
+        recyclerAlertas.setLayoutManager(new GridLayoutManager(this.getActivity(),1));
+        tituloCalendario = view.findViewById(R.id.title_calendario);
+        alertaSinEventos = view.findViewById(R.id.no_eventos);
+        adapterAlertas = new AdapterAlertaCalendadrio(listaAlertaasAux, this.getActivity());
+        recyclerAlertas.setAdapter(adapterAlertas);
 
         calendar = view.findViewById(R.id.compactcalendar_view);
         calendar.setUseThreeLetterAbbreviation(true);
@@ -91,12 +105,49 @@ public class CalendarioFragment extends Fragment {
             @Override
             public void onDayClick(Date dateClicked) {
                 Context context = getActivity().getApplicationContext();
-                //if(dateClicked.toString().compareTo())
+                listaAlertaasAux.clear();
+                for (ElementoListadoAlerta ela : listaAlertas)
+                {
+                    String stralert = formatter.format(ela.alerta.fechaInicio);
+
+                    Date fechaHoy = new Date();
+                    Date fechaAlerta = null;
+                    try {
+                     fechaAlerta = formatter.parse(stralert);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    if(ela.alerta.periodica == 2 && fechaAlerta.getDate() == dateClicked.getDate()){
+                        listaAlertaasAux.add(ela);
+                    }
+                    else if(ela.alerta.periodica == 1){
+                        boolean flag = true;
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(fechaAlerta);
+                        while (flag){
+                            Date tempFecha = cal.getTime();
+                            if(tempFecha.getMonth() == dateClicked.getMonth() && tempFecha.getDate() == dateClicked.getDate() && tempFecha.getYear() == dateClicked.getYear()){
+                                listaAlertaasAux.add(ela);
+                            }
+                            if(tempFecha.getMonth() > dateClicked.getMonth()){
+                                flag = false;
+                            }
+                            cal.add(Calendar.DATE,7);
+                        }
+                    }
+                }
+                if(listaAlertaasAux.size() == 0){
+                    alertaSinEventos.setVisibility(View.VISIBLE);
+                }else{
+                    alertaSinEventos.setVisibility(View.GONE);
+                }
+                adapterAlertas.notifyDataSetChanged();
+
             }
 
             @Override
             public void onMonthScroll(Date firstDayOfNewMonth) {
-                actionbar.setTitle(formatoFecha.format(firstDayOfNewMonth));
+                tituloCalendario.setText(formatoFecha.format(firstDayOfNewMonth));
             }
         });
 
@@ -108,13 +159,13 @@ public class CalendarioFragment extends Fragment {
 
         final Date[] fechaUltimoRegistro = {null};
 
+
         mDatabaseAlertas.addValueEventListener(new ValueEventListener() {
 
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (final DataSnapshot child: dataSnapshot.getChildren()) {
-                    final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yy");
 
 
                     final Alerta alerta = child.getValue(Alerta.class);
@@ -122,17 +173,29 @@ public class CalendarioFragment extends Fragment {
                     String stralert = formatter.format(alerta.fechaInicio);
 
                     Date fechaHoy = new Date();
+                    int mesAlerta = alerta.fechaInicio.getMonth();
+                    int diaHoy = fechaHoy.getDay();
+                    Date fechaAlerta = null;
+                    try {
+                        fechaAlerta = formatter.parse(stralert);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(fechaAlerta);
                     if(alerta.periodica == 1){
-                        int mesAlerta = alerta.fechaInicio.getMonth();
-                        int diaHoy = fechaHoy.getDay();
-                        Date fechaAlerta = null;
-                        try {
-                            fechaAlerta = formatter.parse(stralert);
-                        } catch (ParseException e) {
-                            e.printStackTrace();
+                        boolean flag = true;
+                        while (flag){
+                            Date tempFecha = cal.getTime();
+                            Event ev1 = new Event(Color.RED,tempFecha.getTime(),"dia de prueba");
+                            calendar.addEvent(ev1);
+                            if(tempFecha.getMonth() > fechaHoy.getMonth()){
+                                flag = false;
+                            }
+                            cal.add(Calendar.DATE,7);
                         }
-                        Calendar cal = Calendar.getInstance();
-                        cal.setTime(fechaAlerta);
+                    }
+                    else if(alerta.periodica == 2){
                         boolean flag = true;
                         while (flag){
                             Date tempFecha = cal.getTime();
@@ -141,10 +204,8 @@ public class CalendarioFragment extends Fragment {
                                 Event ev1 = new Event(Color.RED,tempFecha.getTime(),"dia de prueba");
                                 calendar.addEvent(ev1);
                             }
-                            cal.add(Calendar.DATE,7);
-
+                            cal.add(Calendar.MONTH,1);
                         }
-
                     }
 
                     if (alerta.codigoPaciente != null) {

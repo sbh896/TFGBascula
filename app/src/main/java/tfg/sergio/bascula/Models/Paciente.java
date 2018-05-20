@@ -1,5 +1,8 @@
 package tfg.sergio.bascula.Models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.Calendar;
 import java.util.Date;
 
@@ -7,7 +10,7 @@ import java.util.Date;
  * Created by sergio on 27/02/2018.
  */
 
-public class Paciente {
+public class Paciente implements Parcelable {
     private String Nombre;
     private String Apellidos;
     private String Id;
@@ -17,6 +20,28 @@ public class Paciente {
     private boolean EsDietaHipocalorica;
     private String UltimoRegistro = null;
 
+
+    protected Paciente(Parcel in) {
+        Nombre = in.readString();
+        Apellidos = in.readString();
+        Id = in.readString();
+        UrlImagen = in.readString();
+        Centro = in.readString();
+        EsDietaHipocalorica = in.readByte() != 0;
+        UltimoRegistro = in.readString();
+    }
+
+    public static final Creator<Paciente> CREATOR = new Creator<Paciente>() {
+        @Override
+        public Paciente createFromParcel(Parcel in) {
+            return new Paciente(in);
+        }
+
+        @Override
+        public Paciente[] newArray(int size) {
+            return new Paciente[size];
+        }
+    };
 
     public void setEsDietaHipocalorica(boolean esDietaHipocalorica) {EsDietaHipocalorica = esDietaHipocalorica;}
     public void setFechaNacimiento(Date fechaNacimiento) {this.FechaNacimiento = fechaNacimiento;}
@@ -86,5 +111,23 @@ public class Paciente {
         monthsBetween += (today.get(Calendar.YEAR) - dob.get(Calendar.YEAR)) * 12;
         return monthsBetween;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(Nombre);
+        parcel.writeString(Apellidos);
+        parcel.writeString(Id);
+        parcel.writeString(UrlImagen);
+        parcel.writeString(Centro);
+        parcel.writeByte((byte) (EsDietaHipocalorica ? 1 : 0));
+        parcel.writeString(UltimoRegistro);
+    }
+
 
 }

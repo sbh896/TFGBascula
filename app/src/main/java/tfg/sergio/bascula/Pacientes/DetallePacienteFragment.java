@@ -128,6 +128,16 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
             case R.id.action_update:
+                if(paciente_final != null){
+                    FragmentManager fm = getFragmentManager();
+                    FragmentTransaction ft = fm.beginTransaction();
+                    Bundle args = new Bundle();
+                    args.putParcelable("paciente", paciente_final);
+                    Fragment modificarPacienteFragment = new ModificarPacienteFragment();
+                    modificarPacienteFragment.setArguments(args);
+                    ft.replace(R.id.pacientes_screen,modificarPacienteFragment);
+                    ft.commit();
+                }
                 return true;
             case R.id.action_delete:
                 AlertDialog alert = builder.create();

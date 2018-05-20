@@ -1,20 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <com.github.sundeepk.compactcalendarview.CompactCalendarView
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/compactcalendar_view"
-        android:layout_width="fill_parent"
-        android:paddingRight="10dp"
-        android:paddingLeft="10dp"
-        android:layout_height="fill_parent"
-        app:compactCalendarTargetHeight="600dp"
-        app:compactCalendarTextSize="12sp"
-        app:compactCalendarBackgroundColor="@color/white"
-        app:compactCalendarTextColor="@color/black"
-        app:compactCalendarCurrentSelectedDayBackgroundColor="#E57373"
-        app:compactCalendarCurrentDayBackgroundColor="#B71C1C"
-        app:compactCalendarMultiEventIndicatorColor="#fff"
-        />
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/grisCalendario"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:weightSum="3">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1.7">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/title_calendario"/>
+            <com.github.sundeepk.compactcalendarview.CompactCalendarView
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/compactcalendar_view"
+                android:layout_width="fill_parent"
+                android:paddingRight="10dp"
+                android:paddingLeft="10dp"
+                android:layout_height="wrap_content"
+                app:compactCalendarTextSize="12sp"
+                app:compactCalendarBackgroundColor="@color/white"
+                app:compactCalendarTextColor="@color/black"
+                app:compactCalendarCurrentSelectedDayBackgroundColor="#E57373"
+                app:compactCalendarCurrentDayBackgroundColor="#B71C1C"
+                app:compactCalendarMultiEventIndicatorColor="#fff"
+                />
+
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_marginTop="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="@color/grisCalendario"
+            android:layout_weight="1"
+            >
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/white">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/no_eventos"
+                    android:text="Sin eventos"
+                    android:textSize="20dp"
+                    android:padding="15dp"/>
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/lista_alertas"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/title_alertas"
+                    android:layout_gravity="left"
+                    android:padding="10dp">
+                </android.support.v7.widget.RecyclerView>
+            </RelativeLayout>
+
+        </RelativeLayout>
+    </LinearLayout>
 </android.support.constraint.ConstraintLayout>
