@@ -36,6 +36,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -45,6 +46,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -80,6 +82,7 @@ public class ModificarPacienteFragment extends Fragment {
     private DatabaseReference mDatabaseCentros;
     private ProgressDialog progreso;
     private Paciente pacienteOriginal;
+    private String keyPaciente;
 
 
     // Permiso de almacenamiento
@@ -103,6 +106,7 @@ public class ModificarPacienteFragment extends Fragment {
 
         Bundle bundle = getArguments();
         pacienteOriginal = bundle.getParcelable("paciente");
+        keyPaciente = bundle.getString("key");
 
         mStorage = FirebaseStorage.getInstance().getReference();
         mDatabase = FirebaseDatabase.getInstance().getReference("pacientes");
@@ -118,6 +122,8 @@ public class ModificarPacienteFragment extends Fragment {
         inputApellido.setText(pacienteOriginal.getApellidos());
         //mSpinner.setSelection(pacienteOriginal.getCentro());
         mDisplayDate.setText(formatter.format(pacienteOriginal.getFechaNacimiento()));
+
+        Picasso.with(getActivity()).load(pacienteOriginal.getUrlImagen()).resize(200,200).into(inputFoto);
         //Guardado
         view.findViewById(R.id.btn_guardar).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -133,12 +139,9 @@ public class ModificarPacienteFragment extends Fragment {
                     Toast.makeText(getActivity(), "Introduzca los apellidos.", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                if(uriImagenAltaCalidad == null) {
-                    Toast.makeText(getActivity(), "Introduzca una imagen de usuario.", Toast.LENGTH_SHORT).show();
-
-                }
                 if(mSpinner.getSelectedItemPosition() == 0){
                     Toast.makeText(getActivity(), "Seleccione un centro.", Toast.LENGTH_SHORT).show();
+                    return;
                 }
 
                 guardarPaciente(nombre,apellidos);
@@ -171,6 +174,8 @@ public class ModificarPacienteFragment extends Fragment {
             }
         });
 
+
+
         //Seleccion de fecha
         mDisplayDate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -200,6 +205,7 @@ public class ModificarPacienteFragment extends Fragment {
                 mes = mes +1;
                 String fecha = dia+"/" + mes + "/" + anio;
                 mDisplayDate.setText(fecha);
+                pacienteOriginal.setFechaNacimiento(fechaNacimiento);
             }
         };
         this.obtenerCentros();
@@ -298,24 +304,52 @@ public class ModificarPacienteFragment extends Fragment {
     private void  guardarPaciente(final String nombre,final String apellidos){
 
         //Guardado del paciente en Firebase
-        progreso.setMessage("Guardando paciente ...");
-        progreso.show();
-        StorageReference path = mStorage.child("Fotos_pacientes").child(uriImagenAltaCalidad.getLastPathSegment());
-        path.putFile(uriImagenAltaCalidad).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Uri downloadUri = taskSnapshot.getDownloadUrl();
-                Centro c = (Centro)mSpinner.getSelectedItem();
-                String id = mDatabase.push().getKey();
-                Paciente paciente = new Paciente(nombre,apellidos,id,downloadUri.toString(),c.Id,fechaNacimiento,inputDieta.isChecked());
-                mDatabase.child(id).setValue(paciente);
-                progreso.dismiss();
 
-            }
-        });
+        pacienteOriginal.setNombre(inputNombre.getText().toString());
+        pacienteOriginal.setApellidos(inputApellido.getText().toString());
+        Centro c = (Centro)mSpinner.getSelectedItem();
+        pacienteOriginal.setCentro(c.Id);
+        pacienteOriginal.setEsDietaHipocalorica(inputDieta.isChecked());
 
-        FragmentManager fm = getFragmentManager();
-        fm.popBackStackImmediate();
+        if(uriImagenAltaCalidad != null){
+            progreso.setMessage("Guardando paciente ...");
+            progreso.show();
+            StorageReference fotoEliminar = mStorage.child("Fotos_pacientes/"+ pacienteOriginal.getArchivoFoto());
+            // Delete the file
+            fotoEliminar.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    // File deleted successfully
+                    int k = 2;
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Uh-oh, an error occurred!
+                    int i = 0;
+
+                }
+            });
+            StorageReference path = mStorage.child("Fotos_pacientes").child(uriImagenAltaCalidad.getLastPathSegment());
+            path.putFile(uriImagenAltaCalidad).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    Uri downloadUri = taskSnapshot.getDownloadUrl();
+                    Centro c = (Centro)mSpinner.getSelectedItem();
+                    pacienteOriginal.setUrlImagen(downloadUri.toString());
+                    pacienteOriginal.setArchivoFoto(uriImagenAltaCalidad.getLastPathSegment());
+                    mDatabase.child(pacienteOriginal.getId()).setValue(pacienteOriginal);
+                    progreso.dismiss();
+                    FragmentManager fm = getFragmentManager();
+                    fm.popBackStackImmediate();
+                }
+            });
+        }else{
+            mDatabase.child(pacienteOriginal.getId()).setValue(pacienteOriginal);
+            FragmentManager fm = getFragmentManager();
+            fm.popBackStackImmediate();
+
+        }
     }
     //endregion
 

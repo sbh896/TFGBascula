@@ -1,19 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="40dp"
+    android:layout_height="wrap_content"
     android:background="@drawable/marker_image" >
-
+    <ImageView
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:id="@+id/imagen_peso"
+        android:layout_marginTop="10dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="5dp"
+        android:background="@drawable/ic_bascula"
+        />
     <TextView
+        android:layout_below="@+id/imagen_peso"
+        android:layout_toRightOf="@id/imagen_peso"
         android:id="@+id/text2"
-        android:layout_width="40dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
         android:text=""
+        android:textAlignment="center"
         android:textColor="@color/black"
-        android:padding="5dp"
+        android:background="@color/white"
+        android:layout_marginRight="5dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginBottom="70dp"
         android:textSize="14dp" />
 
 </RelativeLayout>

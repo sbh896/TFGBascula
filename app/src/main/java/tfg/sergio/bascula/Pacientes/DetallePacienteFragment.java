@@ -133,8 +133,10 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                     FragmentTransaction ft = fm.beginTransaction();
                     Bundle args = new Bundle();
                     args.putParcelable("paciente", paciente_final);
+                    args.putString("key",key);
                     Fragment modificarPacienteFragment = new ModificarPacienteFragment();
                     modificarPacienteFragment.setArguments(args);
+                    ft.addToBackStack("detallePaciente");
                     ft.replace(R.id.pacientes_screen,modificarPacienteFragment);
                     ft.commit();
                 }
@@ -422,7 +424,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         leftAxis.setDrawZeroLine(false);
         leftAxis.setDrawLimitLinesBehindData(true);
 
-        CustomMarkerView mv = new CustomMarkerView(getActivity(), R.layout.marker_layout);
+        CustomMarkerView mv = new CustomMarkerView(getActivity(), R.layout.marker_layout, registros);
 
         mChart.setMarkerView(mv);
         mChart.getAxisRight().setEnabled(false);
@@ -442,7 +444,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         // enable scaling and dragging
         mChart2.setDragEnabled(true);
         mChart2.setScaleEnabled(true);
-        CustomMarkerView mv2 = new CustomMarkerView(getActivity(), R.layout.marker_layout);
+        CustomMarkerView mv2 = new CustomMarkerView(getActivity(), R.layout.marker_layout, registros);
         mChart2.setMarkerView(mv2);
 
         YAxis leftAxis2 = mChart2.getAxisLeft();
@@ -531,7 +533,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         int x =0;
 
         for(RegistroPaciente r : registros){
-            yVals.add(new Entry(x,(float)r.getPeso()));
+            yVals.add(new Entry((int)r.getFecha().getTime()/1000,(float)r.getPeso()));
             x+=60;
         }
         if(yVals.size() == 0){

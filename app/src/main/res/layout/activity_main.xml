@@ -23,13 +23,14 @@
             android:layout_width="match_parent"
             android:layout_weight="1.5" >
             <RelativeLayout
-                android:layout_marginTop="80dp"
+                android:layout_marginTop="75dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 >
                 <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
+                    android:layout_height="50dp"
+                    android:background="@color/white"
                     android:id="@+id/title_alertas"
                     android:textSize="24dp"
                     android:text="Próximas alertas"
@@ -43,12 +44,13 @@
                     android:layout_height="match_parent"
                     android:layout_below="@+id/title_alertas"
                     android:layout_gravity="left"
-                    android:padding="10dp">
+                    android:padding="10dp"
+                    android:background="@color/grisCalendario">
                 </android.support.v7.widget.RecyclerView>
             </RelativeLayout>
         </LinearLayout>
         <LinearLayout
-            android:background="@color/white"
+            android:background="@color/grisCalendario"
             android:layout_height="0dp"
             android:layout_width="match_parent"
             android:layout_weight="2.5"
@@ -61,12 +63,14 @@
                 android:orientation="vertical"
                 android:weightSum="2"
                 android:layout_marginLeft="10dp"
+                android:layout_marginBottom="10dp"
                 >
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:id="@+id/dgrafica_filtros"
                         android:orientation="vertical"
+                        android:background="@color/white"
                         >
                         <TextView
                             android:layout_width="match_parent"
@@ -81,16 +85,19 @@
                         android:layout_marginTop="10dp"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:background="@color/grisCalendario"
                         >
 
                         <com.github.mikephil.charting.charts.BarChart
                             android:id="@+id/chart"
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent" />
+                            android:layout_height="match_parent"
+                            android:background="@color/white"
+                            />
                     </LinearLayout>
             </LinearLayout>
             <RelativeLayout
-                android:background="@drawable/degradado_gris"
+                android:background="@color/grisCalendario"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -101,6 +108,7 @@
                     android:id="@+id/titleRecicler"
                     android:textSize="20dp"
                     android:text="Últimos registros"
+                    android:background="@color/white"
                     android:padding="20dp"
                     android:textColor="@color/black"/>
                 <android.support.v7.widget.RecyclerView

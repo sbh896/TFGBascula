@@ -53,4 +53,5 @@
         <item>Hiperprotéica</item>
         <item>Otra/Suplementos</item>
     </string-array>
+    <string name="rutaFotoPaciente">Fotos_pacientes</string>
 </resources>

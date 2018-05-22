@@ -13,6 +13,25 @@ import java.util.Date;
 public class Paciente implements Parcelable {
     private String Nombre;
     private String Apellidos;
+
+    public String getArchivoFoto() {
+        return ArchivoFoto;
+    }
+
+    public void setArchivoFoto(String archivoFoto) {
+        ArchivoFoto = archivoFoto;
+    }
+
+    private String ArchivoFoto;
+
+    public String getId() {
+        return Id;
+    }
+
+    public void setId(String id) {
+        Id = id;
+    }
+
     private String Id;
     private String UrlImagen;
     private String Centro;
@@ -70,7 +89,7 @@ public class Paciente implements Parcelable {
 
 
 
-    public Paciente(String n, String a, String id, String url, String centro, Date fecha, boolean dieta){
+    public Paciente(String n, String a, String id, String url, String centro, Date fecha, boolean dieta, String archivo){
         this.Nombre=n;
         this.Apellidos = a;
         this.Id = id;
@@ -78,6 +97,7 @@ public class Paciente implements Parcelable {
         this.Centro = centro;
         this.FechaNacimiento = fecha;
         this.EsDietaHipocalorica = dieta;
+        this.ArchivoFoto = archivo;
     }
     public Paciente(){
 

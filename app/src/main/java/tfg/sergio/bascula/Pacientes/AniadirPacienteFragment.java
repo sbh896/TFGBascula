@@ -126,6 +126,7 @@ public class AniadirPacienteFragment extends Fragment {
                 }
                 if(uriImagenAltaCalidad == null) {
                     Toast.makeText(getActivity(), "Introduzca una imagen de usuario.", Toast.LENGTH_SHORT).show();
+                    return;
 
                 }
                 if(mSpinner.getSelectedItemPosition() == 0){
@@ -298,7 +299,7 @@ public class AniadirPacienteFragment extends Fragment {
                 Uri downloadUri = taskSnapshot.getDownloadUrl();
                 Centro c = (Centro)mSpinner.getSelectedItem();
                 String id = mDatabase.push().getKey();
-                Paciente paciente = new Paciente(nombre,apellidos,id,downloadUri.toString(),c.Id,fechaNacimiento,inputDieta.isChecked());
+                Paciente paciente = new Paciente(nombre,apellidos,id,downloadUri.toString(),c.Id,fechaNacimiento,inputDieta.isChecked(),uriImagenAltaCalidad.getLastPathSegment());
                 mDatabase.child(id).setValue(paciente);
                 progreso.dismiss();
 
