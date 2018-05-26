@@ -22,21 +22,14 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import tfg.sergio.bascula.Models.AdapterCentro;
-import tfg.sergio.bascula.Models.AdapterPaciente;
+import tfg.sergio.bascula.Adapters.AdapterCentro;
 import tfg.sergio.bascula.Models.Centro;
-import tfg.sergio.bascula.Models.ElementoListadoPaciente;
-import tfg.sergio.bascula.Models.Paciente;
-import tfg.sergio.bascula.Models.RegistroPaciente;
-import tfg.sergio.bascula.Centros.AniadirCentroFragment;
 import tfg.sergio.bascula.R;
-import tfg.sergio.bascula.Resources.IMCCalculator;
 
 /**
  * Created by yeyo on 25/02/2018.

@@ -1,24 +1,25 @@
-package tfg.sergio.bascula.Models;
+package tfg.sergio.bascula.Adapters;
 
 import android.content.Context;
-import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
+import android.graphics.drawable.ColorDrawable;
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
-
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
-import tfg.sergio.bascula.Centros.CentrosFragment;
-import tfg.sergio.bascula.Pacientes.DetallePacienteFragment;
+import tfg.sergio.bascula.Models.Centro;
 import tfg.sergio.bascula.R;
 
 /**
@@ -29,10 +30,15 @@ public class AdapterCentro extends RecyclerView.Adapter<AdapterCentro.CentrosVie
 
     List<Centro> centros;
     Context ctx;
+    String[] meses = {"Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"};
+    int mesSeleccionado = 01;
 
     public AdapterCentro(List<Centro> listado, Context c){
         this.centros = listado;
         this.ctx = c;
+
+
+
     }
 
     @Override
@@ -43,7 +49,7 @@ public class AdapterCentro extends RecyclerView.Adapter<AdapterCentro.CentrosVie
     }
 
     @Override
-    public void onBindViewHolder(CentrosViewHolder holder, int position) {
+    public void onBindViewHolder(CentrosViewHolder holder, final int position) {
         final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yy");
 
         final Centro centro = centros.get(position);
@@ -54,15 +60,50 @@ public class AdapterCentro extends RecyclerView.Adapter<AdapterCentro.CentrosVie
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                FragmentManager fm =  ((AppCompatActivity)ctx).getSupportFragmentManager();
-//                FragmentTransaction ft = fm.beginTransaction();
-//                ft.addToBackStack("centros");
-//                Bundle bundle = new Bundle();
-//                bundle.putString("key",);
-//                DetallePacienteFragment fragment = new DetallePacienteFragment();
-//                fragment.setArguments(bundle);
-//                ft.replace(R.id.pacientes_screen,fragment);
-//                ft.commit();
+                LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                final View layout = inflater.inflate(R.layout.centro_deetalle_layout,null);
+                final Centro centro = centros.get(position);
+                Date currentTime = Calendar.getInstance().getTime();
+                mesSeleccionado = currentTime.getMonth();
+                ((TextView)layout.findViewById(R.id.centro)).setText(meses[mesSeleccionado]);
+                float density=ctx.getResources().getDisplayMetrics().density;
+                final PopupWindow pw = new PopupWindow(layout, (int)density*800, (int)density*800, true);
+                pw.setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+                pw.setTouchInterceptor(new View.OnTouchListener() {
+                    public boolean onTouch(View v, MotionEvent event) {
+                        if(event.getAction() == MotionEvent.ACTION_OUTSIDE) {
+                            pw.dismiss();
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+                ((ImageButton)layout.findViewById(R.id.izquierda)).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if(mesSeleccionado == 0){
+                            return;
+                        }
+                        mesSeleccionado--;
+                        ((TextView)layout.findViewById(R.id.centro)).setText(meses[mesSeleccionado]);
+                    }
+                });
+
+                ((ImageButton)layout.findViewById(R.id.derecha)).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if(mesSeleccionado == 11){
+                            return;
+                        }
+                        mesSeleccionado++;
+                        ((TextView)layout.findViewById(R.id.centro)).setText(meses[mesSeleccionado]);
+                    }
+                });
+
+
+                pw.setOutsideTouchable(true);
+                // display the pop-up in the center
+                pw.showAtLocation(layout, Gravity.CENTER, 0, 0);
             }
         });
 

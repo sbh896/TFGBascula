@@ -1,6 +1,7 @@
 package tfg.sergio.bascula.Resources;
 
 import android.content.Context;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -51,6 +52,8 @@ public class CustomMarkerView extends MarkerView {
 
         if(aux != null && aux.getUrlFoto() != null){
             Picasso.with(this.getContext()).load(aux.getUrlFoto()).resize(150,150).into(imagenPeso);
+        }else{
+            imagenPeso.setVisibility(View.GONE);
         }
 
 
