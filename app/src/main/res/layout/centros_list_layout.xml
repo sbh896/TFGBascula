@@ -5,7 +5,8 @@
     app:cardElevation="5dp" android:layout_margin="7dp"
     app:cardCornerRadius="6dp"
     app:contentPadding="25dp"
-    app:cardMaxElevation="6dp">
+    app:cardMaxElevation="6dp"
+    >
 <RelativeLayout
     android:layout_width="wrap_content" android:layout_height="wrap_content">
     <ImageView android:id="@+id/iamgen_perfil" android:layout_width="match_parent"
@@ -22,8 +23,21 @@
         android:maxLines="2"
         android:paddingTop="10dp"
         android:text="Nombre"
+        android:layout_marginTop="10dp"
         android:textSize="16sp"/>
+    <TextView
+        android:id="@+id/textViewOptions"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:text="&#8942;"
+        android:textAppearance="?android:textAppearanceLarge"
+        android:layout_below="@+id/iamgen_perfil"
+        android:layout_marginTop="10dp"
+        android:textSize="30dp"
 
+        />
 </RelativeLayout>
 </android.support.v7.widget.CardView>
 
