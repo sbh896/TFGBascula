@@ -1,10 +1,13 @@
 package tfg.sergio.bascula.Models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by yeyo on 04/03/2018.
  */
 
-public class Centro {
+public class Centro implements Parcelable{
     public String Id;
     public String Nombre;
     public String Direccion;
@@ -23,4 +26,16 @@ public class Centro {
     }
 
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(Id);
+        parcel.writeString(Nombre);
+        parcel.writeString(Direccion);
+        parcel.writeString(UrlImagen);
+    }
 }

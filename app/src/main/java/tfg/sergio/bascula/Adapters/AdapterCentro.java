@@ -1,8 +1,14 @@
 package tfg.sergio.bascula.Adapters;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -39,8 +45,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import tfg.sergio.bascula.Centros.ModificarCentroFragment;
 import tfg.sergio.bascula.Models.Centro;
 import tfg.sergio.bascula.Models.PacientesMesCentro;
+import tfg.sergio.bascula.Pacientes.ModificarPacienteFragment;
 import tfg.sergio.bascula.R;
 
 /**
@@ -103,6 +111,17 @@ public class AdapterCentro extends RecyclerView.Adapter<AdapterCentro.CentrosVie
                                 break;
                             case R.id.action_update:
                                 Toast.makeText(ctx, "update", Toast.LENGTH_SHORT).show();
+                                if(centro != null){
+                                    FragmentManager fm = ((AppCompatActivity)ctx).getSupportFragmentManager();
+                                    FragmentTransaction ft = fm.beginTransaction();
+                                    Bundle args = new Bundle();
+                                    args.putParcelable("centro", centro);
+                                    Fragment modificarCentroFragment = new ModificarCentroFragment();
+                                    modificarCentroFragment.setArguments(args);
+                                    ft.addToBackStack("centros");
+                                    ft.replace(R.id.centros_screen,modificarCentroFragment);
+                                    ft.commit();
+                                }
                                 break;
                         }
                         return false;

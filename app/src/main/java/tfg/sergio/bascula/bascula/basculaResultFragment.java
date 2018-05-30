@@ -5,11 +5,13 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -36,6 +38,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -47,7 +50,9 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -233,15 +238,29 @@ public class basculaResultFragment extends Fragment{
                 progreso.setMessage("Guardando paciente ...");
                 progreso.show();
                 StorageReference path = mStorage.child("Fotos_peso_pacientes").child(uriImagenAltaCalidad.getLastPathSegment());
-                path.putFile(uriImagenAltaCalidad).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                Bitmap bmp = null;
+                try {
+                    bmp = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uriImagenAltaCalidad);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bmp.compress(Bitmap.CompressFormat.JPEG, 40, baos);
+                byte[] data = baos.toByteArray();
+                UploadTask uploadTask2 = path.putBytes(data);
+                uploadTask2.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        Uri downloadUri = taskSnapshot.getDownloadUrl();
-                        regis.setUrlFoto(downloadUri.toString());
+                        regis.setUrlFoto(taskSnapshot.getDownloadUrl().toString());
                         mDatabase.child(id).setValue(regis);
-
                         progreso.dismiss();
-
+                        //Toast.makeText(getActivity(), "Upload successful", Toast.LENGTH_LONG).show();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        progreso.dismiss();
+                       // Toast.makeText(getActivity(), "Upload Failed -> " + e, Toast.LENGTH_LONG).show();
                     }
                 });
 

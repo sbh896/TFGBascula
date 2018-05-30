@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -35,6 +36,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -45,7 +47,9 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -292,8 +296,19 @@ public class AniadirPacienteFragment extends Fragment {
         //Guardado del paciente en Firebase
         progreso.setMessage("Guardando paciente ...");
         progreso.show();
+        Bitmap bmp = null;
+        try {
+            bmp = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uriImagenAltaCalidad);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         StorageReference path = mStorage.child("Fotos_pacientes").child(uriImagenAltaCalidad.getLastPathSegment());
-        path.putFile(uriImagenAltaCalidad).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.JPEG, 60, baos);
+        byte[] data = baos.toByteArray();
+        UploadTask uploadTask2 = path.putBytes(data);
+        uploadTask2.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 Uri downloadUri = taskSnapshot.getDownloadUrl();
@@ -302,7 +317,12 @@ public class AniadirPacienteFragment extends Fragment {
                 Paciente paciente = new Paciente(nombre,apellidos,id,downloadUri.toString(),c.Id,fechaNacimiento,inputDieta.isChecked(),uriImagenAltaCalidad.getLastPathSegment());
                 mDatabase.child(id).setValue(paciente);
                 progreso.dismiss();
-
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                progreso.dismiss();
+                // Toast.makeText(getActivity(), "Upload Failed -> " + e, Toast.LENGTH_LONG).show();
             }
         });
 
