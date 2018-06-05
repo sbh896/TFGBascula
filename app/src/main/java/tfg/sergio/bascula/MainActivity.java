@@ -3,8 +3,6 @@ package tfg.sergio.bascula;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -18,16 +16,9 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.Legend;
@@ -36,13 +27,10 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
-import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -53,32 +41,24 @@ import com.google.firebase.database.ValueEventListener;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import tfg.sergio.bascula.Calendario.CalendarioFragment;
-import tfg.sergio.bascula.Centros.AniadirCentroFragment;
 import tfg.sergio.bascula.Centros.CentrosFragment;
 import tfg.sergio.bascula.Models.AdapterAlerta;
-import tfg.sergio.bascula.Models.AdapterPaciente;
 import tfg.sergio.bascula.Models.AdapterRegistro;
 import tfg.sergio.bascula.Models.Alerta;
 import tfg.sergio.bascula.Models.Centro;
 import tfg.sergio.bascula.Models.ElementoListadoAlerta;
 import tfg.sergio.bascula.Models.ElementoListadoPaciente;
-import tfg.sergio.bascula.Models.Mes;
-import tfg.sergio.bascula.Models.MesesAnno;
 import tfg.sergio.bascula.Models.Paciente;
 import tfg.sergio.bascula.Models.PacientesMesCentro;
 import tfg.sergio.bascula.Models.RegistroPaciente;
+import tfg.sergio.bascula.Pacientes.DetallePacienteFragment;
 import tfg.sergio.bascula.Pacientes.PacientesFragment;
-import tfg.sergio.bascula.Resources.EnumIMC;
-import tfg.sergio.bascula.Resources.EnumIMCFirebase;
-import tfg.sergio.bascula.Resources.IMCCalculator;
 import tfg.sergio.bascula.Resources.SwipeController;
 import tfg.sergio.bascula.Resources.SwipeControllerActions;
-import tfg.sergio.bascula.bascula.basculaFragment;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -238,7 +218,23 @@ public class MainActivity extends AppCompatActivity
 //                mAdapter.notifyItemRemoved(position);
 //                mAdapter.notifyItemRangeChanged(position, mAdapter.getItemCount());
             }
-        });        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeController);
+
+            @Override
+            public void onLeftClicked(int position) {
+                ElementoListadoAlerta alertaSeleccionada = listaAlertas.get(position);
+                Fragment fragment = new DetallePacienteFragment();
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                FragmentTransaction ft = fragmentManager.beginTransaction();
+                Bundle bundle = new Bundle();
+                bundle.putString("key", alertaSeleccionada.paciente.getId());
+                fragment.setArguments(bundle);
+                ft.addToBackStack("Main");
+                ft.replace(R.id.screen_area, fragment);
+                ft.commit();
+
+            }
+        });
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeController);
         itemTouchHelper.attachToRecyclerView(recyclerAlertas);
 
         mDatabaseAlertas.addValueEventListener(new ValueEventListener() {

@@ -49,7 +49,9 @@ public class AdapterAlerta extends RecyclerView.Adapter<AdapterAlerta.PacientesV
         holder.paciente_nombre.setText(alerta.paciente.getNombre() + " " + alerta.paciente.getApellidos());
         holder.paciente_fecha.setText(alerta.ultimoRegistro == null ? "-":formatter.format(alerta.ultimoRegistro.getFecha()));
         holder.alerta_fecha.setText(formatter.format(alerta.alerta.fechaInicio));
-        holder.peso.setText(String.valueOf(alerta.ultimoRegistro.getPeso()));
+        if(alerta.ultimoRegistro != null){
+            holder.peso.setText(String.valueOf(alerta.ultimoRegistro.getPeso()));
+        }
 
 //        holder.mView.setOnClickListener(new View.OnClickListener() {
 //            @Override

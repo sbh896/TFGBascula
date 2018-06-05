@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/detalle_centro_fondo"
+    android:elevation="20dp"
+    android:padding="20dp"
+    >
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/selector_mes">
+        <TextView
+            android:id="@+id/titulo_silla"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Selección de silla"
+            android:textSize="25dp"
+            android:gravity="center"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="45dp"/>
+        <ImageView
+
+            android:id="@+id/imagen_centro"
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/titulo_silla"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:src="@drawable/ic_silla"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/imagen_centro"
+            android:layout_below="@id/titulo_silla"
+            android:textSize="20dp"
+            android:text="Modelo"/>
+        <ImageView
+            android:layout_marginTop="20dp"
+            android:id="@+id/imagen_peso"
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/titulo_silla"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:src="@drawable/ic_bascula"/>
+        <TextView
+            android:layout_marginTop="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/imagen_peso"
+            android:layout_below="@id/imagen_centro"
+            android:textSize="20dp"
+            android:text="Modelo"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Continuar"
+            android:id="@+id/btn_silla_continuar"
+            android:layout_below="@id/imagen_peso"
+            android:layout_marginLeft="50dp"/>
+        <Button
+            android:id="@+id/btn_silla_modificar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cambiar silla"
+            android:layout_toRightOf="@+id/btn_silla_continuar"
+            android:layout_below="@id/imagen_peso"
+            />
+
+    </RelativeLayout>
+
+</android.support.constraint.ConstraintLayout>

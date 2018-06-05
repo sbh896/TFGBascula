@@ -15,6 +15,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,8 +26,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -96,6 +99,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
     private ImageButton pesarButton, configAlertButton;
     private ArrayList<RegistroPaciente> registros = new ArrayList<>();
     int estado;
+    private  FrameLayout frameLayout;
     String centro;
     Paciente paciente_final;
 
@@ -164,6 +168,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         out_edad = view.findViewById(R.id.txt_edad);
         out_IMC = view.findViewById(R.id.txt_imc);
         out_altura = view.findViewById(R.id.txt_altura);
+        frameLayout = (FrameLayout) view.findViewById( R.id.detalle_screen);
         out_perfil = view.findViewById(R.id.foto_perfil);
         pesarButton = view.findViewById(R.id.btn_pesar);
         configAlertButton = view.findViewById(R.id.btn_alert);
@@ -180,19 +185,56 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         pesarButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                registros.clear();
-                FragmentManager fm = getFragmentManager();
-                FragmentTransaction ft = fm.beginTransaction();
-                ft.addToBackStack("detalle");
-                Bundle bundle = new Bundle();
-                bundle.putString("key",key);
-                bundle.putInt("estado",estado);
-                bundle.putString("centro",centro);
-                bundle.putString("nombre", paciente_final.getNombre());
-                Fragment fragment = new basculaFragment();
-                fragment.setArguments(bundle);
-                ft.replace(R.id.pacientes_screen,fragment);
-                ft.commit();
+
+                frameLayout.setForeground(new ColorDrawable(0x80FFFFFF));
+
+                LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                final View layout = inflater.inflate(R.layout.seleccion_silla_layout,null);
+
+                // final Centro centro = centros.get(position);
+
+                float density=getActivity().getResources().getDisplayMetrics().density;
+                final PopupWindow pw = new PopupWindow(layout, (int)density*600, (int)density*500, true);
+                pw.setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+                pw.setTouchInterceptor(new View.OnTouchListener() {
+                    public boolean onTouch(View v, MotionEvent event) {
+                        frameLayout.setForeground(null);
+                        if(event.getAction() == MotionEvent.ACTION_OUTSIDE) {
+                            pw.dismiss();
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+                if(paciente_final.getCodigoSilla() == null){
+                    ((Button)layout.findViewById(R.id.btn_silla_modificar)).setText("Pesar silla");
+                    ((Button)layout.findViewById(R.id.btn_silla_continuar)).setEnabled(false);
+                }
+                ((Button)layout.findViewById(R.id.btn_silla_continuar)).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        registros.clear();
+                        FragmentManager fm = getFragmentManager();
+                        FragmentTransaction ft = fm.beginTransaction();
+                        ft.addToBackStack("detalle");
+                        Bundle bundle = new Bundle();
+                        bundle.putString("key",key);
+                        bundle.putInt("estado",estado);
+                        bundle.putString("centro",centro);
+                        bundle.putString("nombre", paciente_final.getNombre());
+                        Fragment fragment = new basculaFragment();
+                        fragment.setArguments(bundle);
+                        ft.replace(R.id.detalle_screen,fragment);
+                        pw.dismiss();
+                        frameLayout.setForeground(null);
+                        ft.commit();
+                    }
+                });
+                pw.setOutsideTouchable(true);
+                // display the pop-up in the center
+                pw.showAtLocation(layout, Gravity.CENTER, 0, 0);
+
+
             }
         });
         mDateSetListener = new DatePickerDialog.OnDateSetListener() {

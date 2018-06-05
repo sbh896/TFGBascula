@@ -39,6 +39,15 @@ public class Paciente implements Parcelable {
     private boolean EsDietaHipocalorica;
     private String UltimoRegistro = null;
 
+    public String getCodigoSilla() {
+        return CodigoSilla;
+    }
+
+    public void setCodigoSilla(String codigoSilla) {
+        CodigoSilla = codigoSilla;
+    }
+
+    private String CodigoSilla = null;
 
     protected Paciente(Parcel in) {
         Nombre = in.readString();
