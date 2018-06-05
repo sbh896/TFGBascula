@@ -232,10 +232,13 @@ public class basculaResultFragment extends Fragment{
                 final String id = mDatabase.push().getKey();
 
                 //Guardado del registro en Firebase
+                if(uriImagenAltaCalidad == null){
+                    mDatabase.child(id).setValue(regis);
+                    return;
+                }
 
-
-                //Guardado del paciente en Firebase
-                progreso.setMessage("Guardando paciente ...");
+                //Guardado del registro en Firebase
+                progreso.setMessage("Guardando registro ...");
                 progreso.show();
                 StorageReference path = mStorage.child("Fotos_peso_pacientes").child(uriImagenAltaCalidad.getLastPathSegment());
                 Bitmap bmp = null;

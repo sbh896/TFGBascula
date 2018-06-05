@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -17,6 +18,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -61,6 +63,8 @@ public class ModificarCentroFragment extends Fragment {
     private ProgressDialog progreso;
     private Centro centroOriginal;
     AlertDialog.Builder alert;
+    private Context ctx = getActivity();
+    private FragmentManager fragmentManager;
 
     private int PICK_IMAGE_REQUEST = 1;
     // Permiso de almacenamiento
@@ -120,6 +124,7 @@ public class ModificarCentroFragment extends Fragment {
         view.findViewById(R.id.btn_guardar).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                fragmentManager = getActivity().getSupportFragmentManager();
                 if (TextUtils.isEmpty(inputCentro.getText().toString())) {
                     Toast.makeText(getActivity(), "Introduzca un nombre.", Toast.LENGTH_SHORT).show();
                     return;
@@ -185,62 +190,67 @@ public class ModificarCentroFragment extends Fragment {
 
     //region Firebase
     private void  guardarCentro(){
-        final String nombre = inputCentro.getText().toString();
-        final String direccion = inputDireccion.getText().toString();
+        centroOriginal.Nombre = inputCentro.getText().toString();
+        centroOriginal.Direccion = inputDireccion.getText().toString();
 
+        if(uriImagenAltaCalidad != null){
+            progreso.show();
+            if(centroOriginal.ArchivoFoto != null){
 
-        Bitmap bmp = null;
-        try {
-            bmp = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uriImagenAltaCalidad);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bmp.compress(Bitmap.CompressFormat.JPEG, 25, baos);
-            byte[] data = baos.toByteArray();
-            //uploading the image
+            StorageReference fotoEliminar = mStorage.child("Fotos_centros/"+ centroOriginal.ArchivoFoto);
+                // Delete the file
+                fotoEliminar.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                    }
+                });
+            }
+
             StorageReference path = mStorage.child("Fotos_centros").child(uriImagenAltaCalidad.getLastPathSegment());
-            UploadTask uploadTask2 = path.putBytes(data);
-            uploadTask2.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                    DateFormat dateFormat = new SimpleDateFormat("YYYYMM");
-                    Date date = new Date();
+            Bitmap bmp = null;
+            try {
+                bmp = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uriImagenAltaCalidad);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bmp.compress(Bitmap.CompressFormat.JPEG, 25, baos);
+                byte[] data = baos.toByteArray();
+                //uploading the image
+                UploadTask uploadTask2 = path.putBytes(data);
+                uploadTask2.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                    //Guardado del centro en Firebase
-                    progreso.setMessage("Guardando centro ...");
-                    progreso.show();
+                        Uri downloadUri = taskSnapshot.getDownloadUrl();
+                        centroOriginal.UrlImagen = downloadUri.toString();
+                        centroOriginal.ArchivoFoto = uriImagenAltaCalidad.getLastPathSegment();
+                        mDatabaseCentros.child(centroOriginal.Id).setValue(centroOriginal);
+                        progreso.dismiss();
 
-                    String id = mDatabaseCentros.push().getKey();
-                    String id2 = mDatabaseDatosMes.push().getKey();
-                    Centro centro = new Centro(id,nombre);
-                    centro.Direccion = direccion;
-                    centro.UrlImagen = taskSnapshot.getDownloadUrl().toString();
-                    String ident = id + dateFormat.format(date);
-                    PacientesMesCentro pmc= new PacientesMesCentro(ident);
-
-                    mDatabaseDatosMes.child(id2).setValue(pmc);
-                    mDatabaseCentros.child(id).setValue(centro);
-                    progreso.dismiss();
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    progreso.dismiss();
-                }
-            });
+                        fragmentManager.popBackStackImmediate();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        progreso.dismiss();
+                    }
+                });
 
 
-        } catch (IOException e) {
-            e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }else{
+            mDatabaseCentros.child(centroOriginal.Id).setValue(centroOriginal);
+            fragmentManager.popBackStackImmediate();
+
         }
-
-
-
-
         progreso.dismiss();
 
-
-        FragmentManager fm = getFragmentManager();
-        fm.popBackStackImmediate();
+        fragmentManager.popBackStackImmediate();
     }
     //endregion
 }

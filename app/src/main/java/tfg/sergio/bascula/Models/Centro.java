@@ -12,6 +12,7 @@ public class Centro implements Parcelable{
     public String Nombre;
     public String Direccion;
     public String UrlImagen;
+    public String ArchivoFoto;
 
     public Centro(){
 

@@ -1,10 +1,13 @@
 package tfg.sergio.bascula.Adapters;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -31,12 +34,17 @@ import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -47,9 +55,13 @@ import java.util.List;
 
 import tfg.sergio.bascula.Centros.ModificarCentroFragment;
 import tfg.sergio.bascula.Models.Centro;
+import tfg.sergio.bascula.Models.Paciente;
 import tfg.sergio.bascula.Models.PacientesMesCentro;
+import tfg.sergio.bascula.Models.RegistroPaciente;
 import tfg.sergio.bascula.Pacientes.ModificarPacienteFragment;
+import tfg.sergio.bascula.Pacientes.PacientesFragment;
 import tfg.sergio.bascula.R;
+import tfg.sergio.bascula.Registro;
 
 /**
  * Created by yeyo on 24/03/2018.
@@ -59,37 +71,48 @@ public class AdapterCentro extends RecyclerView.Adapter<AdapterCentro.CentrosVie
 
     List<Centro> centros;
     Context ctx;
+    FragmentManager Fm;
     String[] meses = {"Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"};
     private String[]estados ={"Obesidad","Sobrepeso", "Normal", "Desnutrición","Desnutrición moderada","Desnutrición severa"};
     int mesSeleccionado = 01;
-    private DatabaseReference mDatabaseDatosMes;
+    private DatabaseReference mDatabaseDatosMes, mDatabasePacientes, mDatabaseRegistros, mDatabaseCentros;
     private BarChart mChart;
+    private StorageReference mStorage;
+    private AlertDialog.Builder builder;
 
 
-    public AdapterCentro(List<Centro> listado, Context c){
+
+    public AdapterCentro(List<Centro> listado, Context c, FragmentManager fm){
         this.centros = listado;
         this.ctx = c;
-
-
-
+        this.Fm = fm;
     }
 
     @Override
     public CentrosViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.centros_list_layout, parent, false);
         CentrosViewHolder holder = new CentrosViewHolder(v,parent.getContext());
+
         return holder;
     }
 
     @Override
     public void onBindViewHolder(final CentrosViewHolder holder, final int position) {
         final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yy");
+        mStorage = FirebaseStorage.getInstance().getReference();
+
+        mDatabaseRegistros = FirebaseDatabase.getInstance().getReference("registros");
         mDatabaseDatosMes = FirebaseDatabase.getInstance().getReference("pacientesMes");
+        mDatabasePacientes = FirebaseDatabase.getInstance().getReference("pacientes");
+        mDatabaseCentros = FirebaseDatabase.getInstance().getReference("centros");
+
 
         final Centro centro = centros.get(position);
         holder.centro_nombre.setText(centro.Nombre);
         //            //cargar Imagen
-        //Picasso.with(holder.context).load(centro.paciente.getUrlImagen()).resize(200,200).into(holder.foto_centro);
+        if(centro.UrlImagen != null){
+            Picasso.with(holder.context).load(centro.UrlImagen).resize(200,200).into(holder.foto_centro);
+        }
 
 
         holder.mView.findViewById(R.id.textViewOptions).setOnClickListener(new View.OnClickListener() {
@@ -107,13 +130,34 @@ public class AdapterCentro extends RecyclerView.Adapter<AdapterCentro.CentrosVie
                         switch (item.getItemId()) {
                             case R.id.action_delete:
                                 Toast.makeText(ctx, "borrar", Toast.LENGTH_SHORT).show();
+                                if(centro != null){
+                                    builder = new AlertDialog.Builder(ctx);
+                                    builder.setTitle("Eliminar centro");
+                                    builder.setMessage("¿Está seguro de que desea eliminar centro seleccionado?");
+                                    builder.setPositiveButton("Sí", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            borrarCentro(centro);
+                                        }
+                                    });
+
+                                    builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                                            dialogInterface.dismiss();
+                                        }
+                                    });
+                                    AlertDialog alert = builder.create();
+                                    alert.show();
+                                }
 
                                 break;
                             case R.id.action_update:
                                 Toast.makeText(ctx, "update", Toast.LENGTH_SHORT).show();
                                 if(centro != null){
-                                    FragmentManager fm = ((AppCompatActivity)ctx).getSupportFragmentManager();
-                                    FragmentTransaction ft = fm.beginTransaction();
+
+                                    FragmentTransaction ft = Fm.beginTransaction();
                                     Bundle args = new Bundle();
                                     args.putParcelable("centro", centro);
                                     Fragment modificarCentroFragment = new ModificarCentroFragment();
@@ -200,6 +244,69 @@ public class AdapterCentro extends RecyclerView.Adapter<AdapterCentro.CentrosVie
 
     }
 
+    private void borrarCentro(Centro centro){
+        //obtenemos todos los pacientes del centro
+        Query firebaseSearchQuery = mDatabasePacientes.orderByChild("centro").startAt(centro.Id).endAt(centro.Id+ "\uf8ff");
+        firebaseSearchQuery.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (final DataSnapshot child: dataSnapshot.getChildren()){
+                    final Paciente paciente = child.getValue(Paciente.class);
+
+                    Query firebaseSearchQuery2 = mDatabaseRegistros.orderByChild("codigoPaciente").startAt(paciente.getId()).endAt(paciente.getId()+ "\uf8ff");
+                    firebaseSearchQuery2.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            for(DataSnapshot child : dataSnapshot.getChildren()){
+                                RegistroPaciente registro = child.getValue(RegistroPaciente.class);
+                                mDatabaseRegistros.child(child.getKey()).removeValue();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                    if(paciente.getArchivoFoto() != null){
+                        StorageReference fotoEliminar = mStorage.child("Fotos_pacientes/"+ paciente.getArchivoFoto());
+                        // Delete the file
+                        fotoEliminar.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception exception) {
+                            }
+                        });
+                    }
+                    mDatabasePacientes.child(child.getKey()).removeValue();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        if(centro.ArchivoFoto != null){
+            StorageReference fotoEliminar = mStorage.child("Fotos_centros/"+ centro.ArchivoFoto);
+            // Delete the file
+            fotoEliminar.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                }
+            });
+        }
+
+        mDatabaseCentros.child(centro.Id).removeValue();
+
+    }
 
     private void obtenerDatosMes(String id){
         final Query firebaseSearchQuery;
@@ -301,7 +408,7 @@ public class AdapterCentro extends RecyclerView.Adapter<AdapterCentro.CentrosVie
             super(itemView);
             mView = itemView;
             centro_nombre =  (TextView) mView.findViewById(R.id.nombre);
-            //foto_centro = (ImageView) mView.findViewById(R.id.iamgen_perfil);
+            foto_centro = (ImageView) mView.findViewById(R.id.iamgen_perfil);
 
             context = ctx;
 

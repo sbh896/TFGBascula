@@ -198,53 +198,67 @@ public class AniadirCentroFragment extends Fragment {
     private void  guardarCentro(){
         final String nombre = inputCentro.getText().toString();
         final String direccion = inputDireccion.getText().toString();
-
+        final DateFormat dateFormat = new SimpleDateFormat("YYYYMM");
+        final Date date = new Date();
 
         Bitmap bmp = null;
-        try {
-            bmp = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uriImagenAltaCalidad);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bmp.compress(Bitmap.CompressFormat.JPEG, 25, baos);
-            byte[] data = baos.toByteArray();
-            //uploading the image
-            StorageReference path = mStorage.child("Fotos_centros").child(uriImagenAltaCalidad.getLastPathSegment());
-            UploadTask uploadTask2 = path.putBytes(data);
-            uploadTask2.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-
-                    DateFormat dateFormat = new SimpleDateFormat("YYYYMM");
-                    Date date = new Date();
-
-                    //Guardado del centro en Firebase
-                    progreso.setMessage("Guardando centro ...");
-                    progreso.show();
-
-                    String id = mDatabaseCentros.push().getKey();
-                    String id2 = mDatabaseDatosMes.push().getKey();
-                    Centro centro = new Centro(id,nombre);
-                    centro.Direccion = direccion;
-                    centro.UrlImagen = taskSnapshot.getDownloadUrl().toString();
-                    String ident = id + dateFormat.format(date);
-                    PacientesMesCentro pmc= new PacientesMesCentro(ident);
-
-                    mDatabaseDatosMes.child(id2).setValue(pmc);
-                    mDatabaseCentros.child(id).setValue(centro);
-                    progreso.dismiss();
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    progreso.dismiss();
-                }
-            });
+        if(uriImagenAltaCalidad != null) {
 
 
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                bmp = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uriImagenAltaCalidad);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bmp.compress(Bitmap.CompressFormat.JPEG, 25, baos);
+                byte[] data = baos.toByteArray();
+                //uploading the image
+                StorageReference path = mStorage.child("Fotos_centros").child(uriImagenAltaCalidad.getLastPathSegment());
+                UploadTask uploadTask2 = path.putBytes(data);
+                uploadTask2.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+
+
+                        //Guardado del centro en Firebase
+                        progreso.setMessage("Guardando centro ...");
+                        progreso.show();
+
+                        String id = mDatabaseCentros.push().getKey();
+                        String id2 = mDatabaseDatosMes.push().getKey();
+                        Centro centro = new Centro(id, nombre);
+                        centro.Direccion = direccion;
+                        centro.UrlImagen = taskSnapshot.getDownloadUrl().toString();
+                        centro.ArchivoFoto = uriImagenAltaCalidad.getLastPathSegment();
+                        String ident = id + dateFormat.format(date);
+                        PacientesMesCentro pmc = new PacientesMesCentro(ident);
+
+                        mDatabaseDatosMes.child(id2).setValue(pmc);
+                        mDatabaseCentros.child(id).setValue(centro);
+                        progreso.dismiss();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        progreso.dismiss();
+                    }
+                });
+
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }else {
+            String id = mDatabaseCentros.push().getKey();
+            String id2 = mDatabaseDatosMes.push().getKey();
+            Centro centro = new Centro(id, nombre);
+            centro.Direccion = direccion;
+            String ident = id + dateFormat.format(date);
+            PacientesMesCentro pmc = new PacientesMesCentro(ident);
+
+            mDatabaseDatosMes.child(id2).setValue(pmc);
+            mDatabaseCentros.child(id).setValue(centro);
         }
-
-
 
 
         progreso.dismiss();

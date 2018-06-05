@@ -94,8 +94,6 @@ public class CentrosFragment extends Fragment {
                 AniadirCentroFragment fragment = new AniadirCentroFragment();
                 ft.replace(R.id.centros_screen,fragment);
                 ft.commit();
-                Toast.makeText(getActivity(), "new one", Toast.LENGTH_SHORT).show();
-
 
             }
         });
@@ -110,7 +108,7 @@ public class CentrosFragment extends Fragment {
 
         Query firebaseSearchQuery = mDatabaseCentros.orderByChild("Nombre").startAt(search).endAt(search + "\uf8ff");
 
-        adapter = new AdapterCentro(elementos, getActivity());
+        adapter = new AdapterCentro(elementos, getActivity(), getFragmentManager());
 
         listaCentros.setAdapter(adapter);
 
