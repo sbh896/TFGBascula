@@ -76,12 +76,14 @@ import tfg.sergio.bascula.Models.Centro;
 import tfg.sergio.bascula.Models.Paciente;
 import tfg.sergio.bascula.Models.PacientesMesCentro;
 import tfg.sergio.bascula.Models.RegistroPaciente;
+import tfg.sergio.bascula.Models.Silla;
 import tfg.sergio.bascula.R;
 import tfg.sergio.bascula.Registro;
 import tfg.sergio.bascula.Resources.CustomMarkerView;
 import tfg.sergio.bascula.Resources.EnumIMC;
 import tfg.sergio.bascula.Resources.FixedDatePicker;
 import tfg.sergio.bascula.Resources.IMCCalculator;
+import tfg.sergio.bascula.bascula.AniadirSillaFragment;
 import tfg.sergio.bascula.bascula.basculaFragment;
 
 /**
@@ -95,7 +97,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
     private TextView out_nombre, out_peso, out_IMC, out_edad, out_altura;
     private ImageView out_perfil;
     private DatabaseReference mDatabase;
-    private DatabaseReference mDatabaseRegs, mDatabaseAlertas;
+    private DatabaseReference mDatabaseRegs, mDatabaseAlertas, mDatabaseSillas;
     private ImageButton pesarButton, configAlertButton;
     private ArrayList<RegistroPaciente> registros = new ArrayList<>();
     int estado;
@@ -163,6 +165,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         mDatabase = FirebaseDatabase.getInstance().getReference("pacientes");
         mDatabaseRegs = FirebaseDatabase.getInstance().getReference("registros");
         mDatabaseAlertas = FirebaseDatabase.getInstance().getReference("alertas");
+        mDatabaseSillas = FirebaseDatabase.getInstance().getReference("silla");
         out_nombre = view.findViewById(R.id.txt_nombre);
         out_peso = view.findViewById(R.id.txt_peso);
         out_edad = view.findViewById(R.id.txt_edad);
@@ -186,53 +189,90 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
             @Override
             public void onClick(View view) {
 
-                frameLayout.setForeground(new ColorDrawable(0x80FFFFFF));
+                if(paciente_final.getCodigoSilla() != null){
+                    mDatabaseSillas.child(paciente_final.getCodigoSilla()).addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            final Silla silla = (Silla) dataSnapshot.getValue(Silla.class);
 
-                LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                final View layout = inflater.inflate(R.layout.seleccion_silla_layout,null);
+                            frameLayout.setForeground(new ColorDrawable(0x80FFFFFF));
 
-                // final Centro centro = centros.get(position);
+                            LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                            final View layout = inflater.inflate(R.layout.seleccion_silla_layout,null);
 
-                float density=getActivity().getResources().getDisplayMetrics().density;
-                final PopupWindow pw = new PopupWindow(layout, (int)density*600, (int)density*500, true);
-                pw.setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-                pw.setTouchInterceptor(new View.OnTouchListener() {
-                    public boolean onTouch(View v, MotionEvent event) {
-                        frameLayout.setForeground(null);
-                        if(event.getAction() == MotionEvent.ACTION_OUTSIDE) {
-                            pw.dismiss();
-                            return true;
+                            // final Centro centro = centros.get(position);
+
+                            float density=getActivity().getResources().getDisplayMetrics().density;
+                            final PopupWindow pw = new PopupWindow(layout, (int)density*600, (int)density*500, true);
+                            pw.setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+                            pw.setTouchInterceptor(new View.OnTouchListener() {
+                                public boolean onTouch(View v, MotionEvent event) {
+                                    frameLayout.setForeground(null);
+                                    if(event.getAction() == MotionEvent.ACTION_OUTSIDE) {
+                                        pw.dismiss();
+                                        return true;
+                                    }
+                                    return false;
+                                }
+                            });
+                            if(paciente_final.getCodigoSilla() == null){
+                                ((Button)layout.findViewById(R.id.btn_silla_modificar)).setText("Pesar silla");
+                                ((Button)layout.findViewById(R.id.btn_silla_continuar)).setEnabled(false);
+                            }
+                            else{
+                                ((TextView)layout.findViewById(R.id.txt_modelo)).setText(silla.modelo);
+                                ((TextView)layout.findViewById(R.id.txt_peso)).setText(silla.peso + "");
+                            }
+                            ((Button)layout.findViewById(R.id.btn_silla_continuar)).setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    registros.clear();
+                                    FragmentManager fm = getFragmentManager();
+                                    FragmentTransaction ft = fm.beginTransaction();
+                                    ft.addToBackStack("detalle");
+                                    Bundle bundle = new Bundle();
+                                    bundle.putString("key",key);
+                                    bundle.putInt("estado",estado);
+                                    bundle.putString("centro",centro);
+                                    bundle.putString("nombre", paciente_final.getNombre());
+                                    Fragment fragment = new basculaFragment();
+                                    fragment.setArguments(bundle);
+                                    ft.replace(R.id.detalle_screen,fragment);
+                                    pw.dismiss();
+                                    frameLayout.setForeground(null);
+                                    ft.commit();
+                                }
+                            });
+                            ((Button)layout.findViewById(R.id.btn_silla_modificar)).setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    registros.clear();
+                                    FragmentManager fm = getFragmentManager();
+                                    FragmentTransaction ft = fm.beginTransaction();
+                                    ft.addToBackStack("detalle");
+                                    Bundle bundle = new Bundle();
+                                    bundle.putString("key",key);
+                                    bundle.putParcelable("paciente", paciente_final);
+                                    Fragment fragment = new AniadirSillaFragment();
+                                    fragment.setArguments(bundle);
+                                    ft.replace(R.id.detalle_screen,fragment);
+                                    pw.dismiss();
+                                    frameLayout.setForeground(null);
+                                    ft.commit();
+                                }
+                            });
+
+                            pw.setOutsideTouchable(true);
+                            // display the pop-up in the center
+                            pw.showAtLocation(layout, Gravity.CENTER, 0, 0);
                         }
-                        return false;
-                    }
-                });
-                if(paciente_final.getCodigoSilla() == null){
-                    ((Button)layout.findViewById(R.id.btn_silla_modificar)).setText("Pesar silla");
-                    ((Button)layout.findViewById(R.id.btn_silla_continuar)).setEnabled(false);
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
                 }
-                ((Button)layout.findViewById(R.id.btn_silla_continuar)).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        registros.clear();
-                        FragmentManager fm = getFragmentManager();
-                        FragmentTransaction ft = fm.beginTransaction();
-                        ft.addToBackStack("detalle");
-                        Bundle bundle = new Bundle();
-                        bundle.putString("key",key);
-                        bundle.putInt("estado",estado);
-                        bundle.putString("centro",centro);
-                        bundle.putString("nombre", paciente_final.getNombre());
-                        Fragment fragment = new basculaFragment();
-                        fragment.setArguments(bundle);
-                        ft.replace(R.id.detalle_screen,fragment);
-                        pw.dismiss();
-                        frameLayout.setForeground(null);
-                        ft.commit();
-                    }
-                });
-                pw.setOutsideTouchable(true);
-                // display the pop-up in the center
-                pw.showAtLocation(layout, Gravity.CENTER, 0, 0);
 
 
             }

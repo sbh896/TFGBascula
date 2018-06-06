@@ -28,7 +28,10 @@
     <color name="lightRed">#a9e65c00</color>
     <color name="lightRed2">#7cf9d423</color>
     <color name="grisCalendario">#eeeeee</color>
-
-
+    <color name="lightGreen2">#7c094010</color>
+    <color name="lightBlue">#a942dfff</color>
+    <color name="lightBlue2">#7c0062f4</color>
+    <color name="lightRed3">#a9ec3b3b</color>
+    <color name="lightRed4">#7cf92323</color>
 
 </resources>

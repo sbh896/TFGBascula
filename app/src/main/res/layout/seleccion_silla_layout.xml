@@ -30,6 +30,7 @@
             android:layout_marginRight="20dp"
             android:src="@drawable/ic_silla"/>
         <TextView
+            android:id="@+id/txt_modelo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/imagen_centro"
@@ -46,13 +47,14 @@
             android:layout_marginRight="20dp"
             android:src="@drawable/ic_bascula"/>
         <TextView
+            android:id="@+id/txt_peso"
             android:layout_marginTop="20dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/imagen_peso"
             android:layout_below="@id/imagen_centro"
             android:textSize="20dp"
-            android:text="Modelo"/>
+            android:text="Peso KG"/>
 
         <Button
             android:layout_width="wrap_content"

@@ -234,6 +234,7 @@ public class basculaResultFragment extends Fragment{
                 //Guardado del registro en Firebase
                 if(uriImagenAltaCalidad == null){
                     mDatabase.child(id).setValue(regis);
+                    getFragmentManager().popBackStackImmediate();
                     return;
                 }
 

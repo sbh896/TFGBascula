@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="@color/white"
+        android:orientation="vertical"
+        android:padding="50dp">
+
+        <ImageView
+            android:id="@+id/imagen_silla_titulo"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_silla"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="40dp"
+            />
+        <TextView
+            android:layout_marginLeft="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Registro de silla"
+            android:textSize="30dp"
+            android:layout_alignTop="@+id/imagen_silla_titulo"
+            android:layout_toRightOf="@+id/imagen_silla_titulo"/>
+        <ImageView
+            android:id="@+id/imagen_estado"
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/imagen_silla_titulo"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:src="@drawable/ic_modelo"/>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/imagen_silla_titulo"
+            android:id="@+id/container_nombre"
+            android:layout_toRightOf="@id/imagen_estado">
+
+            <EditText
+                android:id="@+id/modelo"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:hint="Modelo"
+                android:inputType="text"
+                android:textColor="@android:color/black"
+                android:textColorHint="@android:color/black" />
+        </android.support.design.widget.TextInputLayout>
+        <ImageView
+            android:id="@+id/imagen_centro"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="15dp"
+            android:layout_below="@+id/imagen_estado"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:src="@drawable/ic_bascula"/>
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/imagen_estado"
+            android:layout_toRightOf="@id/imagen_centro">
+
+            <EditText
+                android:id="@+id/btn_peso_silla"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:hint="Peso silla"
+                android:inputType="text"
+                android:clickable="false"
+                android:focusable="false"
+                android:cursorVisible="false"
+                android:focusableInTouchMode="false"
+                android:textColor="@android:color/black"
+                android:textColorHint="@android:color/black" />
+        </android.support.design.widget.TextInputLayout>
+
+        <Button
+            android:layout_marginTop="40dp"
+            android:id="@+id/btn_guardar_silla"
+            android:text="@string/guardar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/imagen_centro"/>
+    </RelativeLayout>
+</android.support.constraint.ConstraintLayout>
