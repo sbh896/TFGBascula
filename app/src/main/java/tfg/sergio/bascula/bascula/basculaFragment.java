@@ -1,5 +1,7 @@
 package tfg.sergio.bascula.bascula;
 
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -15,6 +17,7 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
@@ -31,6 +34,7 @@ import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
@@ -59,6 +63,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 import tfg.sergio.bascula.Manifest;
@@ -67,6 +74,7 @@ import tfg.sergio.bascula.Models.Paciente;
 import tfg.sergio.bascula.Models.PacientesMesCentro;
 import tfg.sergio.bascula.Models.RegistroPaciente;
 import tfg.sergio.bascula.Pacientes.AniadirPacienteFragment;
+import tfg.sergio.bascula.Pacientes.PacientesFragment;
 import tfg.sergio.bascula.R;
 import tfg.sergio.bascula.Registro;
 import tfg.sergio.bascula.Resources.BluetoothUtils;
@@ -80,7 +88,7 @@ import tfg.sergio.bascula.Resources.IMCCalculator;
 
 public class basculaFragment extends Fragment implements TextToSpeech.OnInitListener, TextToSpeech.OnUtteranceCompletedListener {
     private static final int MY_DATA_CHECK_CODE = 1;
-    private ImageButton add;
+    private Button add;
     private DatabaseReference mDatabase, mDatabase2, mDatabaseCentros, mDatabaseDatosMes;
     private String key = "";
     private int estado;
@@ -93,18 +101,25 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
     private BluetoothAdapter mBluettothAdapter;
     private BluetoothLeScanner mBluetoothLeScanner;
     private boolean mEchoInitialized;
-
+    private ProgressDialog progressDialog = null;
+    private View view;
 
     private static final int REQUEST_ENABLE_BT = 1;
     private static final int REQUEST_FINE_LOCATION = 2;
     private static final int SCAN_PERIOD = 2000;
-    private static final String SERVICE_UUID = "6e400001-b513-f393-e0a9-e50e24dcca9e";
+    private static final UUID SERVICE_UUID = UUID.fromString("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
     private static final UUID CHARACTERISTIC_UUID = UUID.fromString("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
+    private static final UUID NOTIFY_UID = UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
+
+    private BluetoothGattCharacteristic pruebacharac;
+    private BluetoothGattDescriptor descPrueba;
+
     private boolean mScanning;
     private Map<String, BluetoothDevice> mScanResults;
     private ScanCallback mScanCallback;
     private boolean mConnected;
     private BluetoothGatt mGatt;
+    private AlertDialog.Builder builder;
 
 
 
@@ -126,7 +141,7 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
         if(!getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)){
             return;
         }
-
+        this.view = view;
         BluetoothManager bluetoothManager = (BluetoothManager) getActivity().getSystemService(Context.BLUETOOTH_SERVICE);
         mBluettothAdapter = bluetoothManager.getAdapter();
         mDatabase = FirebaseDatabase.getInstance().getReference("registros");
@@ -137,14 +152,29 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
         Wave wave = new Wave();
         progressBar.setIndeterminateDrawable(wave);
 
-
+        progressDialog = new ProgressDialog(getActivity(), ProgressDialog.THEME_HOLO_DARK);
+// set indeterminate style
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+// set title and message
+        progressDialog.setTitle("Pesando");
+        progressDialog.setMessage("Por favor espere...");
+        progressDialog.setCancelable(false);
         bundle = getArguments();
         key = bundle.getString("key");
         estado = bundle.getInt("estado");
         centro = bundle.getString("centro");
         nombre = bundle.getString("nombre");
-
         add = view.findViewById(R.id.nuevoPeso);
+
+        builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Dispositivo no encontrado");
+        builder.setMessage("Por favor compruebe que la báscula está encendida e inténtelo de nuevo.");
+        builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                getFragmentManager().popBackStackImmediate();
+            }
+        });
 
 
         add.setOnClickListener(new View.OnClickListener() {
@@ -167,15 +197,14 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
 //                ft.replace(R.id.pacientes_screen,fragment);
 //                ft.commit();
 //                Toast.makeText(getActivity(), "new one", Toast.LENGTH_SHORT).show();
-
+                //Mostramos ventana de espera y bloqueamos acciones del usuario
+                progressDialog.show();
                 BluetoothGattCharacteristic characteristic = BluetoothUtils.findEchoCharacteristic(mGatt);
                 if (characteristic == null) {
                     disconnectGattServer();
                     return;
                 }
-
                 String message = "P";
-
 
                 byte[] messageBytes = new byte[0];
                 try {
@@ -189,23 +218,33 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
 
                 characteristic.setValue(messageBytes);
                 boolean success = mGatt.writeCharacteristic(characteristic);
-                if (success) {
-                    Toast.makeText(getActivity(), "P enviada", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getActivity(), "Error en envío", Toast.LENGTH_SHORT).show();
-                }
 
+                //Se establece un timeout para que  en caso de no obtener respuesta se rehabilite la pantalla.
+                new Timer().schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        progressDialog.dismiss();
+                    }
+                }, 10000);
             }
         });
         escanear();
         super.onViewCreated(view, savedInstanceState);
     }
 
+    private void habilitar_pantalla(){
+
+    }
+
+
     //region bluetooth
     private void escanear(){
         if(!comprobarPermisos() ){//|| mScanning){
             return;
         }
+        BluetoothManager manager = (BluetoothManager) getActivity().getSystemService(Context.BLUETOOTH_SERVICE);
+        assert manager != null;
+        List<BluetoothDevice>adsf = manager.getConnectedDevices(BluetoothProfile.GATT);
         List<ScanFilter> filters = new ArrayList<>();
         ScanSettings settings = new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER)
@@ -228,7 +267,7 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
                 mScanning = false;
                 mHandler = null;
             }
-        }, 2000);
+        }, 5000);
 
     }
 
@@ -284,16 +323,18 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
     }
 
     private void scanComplete() {
-        if (mScanResults.isEmpty()) {
-            return;
-        }
+        BluetoothDevice device = null;
+
         for (String deviceAddress : mScanResults.keySet()) {
             String prueba = deviceAddress;
             if(deviceAddress.equals("30:AE:A4:06:55:16")){
-                BluetoothDevice device = mScanResults.get(deviceAddress);
+                device = mScanResults.get(deviceAddress);
                 connectDevice(device);
             }
-
+        }
+        if(device == null){
+            AlertDialog alert = builder.create();
+            alert.show();
         }
     }
 
@@ -333,30 +374,20 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
                     enableCharacteristicNotification(gatt, mCharacteristic);
                 }
             }
-//            for (BluetoothGattCharacteristic characteristic : matchingCharacteristics) {
-//                characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
-//                enableCharacteristicNotification(gatt, characteristic);
-//            }
         }
 
         @Override
-        public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-            super.onCharacteristicWrite(gatt, characteristic, status);
-            String uui = "";
-            boolean result = mGatt.readCharacteristic(characteristic);
-            UUID uuid = characteristic.getUuid();
-        }
-
-        @Override
-        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-            super.onCharacteristicRead(gatt, characteristic, status);
-            String uui = "";
-            UUID uuid = characteristic.getUuid();
+        public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
+            super.onDescriptorRead(gatt, descriptor, status);
         }
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             super.onCharacteristicChanged(gatt, characteristic);
+
+            //Se devuelve el control al usuario
+            progressDialog.dismiss();
+
             byte[] messageBytes = characteristic.getValue();
             String message = null;
             try {
@@ -394,31 +425,36 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
     }
 
     private void enableCharacteristicNotification(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-        if(!characteristic.getUuid().equals(CHARACTERISTIC_UUID)){
-                   List<BluetoothGattDescriptor> descs= characteristic.getDescriptors();
-            BluetoothGattDescriptor desc = characteristic.getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"));
-            if(desc != null){
-                boolean characteristicWriteSuccess = gatt.setCharacteristicNotification(characteristic, true);
-                desc.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
-                boolean status =  gatt.writeDescriptor(desc);
-            }
-            return;
-        }
-        //habilitar notificaciones locales
-        boolean characteristicWriteSuccess = gatt.setCharacteristicNotification(characteristic, true);
-        //remotas
-//        BluetoothGattDescriptor desc = characteristic.getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"));
-//        BluetoothGattDescriptor desc2 = characteristic.getDescriptor(CHARACTERISTIC_UUID);
-//
-//        List<BluetoothGattDescriptor> descs= characteristic.getDescriptors();
-//        desc.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
-//        boolean status =  gatt.writeDescriptor(desc);
-        if (characteristicWriteSuccess) {
-            if (BluetoothUtils.isEchoCharacteristic(characteristic)) {
-                initializeEcho();
+        if (characteristic.getUuid().equals(NOTIFY_UID) &&  gatt.setCharacteristicNotification(characteristic, true)) {
+            BluetoothGattDescriptor descriptor = characteristic.getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"));
+            if (descriptor != null) {
+                if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0) {
+                    descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                    //descriptor.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
+                } else if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0) {
+                } else {
+                    // The characteristic does not have NOTIFY or INDICATE property set;
+                }
+
+                if (gatt.writeDescriptor(descriptor)) {
+                    // Success
+                } else {
+                    // Failed to set client characteristic notification;
+                }
+            } else {
+                // Failed to set client characteristic notification;
             }
         } else {
+            // Failed to register notification;
         }
+//        List<BluetoothGattDescriptor> descs= characteristic.getDescriptors();
+//        for(BluetoothGattDescriptor descriptor : descs) {
+//            boolean characteristicWriteSuccess = gatt.setCharacteristicNotification(characteristic, true);
+//            descriptor.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
+//            boolean status = gatt.writeDescriptor(descriptor);
+//            pruebacharac = characteristic;
+//
+//        }
     }
     public void initializeEcho() {
         mEchoInitialized = true;
@@ -435,7 +471,7 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
         if (requestCode == MY_DATA_CHECK_CODE) {
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
                 // success, create the TTS instance
-                //mTts = new TextToSpeech(getActivity(), this);
+                mTts = new TextToSpeech(getActivity(), this);
             } else {
                 // missing data, install it
                 Intent installIntent = new Intent();
@@ -452,7 +488,7 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
         mTts.setLanguage(new Locale(Locale.getDefault().getLanguage()));
         mTts.setOnUtteranceCompletedListener(this);
 
-        String text = "Hola " + nombre+ ", es hora de pesarte";
+        String text = "Por favor, colócate sobre la báscula y pulsa el botón.";
         progressBar.setVisibility(View.VISIBLE);
         HashMap<String, String> myHashAlarm = new HashMap<String, String>();
         myHashAlarm.put(TextToSpeech.Engine.KEY_PARAM_STREAM, String.valueOf(AudioManager.STREAM_ALARM));

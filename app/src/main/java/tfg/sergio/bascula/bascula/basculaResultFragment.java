@@ -369,6 +369,7 @@ public class basculaResultFragment extends Fragment{
             fragment.setArguments( myBundle  );
             mFragmentList.add(fragment);
             mFragmentTitleList.add(title);
+
         }
 
         @Override
