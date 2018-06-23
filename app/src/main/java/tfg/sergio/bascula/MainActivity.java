@@ -1,5 +1,7 @@
 package tfg.sergio.bascula;
 
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattDescriptor;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -86,6 +88,8 @@ public class MainActivity extends AppCompatActivity
 
     private RecyclerView recyclerAlertas;
     private List<ElementoListadoAlerta> listaAlertas = new ArrayList<>();
+    private BluetoothGatt mGatt;
+
 
 
     @Override
@@ -145,15 +149,24 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            int count = getFragmentManager().getBackStackEntryCount();
+            int count = getSupportFragmentManager().getBackStackEntryCount();
 
             if (count == 0) {
                 super.onBackPressed();
                 //additional code
             } else {
-                getFragmentManager().popBackStack();
+                if(mGatt != null){
+                    mGatt.disconnect();
+                    mGatt.close();
+                }
+                getSupportFragmentManager().popBackStack();
+
             }
         }
+    }
+
+    public void setGatt(BluetoothGatt gatt){
+        mGatt = gatt;
     }
 
     @SuppressWarnings("StatementWithEmptyBody")

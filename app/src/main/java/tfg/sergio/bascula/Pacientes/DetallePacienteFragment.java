@@ -2,6 +2,7 @@ package tfg.sergio.bascula.Pacientes;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
@@ -104,6 +105,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
     private  FrameLayout frameLayout;
     String centro;
     Paciente paciente_final;
+    private double altura_paciente=0;
 
     //variables para creación de alerta
     private DatePickerDialog.OnDateSetListener mDateSetListener;
@@ -227,12 +229,14 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                                 @Override
                                 public void onClick(View view) {
                                     registros.clear();
+
                                     FragmentManager fm = getFragmentManager();
                                     FragmentTransaction ft = fm.beginTransaction();
                                     ft.addToBackStack("detalle");
                                     Bundle bundle = new Bundle();
                                     bundle.putString("key",key);
                                     bundle.putInt("estado",estado);
+                                    bundle.putDouble("altura",altura_paciente);
                                     bundle.putString("centro",centro);
                                     bundle.putString("nombre", paciente_final.getNombre());
                                     Fragment fragment = new basculaFragment();
@@ -393,6 +397,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                                 out_edad.setText(""+paciente.monthsBetweenDates());
                                 out_peso.setText(String.format("%.2f",reg.getPeso()));
                                 out_altura.setText(String.format("%.2f",reg.getAltura()));
+                                altura_paciente = reg.getAltura();
                             }
                         }
 

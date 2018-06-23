@@ -33,5 +33,6 @@
     <color name="lightBlue2">#7c0062f4</color>
     <color name="lightRed3">#a9ec3b3b</color>
     <color name="lightRed4">#7cf92323</color>
+    <color name="transparent">#00ff0000</color>
 
 </resources>

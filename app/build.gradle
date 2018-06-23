@@ -38,6 +38,8 @@ dependencies {
     compile 'de.hdodenhof:circleimageview:2.2.0'
     compile 'com.github.ybq:Android-SpinKit:1.1.0'
     compile 'com.github.sundeepk:compact-calendar-view:2.0.2.3'
+    compile 'com.github.dimorinny:floating-text-button:0.0.4'
+
 
 }
 
