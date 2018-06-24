@@ -61,6 +61,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 import tfg.sergio.bascula.Models.Centro;
 import tfg.sergio.bascula.Models.Paciente;
 import tfg.sergio.bascula.Models.PacientesMesCentro;
@@ -87,7 +88,7 @@ public class basculaResultFragment extends Fragment{
     private DatabaseReference mDatabase, mDatabase2, mDatabaseCentros, mDatabaseDatosMes;
     private StorageReference mStorage;
     private Paciente paciente;
-    private Button aceptar,cancelar;
+    private FloatingTextButton aceptar,cancelar;
     private TextView textIMC,textPeso;
     private ImageButton inputFoto;
     private Uri uriImagenAltaCalidad = null;
@@ -126,6 +127,7 @@ public class basculaResultFragment extends Fragment{
         mDatabaseCentros = FirebaseDatabase.getInstance().getReference("centros");
         mDatabaseDatosMes = FirebaseDatabase.getInstance().getReference("pacientesMes");
         textPeso = view.findViewById(R.id.txt_peso);
+        textIMC = view.findViewById(R.id.txt_imc);
         bundle = getArguments();
         key = bundle.getString("key");
         estado = bundle.getInt("estado");
@@ -139,6 +141,7 @@ public class basculaResultFragment extends Fragment{
         IMCCalculator imcCalc = new IMCCalculator();
         double imc = IMCCalculator.CalcularIMC(peso,altura);
         textPeso.setText(""+df2.format(peso) + " Kg");
+        textIMC.setText(""+df2.format(imc));
         final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yy");
 
         //Botón foto
@@ -256,6 +259,7 @@ public class basculaResultFragment extends Fragment{
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                             regis.setUrlFoto(taskSnapshot.getDownloadUrl().toString());
+                            regis.setArchivoFoto(uriImagenAltaCalidad.getLastPathSegment());
                             mDatabase.child(id).setValue(regis);
                             progreso.dismiss();
                             //Toast.makeText(getActivity(), "Upload successful", Toast.LENGTH_LONG).show();

@@ -2,6 +2,7 @@ package tfg.sergio.bascula.bascula;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -225,6 +226,7 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
             }
         });
         btn_altura.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("DefaultLocale")
             @Override
             public void onClick(View view) {
                 altura=altura_original;

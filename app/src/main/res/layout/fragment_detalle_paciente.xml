@@ -7,13 +7,6 @@
     android:background="@color/white"
     android:foreground="#00FFFFFF"
     android:id="@+id/detalle_screen">
-
-    <ScrollView
-
-        android:layout_height="fill_parent"
-        android:layout_width="fill_parent"
-        android:background="@color/white">
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -21,7 +14,7 @@
             android:orientation="vertical">
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="405dp"
+                android:layout_height="350dp"
                 >
                 <ImageView
                     android:layout_width="match_parent"
@@ -34,8 +27,8 @@
                     android:layout_height="370dp"
                     android:orientation="vertical">
                     <ImageView
-                        android:layout_width="350dp"
-                        android:layout_height="350dp"
+                        android:layout_width="300dp"
+                        android:layout_height="300dp"
                         android:id="@+id/foto_perfil"
                         android:layout_gravity="center"
                         android:padding="20dp"
@@ -66,7 +59,9 @@
                     android:layout_width="500dp"
                     android:layout_height="100dp"
                     android:layout_centerHorizontal="true"
-                    android:layout_marginTop="300dp">
+                    android:elevation="50dp"
+
+                    android:layout_marginTop="280dp">
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -182,57 +177,35 @@
 
             <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="300dp">
+                    android:layout_height="fill_parent">
                     <com.github.mikephil.charting.charts.LineChart
                         android:id="@+id/peso_grafica"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent" />
                 </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="20dp"
-                    android:text="Evolución IMC."
-                    android:padding="20dp"
-                    android:textColor="@color/black"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="300dp">
-                <com.github.mikephil.charting.charts.LineChart
-                    android:id="@+id/imc_grafica"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
-            </LinearLayout>
-
-            <ImageButton
-                android:src="@drawable/button_add"
-                android:id="@+id/btn_pesar"
-                android:layout_width="60dp"
-                android:scaleType="fitCenter"
-                android:layout_height="60dp"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentRight="true"
-                android:layout_marginBottom="15dp"
-                android:layout_marginRight="15dp"
-                android:background="@null"
-                android:text="Button" />
-            <ImageButton
-                android:src="@drawable/ic_add_alert"
-                android:id="@+id/btn_alert"
-                android:layout_width="60dp"
-                android:scaleType="fitCenter"
-                android:layout_height="60dp"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentLeft="true"
-                android:layout_marginBottom="15dp"
-                android:layout_marginRight="15dp"
-                android:background="@null"
-                android:text="Button" />
         </LinearLayout>
-    </ScrollView>
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
+        android:layout_width="wrap_content"
+        android:id="@+id/btn_pesar"
+        android:layout_height="wrap_content"
+        app:floating_title_color="@color/white"
+        app:floating_title="Pesar"
+        app:floating_left_icon="@drawable/ic_peso"
+        app:floating_background_color="@color/Green"
+        android:layout_gravity="bottom|center"
+        android:layout_marginRight="80dp"
+        >
+    </ru.dimorinny.floatingtextbutton.FloatingTextButton>
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
+        android:layout_width="wrap_content"
+        android:id="@+id/btn_alert"
+        android:layout_height="wrap_content"
+        app:floating_title_color="@color/white"
+        app:floating_title="Configurar alerta"
+        app:floating_left_icon="@drawable/ic_add_alert"
+        app:floating_background_color="@color/OrangeRed"
+        android:layout_gravity="bottom|center"
+        android:layout_marginLeft="100dp"
+        >
+    </ru.dimorinny.floatingtextbutton.FloatingTextButton>
 </FrameLayout>

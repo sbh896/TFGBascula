@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -37,6 +38,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.animation.Easing;
+import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.LimitLine;
@@ -51,6 +53,8 @@ import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.MPPointD;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -58,6 +62,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 import java.lang.reflect.Array;
@@ -72,6 +78,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
+import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 import tfg.sergio.bascula.Models.Alerta;
 import tfg.sergio.bascula.Models.Centro;
 import tfg.sergio.bascula.Models.Paciente;
@@ -94,13 +101,14 @@ import tfg.sergio.bascula.bascula.basculaFragment;
 public class DetallePacienteFragment extends Fragment implements OnChartGestureListener,
         OnChartValueSelectedListener {
     private String key = "";
-    private LineChart mChart, mChart2;
+    private LineChart mChart;
     private TextView out_nombre, out_peso, out_IMC, out_edad, out_altura;
     private ImageView out_perfil;
     private DatabaseReference mDatabase;
     private DatabaseReference mDatabaseRegs, mDatabaseAlertas, mDatabaseSillas;
-    private ImageButton pesarButton, configAlertButton;
+    private FloatingTextButton pesarButton, configAlertButton;
     private ArrayList<RegistroPaciente> registros = new ArrayList<>();
+    private StorageReference mStorage;
     int estado;
     private  FrameLayout frameLayout;
     String centro;
@@ -168,6 +176,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         mDatabaseRegs = FirebaseDatabase.getInstance().getReference("registros");
         mDatabaseAlertas = FirebaseDatabase.getInstance().getReference("alertas");
         mDatabaseSillas = FirebaseDatabase.getInstance().getReference("silla");
+        mStorage = FirebaseStorage.getInstance().getReference();
         out_nombre = view.findViewById(R.id.txt_nombre);
         out_peso = view.findViewById(R.id.txt_peso);
         out_edad = view.findViewById(R.id.txt_edad);
@@ -181,10 +190,6 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         mChart.setOnChartGestureListener(this);
         mChart.setOnChartValueSelectedListener(this);
         mChart.setDrawGridBackground(false);
-        mChart2 = (LineChart) view.findViewById(R.id.imc_grafica);
-        mChart2.setOnChartGestureListener(this);
-        mChart2.setOnChartValueSelectedListener(this);
-        mChart2.setDrawGridBackground(false);
         obtenerRegistros();
 
         pesarButton.setOnClickListener(new View.OnClickListener() {
@@ -197,7 +202,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             final Silla silla = (Silla) dataSnapshot.getValue(Silla.class);
 
-                            frameLayout.setForeground(new ColorDrawable(0x80FFFFFF));
+                          //  frameLayout.setForeground(new ColorDrawable(0x80FFFFFF));
 
                             LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                             final View layout = inflater.inflate(R.layout.seleccion_silla_layout,null);
@@ -209,9 +214,9 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                             pw.setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
                             pw.setTouchInterceptor(new View.OnTouchListener() {
                                 public boolean onTouch(View v, MotionEvent event) {
-                                    frameLayout.setForeground(null);
                                     if(event.getAction() == MotionEvent.ACTION_OUTSIDE) {
                                         pw.dismiss();
+                                        frameLayout.setForeground(null);
                                         return true;
                                     }
                                     return false;
@@ -499,7 +504,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         l.setForm(Legend.LegendForm.LINE);
         // no description text
         //mChart.setDescription("Demo Line Chart");
-        mChart.setNoDataText("You need to provide data for the chart.");
+        mChart.setNoDataText("Todavía no hay datos registrados.");
         // enable touch gestures
         mChart.setTouchEnabled(true);
         // enable scaling and dragging
@@ -511,42 +516,9 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         leftAxis.setDrawZeroLine(false);
         leftAxis.setDrawLimitLinesBehindData(true);
 
-        CustomMarkerView mv = new CustomMarkerView(getActivity(), R.layout.marker_layout, registros);
-
-        mChart.setMarkerView(mv);
         mChart.getAxisRight().setEnabled(false);
         mChart.animateX(2500, Easing.EasingOption.EaseInOutQuart);
         mChart.invalidate();
-
-        // get the legend (only possible after setting data)
-        Legend l2 = mChart2.getLegend();
-        // modify the legend ...
-        // l.setPosition(LegendPosition.LEFT_OF_CHART);
-        l2.setForm(Legend.LegendForm.LINE);
-        // no description text
-        //mChart2.setDescription("Demo Line Chart");
-        mChart2.setNoDataText("You need to provide data for the chart.");
-        // enable touch gestures
-        mChart2.setTouchEnabled(true);
-        // enable scaling and dragging
-        mChart2.setDragEnabled(true);
-        mChart2.setScaleEnabled(true);
-        CustomMarkerView mv2 = new CustomMarkerView(getActivity(), R.layout.marker_layout, registros);
-        mChart2.setMarkerView(mv2);
-
-        YAxis leftAxis2 = mChart2.getAxisLeft();
-        leftAxis2.removeAllLimitLines(); // reset all limit lines to avoid overlapping lines
-        leftAxis2.enableGridDashedLine(10f, 10f, 0f);
-        leftAxis2.setDrawZeroLine(false);
-        leftAxis2.setDrawLimitLinesBehindData(true);
-        mChart2.getAxisRight().setEnabled(false);
-        mChart2.animateX(2500, Easing.EasingOption.EaseInOutQuart);
-
-
-
-        mChart2.invalidate();
-        mChart2.notifyDataSetChanged();
-
     }
 
     private void setData() {
@@ -555,16 +527,12 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
 
         ArrayList<Entry> yVals = setYAxisValues();
 
-        ArrayList<Entry> yimc = setimcYvalues();
-
         LineDataSet set1;
         LineDataSet set2;
 
         // create a dataset and give it a type
         set1 = new LineDataSet(yVals, "Peso");
-        set2 = new LineDataSet(yimc,"IMC");
 
-        set2.setFillAlpha(110);
         set1.setFillAlpha(110);
         // set1.setFillColor(Color.RED);
 
@@ -579,28 +547,21 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         set1.setValueTextSize(9f);
         set1.setDrawFilled(true);
 
-        set2.setColor(Color.BLACK);
-        set2.setCircleColor(Color.BLACK);
-        set2.setLineWidth(1f);
-        set2.setCircleRadius(3f);
-        set2.setDrawCircleHole(false);
-        set2.setValueTextSize(9f);
-        set2.setDrawFilled(true);
+
 
 
         ArrayList<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
-        ArrayList<ILineDataSet> dataSets2 = new ArrayList<ILineDataSet>();
 
         dataSets.add(set1); // add the datasets
-        dataSets2.add(set2);
 
         // create a data object with the datasets
         LineData data = new LineData(dataSets);
-        LineData data2 = new LineData(dataSets2);
 
         // set data
         mChart.setData(data);
-        mChart2.setData(data2);
+        data.notifyDataChanged(); // let the data know a dataSet changed
+        mChart.notifyDataSetChanged(); // let the chart know it's data changed
+        mChart.invalidate();
 
     }
 
@@ -620,8 +581,8 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         int x =0;
 
         for(RegistroPaciente r : registros){
-            yVals.add(new Entry((int)r.getFecha().getTime()/1000,(float)r.getPeso()));
-            x+=60;
+            yVals.add(new Entry(x,(float)r.getPeso()));
+            x+=1;
         }
         if(yVals.size() == 0){
             yVals.add(new Entry(0, 0));
@@ -630,22 +591,41 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         return yVals;
     }
 
-    private ArrayList<Entry> setimcYvalues(){
-        ArrayList<Entry> yVals = new ArrayList<Entry>();
-        int x =0;
 
-        for(RegistroPaciente r : registros){
-            float imc = (float) (r.getPeso()/Math.pow(r.getAltura(),2));
-            yVals.add(new Entry(x,imc));
-            x+=60;
+    public void eliminarRegistro(RegistroPaciente registroPaciente){
+        String keyEliminar = registroPaciente.getCodigoRegistro();
+        //borrado de foto
+        if(registroPaciente.getArchivoFoto() != null){
+            StorageReference fotoEliminar = mStorage.child("Fotos_peso_pacientes/"+ registroPaciente.getArchivoFoto());
+            // Delete the file
+            fotoEliminar.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                }
+            });
         }
-        if(yVals.size() == 0){
-            yVals.add(new Entry(0, 0));
+        mDatabaseRegs.child(keyEliminar).removeValue();
+        registros.remove(registroPaciente);
+
+        //actualizamos el último registro de paciente si este es el eliminado
+        if(paciente_final.getUltimoRegistro().equals(keyEliminar)){
+            if(registros.size() > 0){
+                String key = registros.get(registros.size()-1).getCodigoRegistro();
+                paciente_final.setUltimoRegistro(key);
+            }
+            else{
+                paciente_final.setUltimoRegistro(null);
+            }
+                mDatabase.child(paciente_final.getId()).setValue(paciente_final);
         }
-
-        return yVals;
-
+        Collections.sort(registros);
+        setData();
     }
+
     //region metodos override
     public void onChartGestureStart(MotionEvent me,
                                     ChartTouchListener.ChartGesture
@@ -678,7 +658,85 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
 
     @Override
     public void onChartSingleTapped(MotionEvent me) {
+        final java.text.DateFormat dateFormat = new SimpleDateFormat("YYYY");
 
+        final Date date = new Date();
+        final String anio = dateFormat.format(date);
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+        TextView fecha,peso,altura,imc;
+        ImageView foto_registro;
+        FloatingTextButton eliminarReg;
+        float prueba = me.getX();
+        float tappedX = me.getX();
+        float tappedY = me.getY();
+        MPPointD point = mChart.getTransformer(YAxis.AxisDependency.LEFT).getValuesByTouchPoint(tappedX, tappedY);
+
+        final RegistroPaciente registroSeleccionado = registros.get((int)Math.round(point.x));
+
+
+        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        final View layout = inflater.inflate(R.layout.registro_detalle_layout,null);
+        fecha = layout.findViewById(R.id.txt_fecha_registro);
+        altura = layout.findViewById(R.id.txt_altura_registro);
+        peso = layout.findViewById(R.id.txt_peso_registro);
+        eliminarReg = layout.findViewById(R.id.btn_eliminar_registro);
+        imc = layout.findViewById(R.id.txt_imc_registro);
+        foto_registro = layout.findViewById(R.id.imagen_detalle_registro);
+        foto_registro.setVisibility(View.GONE);
+        int hDensity = 450;
+        if(registroSeleccionado.getUrlFoto() != null){
+            Picasso.with(getActivity()).load(registroSeleccionado.getUrlFoto()).resize(200,200).into(foto_registro);
+            foto_registro.setVisibility(View.VISIBLE);
+            hDensity = 800;
+        }
+
+        altura.setText("Altura: "+ registroSeleccionado.getAltura());
+        peso.setText("Peso: " + registroSeleccionado.getPeso());
+        imc.setText("IMC: " + registroSeleccionado.getIMC());
+        fecha.setText(formatter.format(registroSeleccionado.getFecha()));
+        float density=getActivity().getResources().getDisplayMetrics().density;
+        final PopupWindow pw = new PopupWindow(layout, (int)density*600, (int)density*hDensity, true);
+        pw.setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        pw.setTouchInterceptor(new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction() == MotionEvent.ACTION_OUTSIDE) {
+                    pw.dismiss();
+                    frameLayout.setForeground(null);
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        eliminarReg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                builder = new AlertDialog.Builder(getActivity());
+                builder.setTitle("Eliminar centro");
+                builder.setMessage("¿Está seguro de que desea eliminar el registro seleccionado?");
+                builder.setPositiveButton("Sí", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        eliminarRegistro(registroSeleccionado);
+                        pw.dismiss();
+                    }
+                });
+
+                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                        dialogInterface.dismiss();
+                    }
+                });
+                AlertDialog alert = builder.create();
+                alert.show();
+            }
+        });
+
+        pw.setOutsideTouchable(true);
+        // display the pop-up in the center
+        pw.showAtLocation(layout, Gravity.CENTER, 0, 0);
 
     }
 
