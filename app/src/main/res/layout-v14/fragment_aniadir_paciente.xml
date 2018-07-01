@@ -73,20 +73,41 @@
                 android:textColorHint="@android:color/black" />
         </android.support.design.widget.TextInputLayout>
         <ImageView
-            android:id="@+id/imagen_cumple"
+            android:id="@+id/imagen_genero"
             android:layout_width="30dp"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/dateinput"
             android:layout_below="@+id/container_ape"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
+            android:src="@drawable/ic_genero"/>
+        <Spinner
+            android:id="@+id/sp_genero"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawSelectorOnTop="true"
+            android:layout_alignBottom="@+id/imagen_genero"
+            android:entries="@array/genero"
+            android:layout_toRightOf="@id/imagen_genero"
+            android:layout_below="@id/container_ape"
+            />
+
+        <ImageView
+            android:id="@+id/imagen_cumple"
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/dateinput"
+            android:layout_below="@+id/imagen_genero"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="5dp"
             android:src="@drawable/ic_cumple"/>
 
         <android.support.design.widget.TextInputLayout
             android:layout_toRightOf="@id/imagen_cumple"
             android:id="@+id/container_fecha"
             android:layout_width="match_parent"
-            android:layout_below="@id/container_ape"
+            android:layout_below="@id/imagen_genero"
             android:layout_height="wrap_content">
 
             <EditText
@@ -148,11 +169,28 @@
             android:layout_toRightOf="@id/imagen_centro"
             android:layout_marginTop="21dp" />
 
-        <Button
+
+        <ru.dimorinny.floatingtextbutton.FloatingTextButton
+            android:layout_width="wrap_content"
             android:id="@+id/btn_guardar"
-            android:text="@string/guardar"
-            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/imagen_centro"/>
+            app:floating_title="Guardar"
+            app:floating_title_color="@color/white"
+            app:floating_background_color="@color/Green"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:padding="30dp">
+        </ru.dimorinny.floatingtextbutton.FloatingTextButton>
+        <ru.dimorinny.floatingtextbutton.FloatingTextButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:floating_title="Cancelar"
+            app:floating_title_color="@color/white"
+            app:floating_background_color="@color/red"
+            android:layout_toLeftOf="@id/btn_guardar"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:padding="30dp">
+        </ru.dimorinny.floatingtextbutton.FloatingTextButton>
     </RelativeLayout>
 </android.support.constraint.ConstraintLayout>

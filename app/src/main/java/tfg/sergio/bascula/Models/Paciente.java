@@ -11,8 +11,6 @@ import java.util.Date;
  */
 
 public class Paciente implements Parcelable {
-    private String Nombre;
-    private String Apellidos;
 
     public String getArchivoFoto() {
         return ArchivoFoto;
@@ -22,7 +20,6 @@ public class Paciente implements Parcelable {
         ArchivoFoto = archivoFoto;
     }
 
-    private String ArchivoFoto;
 
     public String getId() {
         return Id;
@@ -32,12 +29,25 @@ public class Paciente implements Parcelable {
         Id = id;
     }
 
+    private String Nombre;
+    private String Apellidos;
+    private String ArchivoFoto;
     private String Id;
     private String UrlImagen;
     private String Centro;
     private Date FechaNacimiento;
     private boolean EsDietaHipocalorica;
     private String UltimoRegistro = null;
+    private String CodigoSilla = null;
+    private int Sexo; //1 hombre, 2 mujer
+
+    public int getSexo() {
+        return Sexo;
+    }
+
+    public void setSexo(int sexo) {
+        Sexo = sexo;
+    }
 
     public String getCodigoSilla() {
         return CodigoSilla;
@@ -47,7 +57,6 @@ public class Paciente implements Parcelable {
         CodigoSilla = codigoSilla;
     }
 
-    private String CodigoSilla = null;
 
     protected Paciente(Parcel in) {
         Nombre = in.readString();
@@ -98,7 +107,7 @@ public class Paciente implements Parcelable {
 
 
 
-    public Paciente(String n, String a, String id, String url, String centro, Date fecha, boolean dieta, String archivo){
+    public Paciente(String n, String a, String id, String url, String centro, Date fecha, boolean dieta, String archivo, int sexo){
         this.Nombre=n;
         this.Apellidos = a;
         this.Id = id;
@@ -107,6 +116,7 @@ public class Paciente implements Parcelable {
         this.FechaNacimiento = fecha;
         this.EsDietaHipocalorica = dieta;
         this.ArchivoFoto = archivo;
+        this.Sexo = sexo;
     }
     public Paciente(){
 

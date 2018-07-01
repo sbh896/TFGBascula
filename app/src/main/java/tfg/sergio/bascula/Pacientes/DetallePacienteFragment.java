@@ -203,77 +203,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                             final Silla silla = (Silla) dataSnapshot.getValue(Silla.class);
 
                           //  frameLayout.setForeground(new ColorDrawable(0x80FFFFFF));
-
-                            LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                            final View layout = inflater.inflate(R.layout.seleccion_silla_layout,null);
-
-                            // final Centro centro = centros.get(position);
-
-                            float density=getActivity().getResources().getDisplayMetrics().density;
-                            final PopupWindow pw = new PopupWindow(layout, (int)density*600, (int)density*500, true);
-                            pw.setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-                            pw.setTouchInterceptor(new View.OnTouchListener() {
-                                public boolean onTouch(View v, MotionEvent event) {
-                                    if(event.getAction() == MotionEvent.ACTION_OUTSIDE) {
-                                        pw.dismiss();
-                                        frameLayout.setForeground(null);
-                                        return true;
-                                    }
-                                    return false;
-                                }
-                            });
-                            if(paciente_final.getCodigoSilla() == null){
-                                ((Button)layout.findViewById(R.id.btn_silla_modificar)).setText("Pesar silla");
-                                ((Button)layout.findViewById(R.id.btn_silla_continuar)).setEnabled(false);
-                            }
-                            else{
-                                ((TextView)layout.findViewById(R.id.txt_modelo)).setText(silla.modelo);
-                                ((TextView)layout.findViewById(R.id.txt_peso)).setText(silla.peso + "");
-                            }
-                            ((Button)layout.findViewById(R.id.btn_silla_continuar)).setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    registros.clear();
-
-                                    FragmentManager fm = getFragmentManager();
-                                    FragmentTransaction ft = fm.beginTransaction();
-                                    ft.addToBackStack("detalle");
-                                    Bundle bundle = new Bundle();
-                                    bundle.putString("key",key);
-                                    bundle.putInt("estado",estado);
-                                    bundle.putDouble("altura",altura_paciente);
-                                    bundle.putString("centro",centro);
-                                    bundle.putString("nombre", paciente_final.getNombre());
-                                    Fragment fragment = new basculaFragment();
-                                    fragment.setArguments(bundle);
-                                    ft.replace(R.id.detalle_screen,fragment);
-                                    pw.dismiss();
-                                    frameLayout.setForeground(null);
-                                    ft.commit();
-                                }
-                            });
-                            ((Button)layout.findViewById(R.id.btn_silla_modificar)).setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    registros.clear();
-                                    FragmentManager fm = getFragmentManager();
-                                    FragmentTransaction ft = fm.beginTransaction();
-                                    ft.addToBackStack("detalle");
-                                    Bundle bundle = new Bundle();
-                                    bundle.putString("key",key);
-                                    bundle.putParcelable("paciente", paciente_final);
-                                    Fragment fragment = new AniadirSillaFragment();
-                                    fragment.setArguments(bundle);
-                                    ft.replace(R.id.detalle_screen,fragment);
-                                    pw.dismiss();
-                                    frameLayout.setForeground(null);
-                                    ft.commit();
-                                }
-                            });
-
-                            pw.setOutsideTouchable(true);
-                            // display the pop-up in the center
-                            pw.showAtLocation(layout, Gravity.CENTER, 0, 0);
+                            mostrarSeleccionSilla(silla);
                         }
 
                         @Override
@@ -281,6 +211,9 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
 
                         }
                     });
+                }
+                else {
+                    mostrarSeleccionSilla(null);
                 }
 
 
@@ -377,7 +310,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
 
 
         mDatabase.child(key).addValueEventListener(new ValueEventListener() {
-            final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+            final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/YY");
             IMCCalculator imcCalculator = new IMCCalculator();
 
             @Override
@@ -399,7 +332,6 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                                 int IMC = IMCCalculator.Calcular(paciente.monthsBetweenDates(),reg.getIMC(),0);
                                 estado = IMC;
                                 out_IMC.setText(EnumIMC.values()[IMC].toString());
-                                out_edad.setText(""+paciente.monthsBetweenDates());
                                 out_peso.setText(String.format("%.2f",reg.getPeso()));
                                 out_altura.setText(String.format("%.2f",reg.getAltura()));
                                 altura_paciente = reg.getAltura();
@@ -449,7 +381,78 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         iniciarGrafica();
         super.onViewCreated(view, savedInstanceState);
     }
+    private void mostrarSeleccionSilla(Silla silla){
+        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        final View layout = inflater.inflate(R.layout.seleccion_silla_layout,null);
 
+        // final Centro centro = centros.get(position);
+
+        float density=getActivity().getResources().getDisplayMetrics().density;
+        final PopupWindow pw = new PopupWindow(layout, (int)density*600, (int)density*500, true);
+        pw.setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        pw.setTouchInterceptor(new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction() == MotionEvent.ACTION_OUTSIDE) {
+                    pw.dismiss();
+                    frameLayout.setForeground(null);
+                    return true;
+                }
+                return false;
+            }
+        });
+        if(paciente_final.getCodigoSilla() == null){
+            ((Button)layout.findViewById(R.id.btn_silla_modificar)).setText("Pesar silla");
+            ((Button)layout.findViewById(R.id.btn_silla_continuar)).setEnabled(false);
+        }
+        else{
+            ((TextView)layout.findViewById(R.id.txt_modelo)).setText(silla.modelo);
+            ((TextView)layout.findViewById(R.id.txt_peso)).setText(silla.peso + "");
+        }
+        ((Button)layout.findViewById(R.id.btn_silla_continuar)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                registros.clear();
+
+                FragmentManager fm = getFragmentManager();
+                FragmentTransaction ft = fm.beginTransaction();
+                ft.addToBackStack("detalle");
+                Bundle bundle = new Bundle();
+                bundle.putString("key",key);
+                bundle.putInt("estado",estado);
+                bundle.putDouble("altura",altura_paciente);
+                bundle.putString("centro",centro);
+                bundle.putString("nombre", paciente_final.getNombre());
+                Fragment fragment = new basculaFragment();
+                fragment.setArguments(bundle);
+                ft.replace(R.id.detalle_screen,fragment);
+                pw.dismiss();
+                frameLayout.setForeground(null);
+                ft.commit();
+            }
+        });
+        ((Button)layout.findViewById(R.id.btn_silla_modificar)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                registros.clear();
+                FragmentManager fm = getFragmentManager();
+                FragmentTransaction ft = fm.beginTransaction();
+                ft.addToBackStack("detalle");
+                Bundle bundle = new Bundle();
+                bundle.putString("key",key);
+                bundle.putParcelable("paciente", paciente_final);
+                Fragment fragment = new AniadirSillaFragment();
+                fragment.setArguments(bundle);
+                ft.replace(R.id.detalle_screen,fragment);
+                pw.dismiss();
+                frameLayout.setForeground(null);
+                ft.commit();
+            }
+        });
+
+        pw.setOutsideTouchable(true);
+        // display the pop-up in the center
+        pw.showAtLocation(layout, Gravity.CENTER, 0, 0);
+    }
     private void obtenerRegistros(){
         final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
         Query firebaseSearchQuery = mDatabaseRegs.orderByChild("codigoPaciente").equalTo(key);
@@ -671,6 +674,9 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         float tappedY = me.getY();
         MPPointD point = mChart.getTransformer(YAxis.AxisDependency.LEFT).getValuesByTouchPoint(tappedX, tappedY);
 
+        if(registros == null || registros.size() == 0 || registros.get((int)Math.round(point.x)) == null){
+            return;
+        }
         final RegistroPaciente registroSeleccionado = registros.get((int)Math.round(point.x));
 
 

@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     android:background="@color/white"
     android:foreground="#00FFFFFF"
-    android:id="@+id/detalle_screen">
+    android:id="@+id/detalle_screen"
+    android:clickable="true">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -106,7 +107,7 @@
                                 android:id="@+id/txt_peso"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="1205"
+                                android:text="---"
                                 android:textStyle="bold"
                                 android:textSize="20sp"
                                 android:paddingTop="10dp"
@@ -129,7 +130,7 @@
                                 android:id="@+id/txt_altura"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="20/10/2018"
+                                android:text="---"
                                 android:textStyle="bold"
                                 android:textSize="20sp"
                                 android:paddingTop="10dp"

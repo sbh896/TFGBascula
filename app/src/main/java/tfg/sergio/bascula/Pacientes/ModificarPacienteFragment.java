@@ -65,7 +65,7 @@ import tfg.sergio.bascula.Resources.FixedDatePicker;
 
 public class ModificarPacienteFragment extends Fragment {
 
-    private SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+    private SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/YYYY");
     private EditText inputNombre,inputApellido;
     private ImageButton inputFoto;
     private Uri uriImagenAltaCalidad = null;
@@ -73,7 +73,7 @@ public class ModificarPacienteFragment extends Fragment {
     private TextView mDisplayDate;
     private DatePickerDialog.OnDateSetListener mDateSetListener;
     private Switch inputDieta;
-    private Spinner mSpinner;
+    private Spinner mSpinner, inputGenero;
     private ArrayList<Centro>centros = new ArrayList<>();
     private Date fechaNacimiento;
     //almacenamiento firebase
@@ -121,7 +121,9 @@ public class ModificarPacienteFragment extends Fragment {
         inputNombre.setText(pacienteOriginal.getNombre());
         inputApellido.setText(pacienteOriginal.getApellidos());
         //mSpinner.setSelection(pacienteOriginal.getCentro());
-        mDisplayDate.setText(formatter.format(pacienteOriginal.getFechaNacimiento()));
+        inputGenero = view.findViewById(R.id.sp_genero);
+        inputGenero.setSelection(pacienteOriginal.getSexo());
+        mDisplayDate.setText(formatter.format(new Date(pacienteOriginal.getFechaNacimiento().getYear()-1900,pacienteOriginal.getFechaNacimiento().getMonth(),pacienteOriginal.getFechaNacimiento().getDay())));
 
         Picasso.with(getActivity()).load(pacienteOriginal.getUrlImagen()).resize(200,200).into(inputFoto);
         //Guardado
@@ -135,15 +137,18 @@ public class ModificarPacienteFragment extends Fragment {
                     Toast.makeText(getActivity(), "Introduzca un nombre.", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                if (TextUtils.isEmpty(apellidos)) {
+                else if (TextUtils.isEmpty(apellidos)) {
                     Toast.makeText(getActivity(), "Introduzca los apellidos.", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                if(mSpinner.getSelectedItemPosition() == 0){
+                else if(mSpinner.getSelectedItemPosition() == 0){
                     Toast.makeText(getActivity(), "Seleccione un centro.", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
+                else if(inputGenero.getSelectedItemPosition() == 0){
+                    Toast.makeText(getActivity(), "Seleccione un género.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 guardarPaciente(nombre,apellidos);
             }
         });
@@ -309,6 +314,7 @@ public class ModificarPacienteFragment extends Fragment {
         pacienteOriginal.setApellidos(inputApellido.getText().toString());
         Centro c = (Centro)mSpinner.getSelectedItem();
         pacienteOriginal.setCentro(c.Id);
+        pacienteOriginal.setSexo(inputGenero.getSelectedItemPosition());
         pacienteOriginal.setEsDietaHipocalorica(inputDieta.isChecked());
 
         if(uriImagenAltaCalidad != null){

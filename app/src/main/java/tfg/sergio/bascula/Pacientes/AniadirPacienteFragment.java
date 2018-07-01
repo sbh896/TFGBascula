@@ -74,7 +74,7 @@ public class AniadirPacienteFragment extends Fragment {
     private TextView mDisplayDate;
     private DatePickerDialog.OnDateSetListener mDateSetListener;
     private Switch inputDieta;
-    private Spinner mSpinner;
+    private Spinner mSpinner, inputGenero;
     private ArrayList<Centro>centros = new ArrayList<>();
     private Date fechaNacimiento;
     //almacenamiento firebase
@@ -112,6 +112,8 @@ public class AniadirPacienteFragment extends Fragment {
         inputFoto = (ImageButton) view.findViewById(R.id.imagen_paciente);
         inputDieta = (Switch) view.findViewById(R.id.sw_dieta);
         progreso = new ProgressDialog(getActivity());
+        inputGenero = view.findViewById(R.id.sp_genero);
+
 
         //Guardado
         view.findViewById(R.id.btn_guardar).setOnClickListener(new View.OnClickListener() {
@@ -124,17 +126,22 @@ public class AniadirPacienteFragment extends Fragment {
                     Toast.makeText(getActivity(), "Introduzca un nombre.", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                if (TextUtils.isEmpty(apellidos)) {
+                else if (TextUtils.isEmpty(apellidos)) {
                     Toast.makeText(getActivity(), "Introduzca los apellidos.", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                if(uriImagenAltaCalidad == null) {
+                else if(uriImagenAltaCalidad == null) {
                     Toast.makeText(getActivity(), "Introduzca una imagen de usuario.", Toast.LENGTH_SHORT).show();
                     return;
 
                 }
-                if(mSpinner.getSelectedItemPosition() == 0){
+                else if(mSpinner.getSelectedItemPosition() == 0){
                     Toast.makeText(getActivity(), "Seleccione un centro.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                else if(inputGenero.getSelectedItemPosition() == 0){
+                    Toast.makeText(getActivity(), "Seleccione un género.", Toast.LENGTH_SHORT).show();
+                    return;
                 }
 
                 guardarPaciente(nombre,apellidos);
@@ -154,6 +161,8 @@ public class AniadirPacienteFragment extends Fragment {
                 startActivityForResult(camera_intent,CAMERA_REQUEST_CODE);
             }
         });
+
+
 
         //seleccion de centro
         mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -192,7 +201,10 @@ public class AniadirPacienteFragment extends Fragment {
         mDateSetListener = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker datePicker, int anio, int mes, int dia) {
-                fechaNacimiento=new Date(anio,mes,dia);
+                fechaNacimiento=new Date();
+                fechaNacimiento.setMonth(mes);
+                fechaNacimiento.setYear(anio);
+                fechaNacimiento.setDate(dia);
                 mes = mes +1;
                 String fecha = dia+"/" + mes + "/" + anio;
                 mDisplayDate.setText(fecha);
@@ -314,7 +326,8 @@ public class AniadirPacienteFragment extends Fragment {
                 Uri downloadUri = taskSnapshot.getDownloadUrl();
                 Centro c = (Centro)mSpinner.getSelectedItem();
                 String id = mDatabase.push().getKey();
-                Paciente paciente = new Paciente(nombre,apellidos,id,downloadUri.toString(),c.Id,fechaNacimiento,inputDieta.isChecked(),uriImagenAltaCalidad.getLastPathSegment());
+                int genero = inputGenero.getSelectedItemPosition();
+                Paciente paciente = new Paciente(nombre,apellidos,id,downloadUri.toString(),c.Id,fechaNacimiento,inputDieta.isChecked(),uriImagenAltaCalidad.getLastPathSegment(),genero);
                 mDatabase.child(id).setValue(paciente);
                 progreso.dismiss();
             }

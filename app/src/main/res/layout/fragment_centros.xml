@@ -23,6 +23,7 @@
             android:layout_marginEnd="44dp"
             android:textColor="@color/black"
             android:inputType="textNoSuggestions"
+            android:text="Buscador"
             />
         <ImageButton
             android:src="@drawable/button_add"
@@ -46,6 +47,5 @@
             android:layout_gravity="left"
             android:layout_marginTop="28dp">
         </android.support.v7.widget.RecyclerView>
-
     </RelativeLayout>
 </FrameLayout>
