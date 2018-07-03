@@ -90,6 +90,7 @@ public class basculaResultFragment extends Fragment{
     private Paciente paciente;
     private FloatingTextButton aceptar,cancelar;
     private TextView textIMC,textPeso;
+    private Paciente paciente_final;
     private ImageButton inputFoto;
     private Uri uriImagenAltaCalidad = null;
     private static final int CAMERA_REQUEST_CODE = 1;
@@ -135,6 +136,8 @@ public class basculaResultFragment extends Fragment{
         nombre = bundle.getString("nombre");
         peso = bundle.getDouble("peso");
         altura = bundle.getDouble("altura");
+        paciente_final = bundle.getParcelable("paciente");
+
         inputFoto = (ImageButton) view.findViewById(R.id.imagen_paciente);
         progreso = new ProgressDialog(getActivity());
 
@@ -233,6 +236,9 @@ public class basculaResultFragment extends Fragment{
             public void onClick(View view) {
                 final RegistroPaciente regis = new RegistroPaciente(key,peso,altura, Calendar.getInstance().getTime());
                 final String id = mDatabase.push().getKey();
+                regis.setTimeStamp(Calendar.getInstance().getTimeInMillis());
+                int IMC = IMCCalculator.Calcular(paciente_final.monthsBetweenDates(),regis.getIMC(),paciente_final.getSexo());
+                regis.setCodigoEstadoIMC(IMC);
 
                 //Guardado del registro en Firebase
                 if(uriImagenAltaCalidad == null){
@@ -302,7 +308,7 @@ public class basculaResultFragment extends Fragment{
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         PacientesMesCentro pmc = null;
                         IMCCalculator imcCalculator = new IMCCalculator();
-                        int imcNuevo = imcCalculator.Calcular(paciente.monthsBetweenDates(),regis.getIMC(),0);
+                        int imcNuevo = imcCalculator.Calcular(paciente.monthsBetweenDates(),regis.getIMC(),paciente.getSexo());
                         String Key="";
                         for (DataSnapshot child: dataSnapshot.getChildren()) {
                             System.out.println(child.getKey());

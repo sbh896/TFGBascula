@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/fondo_bascula"
     android:id="@+id/pacientes_screen"
-
+    android:clickable="true"
     >
     <ProgressBar
         android:id="@+id/progressBar"

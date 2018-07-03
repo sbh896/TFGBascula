@@ -329,7 +329,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             RegistroPaciente reg =  (RegistroPaciente) dataSnapshot.getValue(RegistroPaciente.class);
                             if(reg!=null){
-                                int IMC = IMCCalculator.Calcular(paciente.monthsBetweenDates(),reg.getIMC(),0);
+                                int IMC = reg.getCodigoEstadoIMC();
                                 estado = IMC;
                                 out_IMC.setText(EnumIMC.values()[IMC].toString());
                                 out_peso.setText(String.format("%.2f",reg.getPeso()));
@@ -421,6 +421,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                 bundle.putInt("estado",estado);
                 bundle.putDouble("altura",altura_paciente);
                 bundle.putString("centro",centro);
+                bundle.putParcelable("paciente", paciente_final);
                 bundle.putString("nombre", paciente_final.getNombre());
                 Fragment fragment = new basculaFragment();
                 fragment.setArguments(bundle);

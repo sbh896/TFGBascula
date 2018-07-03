@@ -11,7 +11,7 @@ public enum EnumIMC {
     DESN("Desnutrición", 3),
     DESNMOD("Desnutrición moderada", 4),
     DESNSEV("Desnutrición severa", 5),
-    TODOS("Todos",-1);
+    TODOS("IMC",-1);
 
     private String stringValue;
     private int intValue;

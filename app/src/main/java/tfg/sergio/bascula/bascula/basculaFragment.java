@@ -34,6 +34,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -103,7 +104,7 @@ import tfg.sergio.bascula.Resources.IMCCalculator;
  */
 
 public class basculaFragment extends Fragment implements TextToSpeech.OnInitListener, TextToSpeech.OnUtteranceCompletedListener {
-    private static final int MY_DATA_CHECK_CODE = 1;
+    private static final int MY_DATA_CHECK_CODE = 5;
     private static final int BLUETOOTH_CODE = 2;
     private Button add, tare;
     private  ImageButton btn_altura;
@@ -122,9 +123,9 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
     private ProgressDialog progressDialog = null, progressDialogDisp = null;
     private View view;
     private RadioGroup inputTipoMedida;
-
+    private Paciente paciente_final;
     private static final int REQUEST_ENABLE_BT = 1;
-    private static final int REQUEST_FINE_LOCATION = 2;
+    private static final int REQUEST_FINE_LOCATION = 3;
     private static final int SCAN_PERIOD = 2000;
     private static final UUID SERVICE_UUID = UUID.fromString("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
     private static final UUID CHARACTERISTIC_UUID = UUID.fromString("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
@@ -196,6 +197,7 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
 
         bundle = getArguments();
         key = bundle.getString("key");
+        paciente_final = bundle.getParcelable("paciente");
         estado = bundle.getInt("estado");
         centro = bundle.getString("centro");
         nombre = bundle.getString("nombre");
@@ -318,6 +320,7 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
                 ft.addToBackStack("bascula");
                 bundle.putDouble("peso",peso);
                 bundle.putDouble("altura",altura);
+                bundle.putParcelable("paciente",paciente_final);
                 basculaResultFragment fragment = new basculaResultFragment();
                 fragment.setArguments(bundle);
                 ft.replace(R.id.pacientes_screen,fragment);
@@ -365,7 +368,7 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
             public void run() {
                 progressDialog.dismiss();
             }
-        }, 10000);
+        }, 5000);
 
     }
 
@@ -409,7 +412,7 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
                 mScanning = false;
                 mHandler = null;
             }
-        }, 5000);
+        }, 10000);
 
     }
 
@@ -441,16 +444,18 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
     };
 
     private boolean comprobarPermisos(){
+        boolean ret = true;
         if(mBluettothAdapter == null || !mBluettothAdapter.isEnabled()) {
             habilitarBluetooth();
-            return false;
+            ret=false;
+
         }
         if(!tienePermisoUbicacion()){
             habilitarUbicacion();
-            return false;
+            ret= false;
         }
         escanear();
-        return true;
+        return ret;
     }
 
     private void habilitarBluetooth(){
@@ -634,6 +639,20 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
         });
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode == REQUEST_FINE_LOCATION){
+            if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                escanear();
+            }else{
+                Toast.makeText(getActivity(), "Por favor active la ubicación e inténtelo de nuevo.", Toast.LENGTH_SHORT).show();
+                progressDialogDisp.dismiss();
+                getFragmentManager().popBackStackImmediate();
+            }
+        }
+    }
+
     public void onActivityResult(
             int requestCode, int resultCode, Intent data) {
         if (requestCode == MY_DATA_CHECK_CODE) {
@@ -651,6 +670,7 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
         else if (requestCode == BLUETOOTH_CODE) {
             if (resultCode == Activity.RESULT_CANCELED) {
                 Toast.makeText(getActivity(), "Por favor active el bluetooth e inténtelo de nuevo.", Toast.LENGTH_SHORT).show();
+                progressDialogDisp.dismiss();
                 getFragmentManager().popBackStackImmediate();
             }
             else if(resultCode == Activity.RESULT_OK){
@@ -691,6 +711,8 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mTts.shutdown(); //mTts is your TextToSpeech Object
+        if(mTts!=null){
+            mTts.shutdown(); //mTts is your TextToSpeech Object
+        }
     }
 }

@@ -87,7 +87,6 @@ public class Login extends AppCompatActivity {
 
                 }
 
-                progressBar.setVisibility(View.VISIBLE);
                 //Realizamos la autenticación empleando firebase
                 auth.signInWithEmailAndPassword(email, pass)
                         .addOnCompleteListener(Login.this, new OnCompleteListener<AuthResult>() {

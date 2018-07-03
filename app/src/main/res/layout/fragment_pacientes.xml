@@ -17,13 +17,20 @@
 
         <EditText
             android:id="@+id/buscador"
-            android:layout_width="match_parent"
+            android:layout_width="600dp"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_marginEnd="44dp"
             android:textColor="@color/black"
             android:inputType="textNoSuggestions"
             />
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:id="@+id/btn_buscar"
+            android:src="@drawable/ic_buscar"
+            android:layout_toRightOf="@id/buscador"
+            android:layout_alignTop="@id/buscador"/>
 
         <Spinner
             android:id="@+id/sp_centros"
@@ -39,6 +46,15 @@
             android:layout_height="wrap_content"
             android:layout_toRightOf="@+id/sp_centros"
             android:layout_alignTop="@+id/sp_centros"
+            />
+        <Spinner
+            android:id="@+id/sp_genero"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_toRightOf="@id/sp_estado_imc"
+            android:layout_below="@+id/buscador"
+            android:entries="@array/genero"
+            android:layout_marginTop="10dp"
             />
         <ImageButton
             android:src="@drawable/button_add"

@@ -61,7 +61,7 @@
 
         <TextView
             android:id="@+id/title_peso"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Peso: "
             android:textAppearance="?android:attr/textAppearanceMedium"
@@ -70,7 +70,7 @@
 
         <TextView
             android:id="@+id/title_imc"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="IMC: "
             android:textAppearance="?android:attr/textAppearanceMedium"

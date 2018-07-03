@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@color/white"
+    android:clickable="true">
 <RelativeLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -97,17 +98,20 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="0.01"
+            android:layout_marginBottom="30dp"
             android:background="@android:color/darker_gray"/>
     </LinearLayout>
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:floating_title="Aceptar"
-        android:layout_alignParentBottom="true"
         app:floating_background_color="@color/Green"
         app:floating_title_color="@color/white"
-        android:layout_marginLeft="80dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
         android:id="@+id/btn_aceptar"
+        android:layout_marginRight="30dp"
+        android:layout_marginBottom="30dp"
         >
     </ru.dimorinny.floatingtextbutton.FloatingTextButton>
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
@@ -117,9 +121,9 @@
         app:floating_background_color="@color/OrangeRed"
         app:floating_title_color="@color/white"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
         android:layout_marginRight="80dp"
         android:id="@+id/btn_cancelar"
+        android:padding="30dp"
         >
     </ru.dimorinny.floatingtextbutton.FloatingTextButton>
 </RelativeLayout>

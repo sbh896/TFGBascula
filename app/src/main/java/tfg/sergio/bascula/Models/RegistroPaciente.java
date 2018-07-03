@@ -25,6 +25,24 @@ public class RegistroPaciente implements Comparable<RegistroPaciente>{
     private Date Fecha;
     private String StrFecha;
     private String ArchivoFoto;
+    private int CodigoEstadoIMC;
+    private Long TimeStamp;
+
+    public Long getTimeStamp() {
+        return TimeStamp;
+    }
+
+    public void setTimeStamp(Long timeStamp) {
+        this.TimeStamp = timeStamp;
+    }
+
+    public int getCodigoEstadoIMC() {
+        return CodigoEstadoIMC;
+    }
+
+    public void setCodigoEstadoIMC(int codigoEstadoIMC) {
+        CodigoEstadoIMC = codigoEstadoIMC;
+    }
 
     public String getArchivoFoto() {
         return ArchivoFoto;

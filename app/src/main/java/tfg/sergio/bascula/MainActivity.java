@@ -31,6 +31,7 @@ import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
+import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -43,6 +44,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -64,7 +66,7 @@ import tfg.sergio.bascula.Resources.SwipeControllerActions;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-
+    String[] meses = {"Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"};
     private FirebaseAuth auth;
     private FirebaseDatabase database;
     private TextView navName;
@@ -327,7 +329,12 @@ public class MainActivity extends AppCompatActivity
     //region Grafica
     private void obtenerRegistroPacientes(){
         final DateFormat dateFormat = new SimpleDateFormat("YYYYMM");
-
+        NumObesidad = 0;
+        NumSobrepeso = 0;
+        NumNormal = 0;
+        NumDesnutricion = 0;
+        NumDesnutricionMod = 0;
+        NumDesnutricionSev = 0;
         final Date date = new Date();
 
         final String ident;
@@ -452,7 +459,7 @@ public class MainActivity extends AppCompatActivity
         yVals1.add(new BarEntry(5, NumDesnutricionSev));
 
         BarDataSet set1;
-
+        mChart.animateY(3000);
         if (mChart.getData() != null &&
                 mChart.getData().getDataSetCount() > 0) {
             set1 = (BarDataSet) mChart.getData().getDataSetByIndex(0);
@@ -460,12 +467,12 @@ public class MainActivity extends AppCompatActivity
             mChart.getData().notifyDataChanged();
             mChart.notifyDataSetChanged();
         } else {
-            set1 = new BarDataSet(yVals1, "The year 2017");
+            set1 = new BarDataSet(yVals1, "Pacientes "+ meses[new Date().getMonth()]);
 
             set1.setDrawIcons(false);
 
             //    set1.setColors(ColorTemplate.MATERIAL_COLORS);
-            set1.setColors(Color.BLUE);
+            set1.setColors(ColorTemplate.COLORFUL_COLORS);
             ArrayList<IBarDataSet> dataSets = new ArrayList<IBarDataSet>();
             dataSets.add(set1);
 
@@ -524,11 +531,15 @@ public class MainActivity extends AppCompatActivity
     public void obtenerUltimosRegistros(){
 
         elementos.removeAll(elementos);
-
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");
+        Long fFin = Calendar.getInstance().getTimeInMillis();
+        Calendar calendar=Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, -15);
+        Long fInicio = calendar.getTimeInMillis();
         final Date[] fechaUltimoRegistro = {null};
 
 
-        Query firebaseSearchQuery = mDatabaseRegistros.orderByChild("StrFecha");//.startAt(search).endAt(search + "\uf8ff");
+        Query firebaseSearchQuery = mDatabaseRegistros.orderByChild("timeStamp").startAt(fInicio);
 
         adapter = new AdapterRegistro(elementos, this);
 

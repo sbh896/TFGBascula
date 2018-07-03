@@ -49,10 +49,11 @@ import tfg.sergio.bascula.Resources.IMCCalculator;
 public class PacientesFragment extends Fragment {
     private RecyclerView listaPacientes;
     private EditText buscador;
-    private Spinner sp_centros, sp_imc;
+    private Spinner sp_centros, sp_imc, sp_genero;
     private ArrayList<Centro> centros = new ArrayList<>();
     private DatabaseReference mDatabaseCentros, mDatabaseRegistros,dbpacientes;
-    private ImageButton btnadd;
+    private ImageButton btnadd, btnSearch;
+
 
     RecyclerView.Adapter adapter;
     List<ElementoListadoPaciente> elementos = new ArrayList<>();
@@ -73,37 +74,28 @@ public class PacientesFragment extends Fragment {
         listaPacientes = (RecyclerView) view.findViewById(R.id.lista_pacientes);
         sp_imc = view.findViewById(R.id.sp_estado_imc);
         sp_centros = (Spinner) view.findViewById(R.id.sp_centros);
+        sp_genero = view.findViewById(R.id.sp_genero);
         btnadd = view.findViewById(R.id.btn_nuevo);
+        btnSearch = view.findViewById(R.id.btn_buscar);
         btnadd.bringToFront();
 
 
         //listaPacientes.setHasFixedSize(true);
         listaPacientes.setLayoutManager(new GridLayoutManager(this.getActivity(),3));
         sp_imc.setAdapter(new ArrayAdapter<EnumIMC>(getActivity(), android.R.layout.simple_spinner_dropdown_item, EnumIMC.values()));
-
+        sp_imc.setSelection(6);
 
         this.FireBasePacientesSearch("");
         this.obtenerCentros();
 
         buscador = (EditText) view.findViewById(R.id.buscador);
-        buscador.addTextChangedListener(new TextWatcher() {
+
+        btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-                FireBasePacientesSearch(charSequence.toString());
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
+            public void onClick(View view) {
+                FireBasePacientesSearch(buscador.getText().toString());
             }
         });
-
         view.findViewById(R.id.btn_nuevo).setOnClickListener(new View.OnClickListener(){
             public void onClick(View view){
                 FragmentManager fm = getFragmentManager();
@@ -135,53 +127,23 @@ public class PacientesFragment extends Fragment {
     //region centros
     private void obtenerCentros(){
         ArrayAdapter<Centro> arrayAdapter = new ArrayAdapter<Centro>(getActivity(),android.R.layout.simple_spinner_dropdown_item,centros){
-            @Override
-            public boolean isEnabled(int position) {
-                if(position == 0)
-                {
-                    // Disable the first item from Spinner
-                    // First item will be use for hint
-                    return false;
-                }
-                else
-                {
-                    return true;
-                }
-            }
 
             @NonNull
             @Override
             public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
                 View view = super.getDropDownView(position, convertView, parent);
-                TextView tv = (TextView) view;
-                if(position == 0){
-                    // Set the hint text color gray
-                    tv.setTextColor(Color.GRAY);
-                }
-                else {
-                    tv.setTextColor(Color.BLACK);
-                }
                 return view;
-
             }
 
             @Override
             public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
                 View view = super.getDropDownView(position, convertView, parent);
-                TextView tv = (TextView) view;
-                if(position == 0){
-                    // Set the hint text color gray
-                    tv.setTextColor(Color.GRAY);
-                }
-                else {
-                    tv.setTextColor(Color.BLACK);
-                }
                 return view;
             }
 
 
         };
-        centros.add(new Centro("-1","Seleccionar centro..."));
+        centros.add(new Centro("-1","Centro"));
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         sp_centros.setAdapter(arrayAdapter);
@@ -220,6 +182,7 @@ public class PacientesFragment extends Fragment {
     private void FireBasePacientesSearch(String search){
        final Centro c = (Centro) sp_centros.getSelectedItem();
        final int estado = ((EnumIMC) sp_imc.getSelectedItem()).getId();
+       final int genero = sp_genero.getSelectedItemPosition();
        elementos.removeAll(elementos);
 
         final Date[] fechaUltimoRegistro = {null};
@@ -248,9 +211,15 @@ public class PacientesFragment extends Fragment {
                            RegistroPaciente reg = dataSnapshot.getValue(RegistroPaciente.class);
                            if(reg != null){
                                IMCCalculator imcCalculator = new IMCCalculator();
-                               int IMC = IMCCalculator.Calcular(paciente.monthsBetweenDates(),reg.getIMC(),0);
-                           }
+                               int IMC = reg.getCodigoEstadoIMC();
+                               if(IMC != estado && estado != -1){
+
+                               }else if((estado != -1 && estado == IMC) || (estado == -1)){
+                                   addElement(paciente,reg, paciente_key);
+                               }
+                           }else{
                                addElement(paciente,reg, paciente_key);
+                           }
                        }
 
                        @Override
@@ -265,11 +234,13 @@ public class PacientesFragment extends Fragment {
             }
 
             public void addElement(Paciente pac , RegistroPaciente reg, String key){
-            if(c!= null && !pac.getCentro().equals(c.Id) && c.Id != "-1"){
-                //Si no pertenece al centro del filtro de búsqueda, se quita
-                return;
-               // mView.setLayoutParams(params);
-            }
+                if(c!= null && !pac.getCentro().equals(c.Id) && c.Id != "-1"){
+                    //Si no pertenece al centro del filtro de búsqueda, se quita
+                    return;
+                }
+                else if(genero != 0 && pac.getSexo() != genero){
+                    return;
+                }
                 ElementoListadoPaciente elp = new ElementoListadoPaciente();
                 elp.paciente = pac;
                 elp.registroPaciente = reg;
