@@ -6,6 +6,6 @@ package tfg.sergio.bascula.Models;
 
 public class Silla {
     public String idSilla;
-    public Float peso;
+    public double peso;
     public String  modelo;
 }

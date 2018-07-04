@@ -296,13 +296,15 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                switch (tipoMedicion){
-                    case 0:
-                        enviarMensaje("P");
-                        break;
-                    case 1:
-                        enviarMensaje("M");
-                        break;
+                if(mConnected){
+                    switch (tipoMedicion){
+                        case 0:
+                            enviarMensaje("P");
+                            break;
+                        case 1:
+                            enviarMensaje("M");
+                            break;
+                    }
                 }
             }
         });

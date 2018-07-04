@@ -145,8 +145,7 @@
             android:layout_gravity="bottom"
             android:visibility="invisible"
             app:SpinKit_Color="@color/colorAccent"
-            android:layout_below="@id/btn_tare"
-            android:layout_marginTop="140dp"
+            android:layout_below="@id/txt_result_bascula"
             android:layout_centerHorizontal="true"
             />
 
