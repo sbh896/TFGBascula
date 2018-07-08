@@ -1,9 +1,7 @@
 package tfg.sergio.bascula;
 
 import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattDescriptor;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -274,8 +272,8 @@ public class MainActivity extends AppCompatActivity
                                 if (pac != null) {
                                     ela.alerta = alerta;
                                     ela.paciente = pac;
-                                    if(pac.getUltimoRegistro() != null){
-                                        mDatabaseRegistros.child(pac.getUltimoRegistro()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                    if(pac.getCodigoUltimoRegistro() != null){
+                                        mDatabaseRegistros.child(pac.getCodigoUltimoRegistro()).addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshotR) {
                                                 RegistroPaciente rp = dataSnapshotR.getValue(RegistroPaciente.class);

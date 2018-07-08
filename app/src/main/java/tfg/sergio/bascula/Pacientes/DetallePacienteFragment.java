@@ -2,19 +2,16 @@ package tfg.sergio.bascula.Pacientes;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
@@ -27,9 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
-import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.RadioButton;
@@ -38,11 +33,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.animation.Easing;
-import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Legend;
-import com.github.mikephil.charting.components.LimitLine;
-import com.github.mikephil.charting.components.MarkerView;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
@@ -66,31 +58,21 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
-import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 import tfg.sergio.bascula.Models.Alerta;
-import tfg.sergio.bascula.Models.Centro;
 import tfg.sergio.bascula.Models.Paciente;
-import tfg.sergio.bascula.Models.PacientesMesCentro;
 import tfg.sergio.bascula.Models.RegistroPaciente;
 import tfg.sergio.bascula.Models.Silla;
 import tfg.sergio.bascula.R;
-import tfg.sergio.bascula.Registro;
-import tfg.sergio.bascula.Resources.CustomMarkerView;
 import tfg.sergio.bascula.Resources.EnumIMC;
 import tfg.sergio.bascula.Resources.FixedDatePicker;
-import tfg.sergio.bascula.Resources.IMCCalculator;
 import tfg.sergio.bascula.bascula.AniadirSillaFragment;
 import tfg.sergio.bascula.bascula.basculaFragment;
 
@@ -346,15 +328,15 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         }
 
         final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/YY");
-        centro = paciente.getCentro();
+        centro = paciente.getCodigoCentro();
         out_nombre.setText(paciente.getNombre() +" "+paciente.getApellidos());
         out_edad.setText(formatter.format(paciente.getFechaNacimiento()));
         //cargar Imagen
         Picasso.with(getActivity()).load(paciente.getUrlImagen()).resize(200,200).into(out_perfil);
 
         //Se obtiene el último registro del paciente
-        if(paciente.getUltimoRegistro() != null){
-            mDatabaseRegs.child(paciente.getUltimoRegistro()).addListenerForSingleValueEvent(new ValueEventListener() {
+        if(paciente.getCodigoUltimoRegistro() != null){
+            mDatabaseRegs.child(paciente.getCodigoUltimoRegistro()).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     RegistroPaciente reg =  (RegistroPaciente) dataSnapshot.getValue(RegistroPaciente.class);
@@ -612,13 +594,13 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         registros.remove(registroPaciente);
 
         //actualizamos el último registro de paciente si este es el eliminado
-        if(paciente_final.getUltimoRegistro().equals(keyEliminar)){
+        if(paciente_final.getCodigoUltimoRegistro().equals(keyEliminar)){
             if(registros.size() > 0){
                 String key = registros.get(registros.size()-1).getCodigoRegistro();
-                paciente_final.setUltimoRegistro(key);
+                paciente_final.setCodigoUltimoRegistro(key);
             }
             else{
-                paciente_final.setUltimoRegistro(null);
+                paciente_final.setCodigoUltimoRegistro(null);
             }
                 mDatabase.child(paciente_final.getId()).setValue(paciente_final);
         }

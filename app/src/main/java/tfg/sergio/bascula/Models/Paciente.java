@@ -34,10 +34,10 @@ public class Paciente implements Parcelable {
     private String ArchivoFoto;
     private String Id;
     private String UrlImagen;
-    private String Centro;
+    private String CodigoCentro;
     private Date FechaNacimiento;
     private boolean EsDietaHipocalorica;
-    private String UltimoRegistro = null;
+    private String CodigoUltimoRegistro = null;
     private String CodigoSilla = null;
     private int Sexo; //1 hombre, 2 mujer
 
@@ -63,9 +63,9 @@ public class Paciente implements Parcelable {
         Apellidos = in.readString();
         Id = in.readString();
         UrlImagen = in.readString();
-        Centro = in.readString();
+        CodigoCentro = in.readString();
         EsDietaHipocalorica = in.readByte() != 0;
-        UltimoRegistro = in.readString();
+        CodigoUltimoRegistro = in.readString();
     }
 
     public static final Creator<Paciente> CREATOR = new Creator<Paciente>() {
@@ -82,8 +82,8 @@ public class Paciente implements Parcelable {
 
     public void setEsDietaHipocalorica(boolean esDietaHipocalorica) {EsDietaHipocalorica = esDietaHipocalorica;}
     public void setFechaNacimiento(Date fechaNacimiento) {this.FechaNacimiento = fechaNacimiento;}
-    public void setCentro(String centro) {
-        Centro = centro;
+    public void setCodigoCentro(String codigoCentro) {
+        CodigoCentro = codigoCentro;
     }
     public void setUrlImagen(String urlImagen) {
         UrlImagen = urlImagen;
@@ -94,25 +94,26 @@ public class Paciente implements Parcelable {
     public void setApellidos(String apellidos) {
         Apellidos = apellidos;
     }
-    public void setUltimoRegistro(String ultimoRegistro) {UltimoRegistro = ultimoRegistro;}
+    public void setCodigoUltimoRegistro(String codigoUltimoRegistro) {
+        CodigoUltimoRegistro = codigoUltimoRegistro;}
 
 
     public String getUrlImagen() { return UrlImagen; }
     public String getNombre() {return Nombre;}
     public String getApellidos() {return Apellidos;}
-    public String getCentro() {return Centro;}
+    public String getCodigoCentro() {return CodigoCentro;}
     public Date getFechaNacimiento() {return FechaNacimiento;}
     public boolean getEsDietaHipocalorica() {return EsDietaHipocalorica;}
-    public String getUltimoRegistro() {return UltimoRegistro;}
+    public String getCodigoUltimoRegistro() {return CodigoUltimoRegistro;}
 
 
 
-    public Paciente(String n, String a, String id, String url, String centro, Date fecha, boolean dieta, String archivo, int sexo){
+    public Paciente(String n, String a, String id, String url, String codigoCentro, Date fecha, boolean dieta, String archivo, int sexo){
         this.Nombre=n;
         this.Apellidos = a;
         this.Id = id;
         this.UrlImagen = url;
-        this.Centro = centro;
+        this.CodigoCentro = codigoCentro;
         this.FechaNacimiento = fecha;
         this.EsDietaHipocalorica = dieta;
         this.ArchivoFoto = archivo;
@@ -163,9 +164,9 @@ public class Paciente implements Parcelable {
         parcel.writeString(Apellidos);
         parcel.writeString(Id);
         parcel.writeString(UrlImagen);
-        parcel.writeString(Centro);
+        parcel.writeString(CodigoCentro);
         parcel.writeByte((byte) (EsDietaHipocalorica ? 1 : 0));
-        parcel.writeString(UltimoRegistro);
+        parcel.writeString(CodigoUltimoRegistro);
     }
 
 

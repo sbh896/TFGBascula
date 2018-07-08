@@ -131,7 +131,7 @@ public class ModificarPacienteFragment extends Fragment {
         progreso = new ProgressDialog(getActivity());
         inputNombre.setText(pacienteOriginal.getNombre());
         inputApellido.setText(pacienteOriginal.getApellidos());
-        //mSpinner.setSelection(pacienteOriginal.getCentro());
+        //mSpinner.setSelection(pacienteOriginal.getCodigoCentro());
         inputGenero = view.findViewById(R.id.sp_genero);
         inputGenero.setSelection(pacienteOriginal.getSexo());
         mDisplayDate.setText(formatter.format(new Date(pacienteOriginal.getFechaNacimiento().getYear()-1900,pacienteOriginal.getFechaNacimiento().getMonth(),pacienteOriginal.getFechaNacimiento().getDay())));
@@ -335,7 +335,7 @@ public class ModificarPacienteFragment extends Fragment {
         pacienteOriginal.setNombre(inputNombre.getText().toString());
         pacienteOriginal.setApellidos(inputApellido.getText().toString());
         Centro c = (Centro)mSpinner.getSelectedItem();
-        pacienteOriginal.setCentro(c.Id);
+        pacienteOriginal.setCodigoCentro(c.Id);
         pacienteOriginal.setSexo(inputGenero.getSelectedItemPosition());
         pacienteOriginal.setEsDietaHipocalorica(inputDieta.isChecked());
 

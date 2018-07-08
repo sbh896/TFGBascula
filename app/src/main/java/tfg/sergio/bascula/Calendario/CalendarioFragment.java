@@ -10,7 +10,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,16 +33,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import tfg.sergio.bascula.Models.AdapterAlerta;
 import tfg.sergio.bascula.Models.AdapterAlertaCalendadrio;
 import tfg.sergio.bascula.Models.Alerta;
 import tfg.sergio.bascula.Models.ElementoListadoAlerta;
 import tfg.sergio.bascula.Models.Paciente;
-import tfg.sergio.bascula.Models.PacientesMesCentro;
 import tfg.sergio.bascula.Models.RegistroPaciente;
 import tfg.sergio.bascula.R;
-import tfg.sergio.bascula.Resources.SwipeController;
-import tfg.sergio.bascula.Resources.SwipeControllerActions;
 
 /**
  * Created by yeyo on 28/04/2018.
@@ -219,8 +214,8 @@ public class CalendarioFragment extends Fragment {
                                 if (pac != null) {
                                     ela.alerta = alerta;
                                     ela.paciente = pac;
-                                    if(pac.getUltimoRegistro() != null){
-                                        mDatabaseRegistros.child(pac.getUltimoRegistro()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                    if(pac.getCodigoUltimoRegistro() != null){
+                                        mDatabaseRegistros.child(pac.getCodigoUltimoRegistro()).addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshotR) {
                                                 RegistroPaciente rp = dataSnapshotR.getValue(RegistroPaciente.class);

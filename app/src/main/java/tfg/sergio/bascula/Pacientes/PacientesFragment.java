@@ -1,6 +1,5 @@
 package tfg.sergio.bascula.Pacientes;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -9,8 +8,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +15,6 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.database.ChildEventListener;
@@ -203,9 +199,9 @@ public class PacientesFragment extends Fragment {
                 ElementoListadoPaciente elp = new ElementoListadoPaciente();
                 final RegistroPaciente regis;
                 elp.paciente=paciente;
-                if(paciente.getUltimoRegistro() != null){
+                if(paciente.getCodigoUltimoRegistro() != null){
 
-                   mDatabaseRegistros.child(paciente.getUltimoRegistro()).addListenerForSingleValueEvent(new ValueEventListener() {
+                   mDatabaseRegistros.child(paciente.getCodigoUltimoRegistro()).addListenerForSingleValueEvent(new ValueEventListener() {
                        @Override
                        public void onDataChange(DataSnapshot dataSnapshot) {
                            RegistroPaciente reg = dataSnapshot.getValue(RegistroPaciente.class);
@@ -228,13 +224,13 @@ public class PacientesFragment extends Fragment {
                        }
                    });
                 }
-                else if (paciente.getUltimoRegistro()==null){
+                else if (paciente.getCodigoUltimoRegistro()==null){
                     addElement(paciente,null, paciente_key);
                 }
             }
 
             public void addElement(Paciente pac , RegistroPaciente reg, String key){
-                if(c!= null && !pac.getCentro().equals(c.Id) && c.Id != "-1"){
+                if(c!= null && !pac.getCodigoCentro().equals(c.Id) && c.Id != "-1"){
                     //Si no pertenece al centro del filtro de búsqueda, se quita
                     return;
                 }
