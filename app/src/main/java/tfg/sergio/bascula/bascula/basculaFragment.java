@@ -338,7 +338,9 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
             }
         });
         progressDialogDisp.show();
-        comprobarPermisos();
+        if(comprobarPermisos()){
+            escanear();
+        }
         super.onViewCreated(view, savedInstanceState);
     }
 
@@ -456,7 +458,6 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
             habilitarUbicacion();
             ret= false;
         }
-        escanear();
         return ret;
     }
 

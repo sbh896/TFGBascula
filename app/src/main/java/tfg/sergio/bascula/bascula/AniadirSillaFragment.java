@@ -88,7 +88,7 @@ public class AniadirSillaFragment extends Fragment {
     private DatabaseReference mDatabaseSillas, mDatabasePacientes;
 
     private ProgressDialog progreso;
-    private AlertDialog.Builder builder;
+    private AlertDialog.Builder builder, builderError;
     private Paciente pacienteOriginal;
 
     //Bluetooth
@@ -147,6 +147,15 @@ public class AniadirSillaFragment extends Fragment {
                 }
             }
         });
+        builderError = new AlertDialog.Builder(getActivity());
+        builderError.setTitle("Dispositivo no encontrado");
+        builderError.setMessage("Por favor compruebe que la báscula está encendida e inténtelo de nuevo.");
+        builderError.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                getFragmentManager().popBackStackImmediate();
+            }
+        });
 
         builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
             @Override
@@ -199,7 +208,9 @@ public class AniadirSillaFragment extends Fragment {
         progressDialog.setMessage("Por favor espere...");
         progressDialog.setCancelable(false);
         progressDialogDisp.show();
-        boolean result = comprobarPermisos();
+        if(comprobarPermisos()){
+            escanear();
+        }
     }
 
     //region bluetooth
@@ -314,7 +325,6 @@ public class AniadirSillaFragment extends Fragment {
             habilitarUbicacion();
             ret= false;
         }
-        escanear();
         return ret;
     }
 
@@ -344,7 +354,7 @@ public class AniadirSillaFragment extends Fragment {
         }
         if(device == null){
             progressDialogDisp.dismiss();
-            AlertDialog alert = builder.create();
+            AlertDialog alert = builderError.create();
             alert.show();
         }
     }

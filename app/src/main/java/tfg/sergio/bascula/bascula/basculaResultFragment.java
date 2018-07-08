@@ -3,11 +3,16 @@ package tfg.sergio.bascula.bascula;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.media.Image;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.MediaStore;
@@ -52,7 +57,9 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -96,6 +103,8 @@ public class basculaResultFragment extends Fragment{
     private static final int CAMERA_REQUEST_CODE = 1;
     private ProgressDialog progreso;
     private static DecimalFormat df2 = new DecimalFormat(".##");
+    private Bitmap imageBitmap;
+
 
     // Permiso de almacenamiento
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -139,8 +148,19 @@ public class basculaResultFragment extends Fragment{
         paciente_final = bundle.getParcelable("paciente");
 
         inputFoto = (ImageButton) view.findViewById(R.id.imagen_paciente);
-        progreso = new ProgressDialog(getActivity());
+        if(savedInstanceState != null){
+            byte[] byteArray = savedInstanceState.getByteArray("imageBitmap");
+            if(byteArray != null){
+                imageBitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+                uriImagenAltaCalidad = Uri.parse(savedInstanceState.getString("imageUri"));
+            }
+        }
+        if(imageBitmap != null){
+            inputFoto.setScaleType(ImageView.ScaleType.FIT_XY);
+            inputFoto.setImageBitmap(imageBitmap);
+        }
 
+        progreso = new ProgressDialog(getActivity());
         IMCCalculator imcCalc = new IMCCalculator();
         double imc = IMCCalculator.CalcularIMC(peso,altura);
         textPeso.setText(""+df2.format(peso) + " Kg");
@@ -215,9 +235,26 @@ public class basculaResultFragment extends Fragment{
 
         if(requestCode == CAMERA_REQUEST_CODE && resultCode == Activity.RESULT_OK){
 
-            //imagen alta calidad
             inputFoto.setScaleType(ImageView.ScaleType.FIT_XY);
-            inputFoto.setImageURI(uriImagenAltaCalidad);
+
+            // First decode with inJustDecodeBounds=true to check dimensions
+            final BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+
+            // Decode bitmap with inSampleSize set
+            options.inJustDecodeBounds = false;
+            InputStream imageStream = null;
+            try {
+                imageStream = getActivity().getContentResolver().openInputStream(uriImagenAltaCalidad);
+                Bitmap img = BitmapFactory.decodeStream(imageStream, null, options);
+                img = rotateImageIfRequired(getActivity(), img, uriImagenAltaCalidad);
+                inputFoto.setImageBitmap(img);
+                imageBitmap = img;
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
     //endregion
@@ -258,7 +295,7 @@ public class basculaResultFragment extends Fragment{
                         e.printStackTrace();
                     }
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    bmp.compress(Bitmap.CompressFormat.JPEG, 40, baos);
+                    imageBitmap.compress(Bitmap.CompressFormat.JPEG, 40, baos);
                     byte[] data = baos.toByteArray();
                     UploadTask uploadTask2 = path.putBytes(data);
                     uploadTask2.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -386,6 +423,56 @@ public class basculaResultFragment extends Fragment{
         public CharSequence getPageTitle(int position) {
             return mFragmentTitleList.get(position);
         }
+    }
+
+    private static Bitmap rotateImageIfRequired(Context context, Bitmap img, Uri selectedImage) throws IOException {
+
+        InputStream input = context.getContentResolver().openInputStream(selectedImage);
+        ExifInterface ei;
+        if (Build.VERSION.SDK_INT > 23)
+            ei = new ExifInterface(input);
+        else
+            ei = new ExifInterface(selectedImage.getPath());
+
+        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+
+        switch (orientation) {
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                return rotateImage(img, 90);
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                return rotateImage(img, 180);
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                return rotateImage(img, 270);
+            default:
+                return img;
+        }
+    }
+
+    private static Bitmap rotateImage(Bitmap img, int degree) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(degree);
+        Bitmap rotatedImg = Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(), matrix, true);
+        img.recycle();
+        return rotatedImg;
+    }
+    //endregion
+
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+
+        // Save UI state changes to the savedInstanceState.
+        // This bundle will be passed to onCreate if the process is
+        // killed and restarted.
+        if(imageBitmap != null){
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            byte[] byteArray = stream.toByteArray();
+            imageBitmap.recycle();
+            savedInstanceState.putByteArray("imageBitmap", byteArray);
+            savedInstanceState.putString("imageUri", uriImagenAltaCalidad.toString());
+        }
+        super.onSaveInstanceState(savedInstanceState);
     }
 }
 

@@ -60,6 +60,7 @@ public class AdapterPaciente extends RecyclerView.Adapter<AdapterPaciente.Pacien
                 ft.addToBackStack("pacientes");
                 Bundle bundle = new Bundle();
                 bundle.putString("key",paciente.key);
+                bundle.putParcelable("paciente",paciente.paciente);
                 DetallePacienteFragment fragment = new DetallePacienteFragment();
                 fragment.setArguments(bundle);
                 ft.replace(R.id.pacientes_screen,fragment);

@@ -176,6 +176,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         mDatabaseRegs = FirebaseDatabase.getInstance().getReference("registros");
         mDatabaseAlertas = FirebaseDatabase.getInstance().getReference("alertas");
         mDatabaseSillas = FirebaseDatabase.getInstance().getReference("silla");
+        paciente_final = bundle.getParcelable("paciente");
         mStorage = FirebaseStorage.getInstance().getReference();
         out_nombre = view.findViewById(R.id.txt_nombre);
         out_peso = view.findViewById(R.id.txt_peso);
@@ -190,12 +191,12 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         mChart.setOnChartGestureListener(this);
         mChart.setOnChartValueSelectedListener(this);
         mChart.setDrawGridBackground(false);
+        setDatosPaciente(paciente_final);
         obtenerRegistros();
 
         pesarButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 if(paciente_final.getCodigoSilla() != null){
                     mDatabaseSillas.child(paciente_final.getCodigoSilla()).addValueEventListener(new ValueEventListener() {
                         @Override
@@ -219,6 +220,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
 
             }
         });
+
         mDateSetListener = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker datePicker, int anio, int mes, int dia) {
@@ -230,6 +232,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                 fechaAlerta.setText(fecha);
             }
         };
+
         configAlertButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -308,53 +311,6 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
             }
         });
 
-
-        mDatabase.child(key).addValueEventListener(new ValueEventListener() {
-            final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/YY");
-            IMCCalculator imcCalculator = new IMCCalculator();
-
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                final Paciente paciente = (Paciente) dataSnapshot.getValue(Paciente.class);
-                if(paciente == null){
-                    return;
-                }
-                paciente_final = paciente;
-                centro = paciente.getCentro();
-                out_nombre.setText(paciente.getNombre() +" "+paciente.getApellidos());
-                if(paciente.getUltimoRegistro() != null){
-                    mDatabaseRegs.child(paciente.getUltimoRegistro()).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            RegistroPaciente reg =  (RegistroPaciente) dataSnapshot.getValue(RegistroPaciente.class);
-                            if(reg!=null){
-                                int IMC = reg.getCodigoEstadoIMC();
-                                estado = IMC;
-                                out_IMC.setText(EnumIMC.values()[IMC].toString());
-                                out_peso.setText(String.format("%.2f",reg.getPeso()));
-                                out_altura.setText(String.format("%.2f",reg.getAltura()));
-                                altura_paciente = reg.getAltura();
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
-                }
-                out_edad.setText(formatter.format(paciente.getFechaNacimiento()));
-
-                //cargar Imagen
-                Picasso.with(getActivity()).load(paciente.getUrlImagen()).resize(200,200).into(out_perfil);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
         builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Eliminar paciente");
         builder.setMessage("¿Está seguro de que desea eliminar al paciente seleccionado?");
@@ -381,6 +337,46 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         iniciarGrafica();
         super.onViewCreated(view, savedInstanceState);
     }
+
+    private void setDatosPaciente(Paciente paciente){
+
+        if(paciente == null){
+            Toast.makeText(getActivity(), "Ha ocurrido un error, por favor, inténtelo de nuevo.", Toast.LENGTH_SHORT).show();
+            getFragmentManager().popBackStackImmediate();
+        }
+
+        final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/YY");
+        centro = paciente.getCentro();
+        out_nombre.setText(paciente.getNombre() +" "+paciente.getApellidos());
+        out_edad.setText(formatter.format(paciente.getFechaNacimiento()));
+        //cargar Imagen
+        Picasso.with(getActivity()).load(paciente.getUrlImagen()).resize(200,200).into(out_perfil);
+
+        //Se obtiene el último registro del paciente
+        if(paciente.getUltimoRegistro() != null){
+            mDatabaseRegs.child(paciente.getUltimoRegistro()).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    RegistroPaciente reg =  (RegistroPaciente) dataSnapshot.getValue(RegistroPaciente.class);
+                    if(reg!=null){
+                        int IMC = reg.getCodigoEstadoIMC();
+                        estado = IMC;
+                        out_IMC.setText(EnumIMC.values()[IMC].toString());
+                        out_peso.setText(String.format("%.2f",reg.getPeso()));
+                        out_altura.setText(String.format("%.2f",reg.getAltura()));
+                        altura_paciente = reg.getAltura();
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+
+    }
+
     private void mostrarSeleccionSilla(Silla silla){
         LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         final View layout = inflater.inflate(R.layout.seleccion_silla_layout,null);

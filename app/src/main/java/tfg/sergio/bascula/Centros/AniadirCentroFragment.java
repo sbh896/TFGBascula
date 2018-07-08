@@ -10,9 +10,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
+import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StrictMode;
@@ -34,6 +38,7 @@ import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -49,10 +54,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -82,6 +90,8 @@ public class AniadirCentroFragment extends Fragment {
     private DatabaseReference mDatabaseCentros, mDatabaseDatosMes;
     private ProgressDialog progreso;
     AlertDialog.Builder alert;
+    private Bitmap imageBitmap;
+
 
     private int PICK_IMAGE_REQUEST = 1;
     // Permiso de almacenamiento
@@ -111,6 +121,19 @@ public class AniadirCentroFragment extends Fragment {
         inputDireccion = view.findViewById(R.id.direccion);
         inputFoto = (ImageButton) view.findViewById(R.id.imagen_paciente);
         progreso = new ProgressDialog(getActivity());
+
+        if(savedInstanceState != null){
+            byte[] byteArray = savedInstanceState.getByteArray("imageBitmap");
+            if(byteArray != null){
+                imageBitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+                uriImagenAltaCalidad = Uri.parse(savedInstanceState.getString("imageUri"));
+            }
+        }
+        if(imageBitmap!=null) {
+            inputFoto.setScaleType(ImageView.ScaleType.FIT_XY);
+            inputFoto.setImageBitmap(imageBitmap);
+        }
+
         alert = new AlertDialog.Builder(getActivity());
         alert.setTitle("Añadir centro");
         alert.setMessage("¿Desea añadir el centro sin dirección?");
@@ -167,15 +190,28 @@ public class AniadirCentroFragment extends Fragment {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
 
             Uri uri = data.getData();
+            //imagen alta calidad
+            inputFoto.setScaleType(ImageView.ScaleType.FIT_XY);
 
+            // First decode with inJustDecodeBounds=true to check dimensions
+            final BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+
+            // Decode bitmap with inSampleSize set
+            options.inJustDecodeBounds = false;
+            InputStream imageStream = null;
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
-                // Log.d(TAG, String.valueOf(bitmap));
-                inputFoto.setImageBitmap(bitmap);
-                uriImagenAltaCalidad = uri;
+                imageStream = getActivity().getContentResolver().openInputStream(uri);
+                Bitmap img = BitmapFactory.decodeStream(imageStream, null, options);
+                img = rotateImageIfRequired(getActivity(), img, uri);
+                inputFoto.setImageBitmap(img);
+                imageBitmap = img;
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            uriImagenAltaCalidad = uri;
         }
     }
 
@@ -202,51 +238,45 @@ public class AniadirCentroFragment extends Fragment {
         final Date date = new Date();
 
         Bitmap bmp = null;
-        if(uriImagenAltaCalidad != null) {
+        if(imageBitmap != null) {
 
 
-            try {
-                bmp = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uriImagenAltaCalidad);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                bmp.compress(Bitmap.CompressFormat.JPEG, 25, baos);
-                byte[] data = baos.toByteArray();
-                //uploading the image
-                StorageReference path = mStorage.child("Fotos_centros").child(uriImagenAltaCalidad.getLastPathSegment());
-                UploadTask uploadTask2 = path.putBytes(data);
-                uploadTask2.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 25, baos);
+            byte[] data = baos.toByteArray();
+            //uploading the image
+            StorageReference path = mStorage.child("Fotos_centros").child(uriImagenAltaCalidad.getLastPathSegment());
+            UploadTask uploadTask2 = path.putBytes(data);
+            uploadTask2.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
 
 
-                        //Guardado del centro en Firebase
-                        progreso.setMessage("Guardando centro ...");
-                        progreso.show();
+                    //Guardado del centro en Firebase
+                    progreso.setMessage("Guardando centro ...");
+                    progreso.show();
 
-                        String id = mDatabaseCentros.push().getKey();
-                        String id2 = mDatabaseDatosMes.push().getKey();
-                        Centro centro = new Centro(id, nombre);
-                        centro.Direccion = direccion;
-                        centro.UrlImagen = taskSnapshot.getDownloadUrl().toString();
-                        centro.ArchivoFoto = uriImagenAltaCalidad.getLastPathSegment();
-                        String ident = id + dateFormat.format(date);
-                        PacientesMesCentro pmc = new PacientesMesCentro(ident);
+                    String id = mDatabaseCentros.push().getKey();
+                    String id2 = mDatabaseDatosMes.push().getKey();
+                    Centro centro = new Centro(id, nombre);
+                    centro.Direccion = direccion;
+                    centro.UrlImagen = taskSnapshot.getDownloadUrl().toString();
+                    centro.ArchivoFoto = uriImagenAltaCalidad.getLastPathSegment();
+                    String ident = id + dateFormat.format(date);
+                    PacientesMesCentro pmc = new PacientesMesCentro(ident);
 
-                        mDatabaseDatosMes.child(id2).setValue(pmc);
-                        mDatabaseCentros.child(id).setValue(centro);
-                        progreso.dismiss();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        progreso.dismiss();
-                    }
-                });
+                    mDatabaseDatosMes.child(id2).setValue(pmc);
+                    mDatabaseCentros.child(id).setValue(centro);
+                    progreso.dismiss();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    progreso.dismiss();
+                }
+            });
 
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
 
         }else {
             String id = mDatabaseCentros.push().getKey();
@@ -268,4 +298,54 @@ public class AniadirCentroFragment extends Fragment {
         fm.popBackStackImmediate();
     }
     //endregion
+
+    private static Bitmap rotateImageIfRequired(Context context, Bitmap img, Uri selectedImage) throws IOException {
+
+        InputStream input = context.getContentResolver().openInputStream(selectedImage);
+        ExifInterface ei;
+        if (Build.VERSION.SDK_INT > 23)
+            ei = new ExifInterface(input);
+        else
+            ei = new ExifInterface(selectedImage.getPath());
+
+        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+
+        switch (orientation) {
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                return rotateImage(img, 90);
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                return rotateImage(img, 180);
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                return rotateImage(img, 270);
+            default:
+                return img;
+        }
+    }
+
+    private static Bitmap rotateImage(Bitmap img, int degree) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(degree);
+        Bitmap rotatedImg = Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(), matrix, true);
+        img.recycle();
+        return rotatedImg;
+    }
+    //endregion
+
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+
+        // Save UI state changes to the savedInstanceState.
+        // This bundle will be passed to onCreate if the process is
+        // killed and restarted.
+        if(imageBitmap != null){
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            byte[] byteArray = stream.toByteArray();
+            imageBitmap.recycle();
+            savedInstanceState.putByteArray("imageBitmap", byteArray);
+            savedInstanceState.putString("imageUri", uriImagenAltaCalidad.toString());
+        }
+        super.onSaveInstanceState(savedInstanceState);
+    }
 }

@@ -9,7 +9,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.provider.MediaStore;
@@ -25,6 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -37,7 +42,9 @@ import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -65,6 +72,8 @@ public class ModificarCentroFragment extends Fragment {
     AlertDialog.Builder alert;
     private Context ctx = getActivity();
     private FragmentManager fragmentManager;
+    private Bitmap imageBitmap;
+
 
     private int PICK_IMAGE_REQUEST = 1;
     // Permiso de almacenamiento
@@ -99,8 +108,19 @@ public class ModificarCentroFragment extends Fragment {
 
         inputCentro.setText(centroOriginal.Nombre);
         inputDireccion.setText(centroOriginal.Direccion);
-
-        if(centroOriginal.UrlImagen != null){
+        if(savedInstanceState != null){
+            byte[] byteArray = savedInstanceState.getByteArray("imageBitmap");
+            if(byteArray != null){
+                imageBitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+                uriImagenAltaCalidad = Uri.parse(savedInstanceState.getString("imageUri"));
+            }
+        }
+        if(imageBitmap!=null) {
+            inputFoto.setScaleType(ImageView.ScaleType.FIT_XY);
+            inputFoto.setImageBitmap(imageBitmap);
+        }
+        else if(centroOriginal.UrlImagen != null){
+            inputFoto.setScaleType(ImageView.ScaleType.FIT_XY);
             Picasso.with(getActivity()).load(centroOriginal.UrlImagen).resize(200,200).into(inputFoto);
         }
 
@@ -162,16 +182,82 @@ public class ModificarCentroFragment extends Fragment {
 
             Uri uri = data.getData();
 
+            //imagen alta calidad
+            inputFoto.setScaleType(ImageView.ScaleType.FIT_XY);
+
+            // First decode with inJustDecodeBounds=true to check dimensions
+            final BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+
+            // Decode bitmap with inSampleSize set
+            options.inJustDecodeBounds = false;
+            InputStream imageStream = null;
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
-                // Log.d(TAG, String.valueOf(bitmap));
-                inputFoto.setImageBitmap(bitmap);
-                uriImagenAltaCalidad = uri;
+                imageStream = getActivity().getContentResolver().openInputStream(uri);
+                Bitmap img = BitmapFactory.decodeStream(imageStream, null, options);
+                img = rotateImageIfRequired(getActivity(), img, uri);
+                inputFoto.setImageBitmap(img);
+                imageBitmap = img;
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            uriImagenAltaCalidad = uri;
         }
     }
+
+
+    private static Bitmap rotateImageIfRequired(Context context, Bitmap img, Uri selectedImage) throws IOException {
+
+        InputStream input = context.getContentResolver().openInputStream(selectedImage);
+        ExifInterface ei;
+        if (Build.VERSION.SDK_INT > 23)
+            ei = new ExifInterface(input);
+        else
+            ei = new ExifInterface(selectedImage.getPath());
+
+        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+
+        switch (orientation) {
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                return rotateImage(img, 90);
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                return rotateImage(img, 180);
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                return rotateImage(img, 270);
+            default:
+                return img;
+        }
+    }
+
+    private static Bitmap rotateImage(Bitmap img, int degree) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(degree);
+        Bitmap rotatedImg = Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(), matrix, true);
+        img.recycle();
+        return rotatedImg;
+    }
+    //endregion
+
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+
+        // Save UI state changes to the savedInstanceState.
+        // This bundle will be passed to onCreate if the process is
+        // killed and restarted.
+        if(imageBitmap != null){
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            byte[] byteArray = stream.toByteArray();
+            imageBitmap.recycle();
+            savedInstanceState.putByteArray("imageBitmap", byteArray);
+            savedInstanceState.putString("imageUri", uriImagenAltaCalidad.toString());
+        }
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
 
     //Verificador de permisos de la app para usar almacenamiento interno
     public static void verifyStoragePermissions(Activity activity) {
@@ -213,36 +299,31 @@ public class ModificarCentroFragment extends Fragment {
             StorageReference path = mStorage.child("Fotos_centros").child(uriImagenAltaCalidad.getLastPathSegment());
 
             Bitmap bmp = null;
-            try {
-                bmp = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uriImagenAltaCalidad);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                bmp.compress(Bitmap.CompressFormat.JPEG, 25, baos);
-                byte[] data = baos.toByteArray();
-                //uploading the image
-                UploadTask uploadTask2 = path.putBytes(data);
-                uploadTask2.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 25, baos);
+            byte[] data = baos.toByteArray();
+            //uploading the image
+            UploadTask uploadTask2 = path.putBytes(data);
+            uploadTask2.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                        Uri downloadUri = taskSnapshot.getDownloadUrl();
-                        centroOriginal.UrlImagen = downloadUri.toString();
-                        centroOriginal.ArchivoFoto = uriImagenAltaCalidad.getLastPathSegment();
-                        mDatabaseCentros.child(centroOriginal.Id).setValue(centroOriginal);
-                        progreso.dismiss();
+                    Uri downloadUri = taskSnapshot.getDownloadUrl();
+                    centroOriginal.UrlImagen = downloadUri.toString();
+                    centroOriginal.ArchivoFoto = uriImagenAltaCalidad.getLastPathSegment();
+                    mDatabaseCentros.child(centroOriginal.Id).setValue(centroOriginal);
+                    progreso.dismiss();
 
-                        fragmentManager.popBackStackImmediate();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        progreso.dismiss();
-                    }
-                });
+                    fragmentManager.popBackStackImmediate();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    progreso.dismiss();
+                }
+            });
 
 
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }else{
             mDatabaseCentros.child(centroOriginal.Id).setValue(centroOriginal);
             fragmentManager.popBackStackImmediate();
