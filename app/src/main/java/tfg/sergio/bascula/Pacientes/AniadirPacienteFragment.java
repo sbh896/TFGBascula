@@ -80,7 +80,7 @@ public class AniadirPacienteFragment extends Fragment {
     private static final int CAMERA_REQUEST_CODE = 1;
     private TextView mDisplayDate;
     private DatePickerDialog.OnDateSetListener mDateSetListener;
-    private Switch inputDieta;
+    private Spinner inputDieta;
     private Spinner mSpinner, inputGenero;
     private ArrayList<Centro>centros = new ArrayList<>();
     private Date fechaNacimiento;
@@ -118,7 +118,7 @@ public class AniadirPacienteFragment extends Fragment {
         inputNombre = (EditText) view.findViewById(R.id.nombre);
         inputApellido = (EditText) view.findViewById(R.id.apellidos);
         inputFoto = (ImageButton) view.findViewById(R.id.imagen_paciente);
-        inputDieta = (Switch) view.findViewById(R.id.sw_dieta);
+        inputDieta =  view.findViewById(R.id.sw_dieta);
         progreso = new ProgressDialog(getActivity());
         inputGenero = view.findViewById(R.id.sp_genero);
         if(savedInstanceState != null){
@@ -346,7 +346,7 @@ public class AniadirPacienteFragment extends Fragment {
                 Centro c = (Centro)mSpinner.getSelectedItem();
                 String id = mDatabase.push().getKey();
                 int genero = inputGenero.getSelectedItemPosition();
-                Paciente paciente = new Paciente(nombre,apellidos,id,downloadUri.toString(),c.Id,fechaNacimiento,inputDieta.isChecked(),uriImagenAltaCalidad.getLastPathSegment(),genero);
+                Paciente paciente = new Paciente(nombre,apellidos,id,downloadUri.toString(),c.Id,fechaNacimiento,inputDieta.getSelectedItemPosition(),uriImagenAltaCalidad.getLastPathSegment(),genero);
                 mDatabase.child(id).setValue(paciente);
                 progreso.dismiss();
             }

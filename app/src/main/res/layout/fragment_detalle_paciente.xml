@@ -193,8 +193,8 @@
         app:floating_title="Pesar"
         app:floating_left_icon="@drawable/ic_peso"
         app:floating_background_color="@color/Green"
-        android:layout_gravity="bottom|center"
-        android:layout_marginRight="80dp"
+        android:layout_gravity="bottom|left"
+        android:layout_marginLeft="30dp"
         >
     </ru.dimorinny.floatingtextbutton.FloatingTextButton>
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
@@ -204,9 +204,22 @@
         app:floating_title_color="@color/white"
         app:floating_title="Configurar alerta"
         app:floating_left_icon="@drawable/ic_add_alert"
-        app:floating_background_color="@color/OrangeRed"
+        app:floating_background_color="@color/bg_main"
         android:layout_gravity="bottom|center"
+        android:layout_marginRight="35dp"
+        >
+    </ru.dimorinny.floatingtextbutton.FloatingTextButton>
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
+        android:layout_width="wrap_content"
+        android:id="@+id/btn_delete_alert"
+        android:layout_height="wrap_content"
+        app:floating_title_color="@color/white"
+        app:floating_title="Eliminar alerta"
+        app:floating_left_icon="@drawable/ic_delete"
+        app:floating_background_color="@color/OrangeRed"
+        android:layout_gravity="bottom|right"
         android:layout_marginLeft="100dp"
+        android:layout_marginRight="30dp"
         >
     </ru.dimorinny.floatingtextbutton.FloatingTextButton>
 </FrameLayout>

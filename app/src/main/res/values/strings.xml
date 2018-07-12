@@ -49,6 +49,7 @@
         <item>Alerta mensual</item>
     </string-array>
     <string-array name="dieta">
+        <item>Dieta</item>
         <item>Hipocalórica</item>
         <item>Hiperprotéica</item>
         <item>Otra/Suplementos</item>

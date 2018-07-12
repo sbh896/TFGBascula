@@ -138,19 +138,15 @@
             android:src="@drawable/ic_comida"
             />
 
-        <Switch
-            android:paddingTop="10dp"
-            android:layout_below="@id/container_fecha"
-            android:layout_gravity="left"
+        <Spinner
             android:id="@+id/sw_dieta"
-            android:layout_toRightOf="@id/imagen_dieta"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checked="false"
-            android:text="Dieta hipocalórica "
-            android:textOff="No"
-            android:textOn="Sí"
-            android:textSize="18sp" />
+            android:layout_width="wrap_content"
+            android:layout_toRightOf="@id/imagen_dieta"
+            android:layout_below="@+id/container_fecha"
+            android:entries="@array/dieta"
+            android:layout_marginTop="10dp"
+            />
         <ImageView
             android:id="@+id/imagen_centro"
             android:layout_width="30dp"

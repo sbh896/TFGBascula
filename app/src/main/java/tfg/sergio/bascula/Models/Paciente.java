@@ -36,7 +36,7 @@ public class Paciente implements Parcelable {
     private String UrlImagen;
     private String CodigoCentro;
     private Date FechaNacimiento;
-    private boolean EsDietaHipocalorica;
+    private int TipoDieta;
     private String CodigoUltimoRegistro = null;
     private String CodigoSilla = null;
     private int Sexo; //1 hombre, 2 mujer
@@ -64,8 +64,9 @@ public class Paciente implements Parcelable {
         Id = in.readString();
         UrlImagen = in.readString();
         CodigoCentro = in.readString();
-        EsDietaHipocalorica = in.readByte() != 0;
+        TipoDieta = in.readInt();
         CodigoUltimoRegistro = in.readString();
+        Sexo = in.readInt();
     }
 
     public static final Creator<Paciente> CREATOR = new Creator<Paciente>() {
@@ -80,7 +81,8 @@ public class Paciente implements Parcelable {
         }
     };
 
-    public void setEsDietaHipocalorica(boolean esDietaHipocalorica) {EsDietaHipocalorica = esDietaHipocalorica;}
+    public void setTipoDieta(int tipoDieta) {
+        TipoDieta = tipoDieta;}
     public void setFechaNacimiento(Date fechaNacimiento) {this.FechaNacimiento = fechaNacimiento;}
     public void setCodigoCentro(String codigoCentro) {
         CodigoCentro = codigoCentro;
@@ -103,19 +105,19 @@ public class Paciente implements Parcelable {
     public String getApellidos() {return Apellidos;}
     public String getCodigoCentro() {return CodigoCentro;}
     public Date getFechaNacimiento() {return FechaNacimiento;}
-    public boolean getEsDietaHipocalorica() {return EsDietaHipocalorica;}
+    public int getTipoDieta() {return TipoDieta;}
     public String getCodigoUltimoRegistro() {return CodigoUltimoRegistro;}
 
 
 
-    public Paciente(String n, String a, String id, String url, String codigoCentro, Date fecha, boolean dieta, String archivo, int sexo){
+    public Paciente(String n, String a, String id, String url, String codigoCentro, Date fecha, int dieta, String archivo, int sexo){
         this.Nombre=n;
         this.Apellidos = a;
         this.Id = id;
         this.UrlImagen = url;
         this.CodigoCentro = codigoCentro;
         this.FechaNacimiento = fecha;
-        this.EsDietaHipocalorica = dieta;
+        this.TipoDieta = dieta;
         this.ArchivoFoto = archivo;
         this.Sexo = sexo;
     }
@@ -165,7 +167,7 @@ public class Paciente implements Parcelable {
         parcel.writeString(Id);
         parcel.writeString(UrlImagen);
         parcel.writeString(CodigoCentro);
-        parcel.writeByte((byte) (EsDietaHipocalorica ? 1 : 0));
+        parcel.writeInt(TipoDieta);
         parcel.writeString(CodigoUltimoRegistro);
     }
 

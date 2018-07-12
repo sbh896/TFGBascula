@@ -45,7 +45,7 @@ import tfg.sergio.bascula.Resources.IMCCalculator;
 public class PacientesFragment extends Fragment {
     private RecyclerView listaPacientes;
     private EditText buscador;
-    private Spinner sp_centros, sp_imc, sp_genero;
+    private Spinner sp_centros, sp_imc, sp_genero, sp_dieta;
     private ArrayList<Centro> centros = new ArrayList<>();
     private DatabaseReference mDatabaseCentros, mDatabaseRegistros,dbpacientes;
     private ImageButton btnadd, btnSearch;
@@ -71,6 +71,7 @@ public class PacientesFragment extends Fragment {
         sp_imc = view.findViewById(R.id.sp_estado_imc);
         sp_centros = (Spinner) view.findViewById(R.id.sp_centros);
         sp_genero = view.findViewById(R.id.sp_genero);
+        sp_dieta = view.findViewById(R.id.sp_dieta);
         btnadd = view.findViewById(R.id.btn_nuevo);
         btnSearch = view.findViewById(R.id.btn_buscar);
         btnadd.bringToFront();
@@ -179,6 +180,7 @@ public class PacientesFragment extends Fragment {
        final Centro c = (Centro) sp_centros.getSelectedItem();
        final int estado = ((EnumIMC) sp_imc.getSelectedItem()).getId();
        final int genero = sp_genero.getSelectedItemPosition();
+       final int dieta = sp_dieta.getSelectedItemPosition();
        elementos.removeAll(elementos);
 
         final Date[] fechaUltimoRegistro = {null};
@@ -235,6 +237,9 @@ public class PacientesFragment extends Fragment {
                     return;
                 }
                 else if(genero != 0 && pac.getSexo() != genero){
+                    return;
+                }
+                else if( dieta != 0 && pac.getTipoDieta() != dieta){
                     return;
                 }
                 ElementoListadoPaciente elp = new ElementoListadoPaciente();

@@ -81,7 +81,7 @@ public class ModificarPacienteFragment extends Fragment {
     private static final int CAMERA_REQUEST_CODE = 1;
     private TextView mDisplayDate;
     private DatePickerDialog.OnDateSetListener mDateSetListener;
-    private Switch inputDieta;
+    private Spinner inputDieta;
     private Spinner mSpinner, inputGenero;
     private ArrayList<Centro>centros = new ArrayList<>();
     private Date fechaNacimiento;
@@ -127,7 +127,7 @@ public class ModificarPacienteFragment extends Fragment {
         inputNombre = (EditText) view.findViewById(R.id.nombre);
         inputApellido = (EditText) view.findViewById(R.id.apellidos);
         inputFoto = (ImageButton) view.findViewById(R.id.imagen_paciente);
-        inputDieta = (Switch) view.findViewById(R.id.sw_dieta);
+        inputDieta =  view.findViewById(R.id.sw_dieta);
         progreso = new ProgressDialog(getActivity());
         inputNombre.setText(pacienteOriginal.getNombre());
         inputApellido.setText(pacienteOriginal.getApellidos());
@@ -337,7 +337,7 @@ public class ModificarPacienteFragment extends Fragment {
         Centro c = (Centro)mSpinner.getSelectedItem();
         pacienteOriginal.setCodigoCentro(c.Id);
         pacienteOriginal.setSexo(inputGenero.getSelectedItemPosition());
-        pacienteOriginal.setEsDietaHipocalorica(inputDieta.isChecked());
+        pacienteOriginal.setTipoDieta(inputDieta.getSelectedItemPosition());
 
         if(uriImagenAltaCalidad != null){
             progreso.setMessage("Guardando paciente ...");

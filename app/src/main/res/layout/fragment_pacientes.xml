@@ -56,6 +56,15 @@
             android:entries="@array/genero"
             android:layout_marginTop="10dp"
             />
+        <Spinner
+            android:id="@+id/sp_dieta"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_toRightOf="@id/sp_genero"
+            android:layout_below="@+id/buscador"
+            android:entries="@array/dieta"
+            android:layout_marginTop="10dp"
+            />
         <ImageButton
             android:src="@drawable/button_add"
             android:id="@+id/btn_nuevo"
