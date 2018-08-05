@@ -23,6 +23,7 @@ public class IMCCalculator {
     private static double[] mascDesSev = { 12.1 ,12.1 ,12.1 ,12.2 ,12.3 ,12.3 ,12.4 ,12.5 ,12.6 ,12.7 ,12.8 ,12.9 ,13.1 ,13.2 ,13.4 ,13.6 ,13.8 ,14.0 ,14.3 ,14.5 ,14.7 ,14.9 ,15.1 ,15.3 ,15.4 ,15.6 ,15.7};
     public IMCCalculator(){
     }
+
     public static int Calcular(int m, float IMC, int sexo){
         int i=0;
         if(sexo == 2){

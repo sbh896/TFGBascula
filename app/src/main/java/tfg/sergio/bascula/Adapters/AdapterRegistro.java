@@ -1,4 +1,4 @@
-package tfg.sergio.bascula.Models;
+package tfg.sergio.bascula.Adapters;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -17,6 +17,7 @@ import com.squareup.picasso.Picasso;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
+import tfg.sergio.bascula.Models.ElementoListadoPaciente;
 import tfg.sergio.bascula.Pacientes.DetallePacienteFragment;
 import tfg.sergio.bascula.R;
 

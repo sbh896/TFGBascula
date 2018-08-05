@@ -9,7 +9,6 @@ import java.util.Date;
 public class Alerta {
     public Date fechaInicio;
     public int periodica;     //0 => unica, 1 => semanal, 2 => mensual
-    public int mail;         // 0 => no, 1 => si
     public String comentario;
     public String codigoPaciente;
 }

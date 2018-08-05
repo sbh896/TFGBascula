@@ -48,8 +48,8 @@ import java.util.List;
 
 import tfg.sergio.bascula.Calendario.CalendarioFragment;
 import tfg.sergio.bascula.Centros.CentrosFragment;
-import tfg.sergio.bascula.Models.AdapterAlerta;
-import tfg.sergio.bascula.Models.AdapterRegistro;
+import tfg.sergio.bascula.Adapters.AdapterAlerta;
+import tfg.sergio.bascula.Adapters.AdapterRegistro;
 import tfg.sergio.bascula.Models.Alerta;
 import tfg.sergio.bascula.Models.Centro;
 import tfg.sergio.bascula.Models.ElementoListadoAlerta;
@@ -240,6 +240,7 @@ public class MainActivity extends AppCompatActivity
                 FragmentTransaction ft = fragmentManager.beginTransaction();
                 Bundle bundle = new Bundle();
                 bundle.putString("key", alertaSeleccionada.paciente.getId());
+                bundle.putParcelable("paciente",alertaSeleccionada.paciente);
                 fragment.setArguments(bundle);
                 ft.addToBackStack("Main");
                 ft.replace(R.id.screen_area, fragment);

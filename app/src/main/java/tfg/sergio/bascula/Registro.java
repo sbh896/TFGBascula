@@ -42,15 +42,7 @@ public class Registro extends AppCompatActivity {
         inputPassword = (EditText) findViewById(R.id.password);
         inputUser = (EditText) findViewById(R.id.user_name);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        btnResetPassword = (Button) findViewById(R.id.btn_recuperar_pwd);
 
-        btnResetPassword.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(Registro.this, Recuperar_pwd.class));
-                finish();
-            }
-        });
 
         btnSignIn.setOnClickListener(new View.OnClickListener() {
             @Override

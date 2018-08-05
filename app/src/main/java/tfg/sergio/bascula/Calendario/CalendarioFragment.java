@@ -33,7 +33,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import tfg.sergio.bascula.Models.AdapterAlertaCalendadrio;
+import tfg.sergio.bascula.Adapters.AdapterAlertaCalendadrio;
 import tfg.sergio.bascula.Models.Alerta;
 import tfg.sergio.bascula.Models.ElementoListadoAlerta;
 import tfg.sergio.bascula.Models.Paciente;

@@ -234,7 +234,10 @@ public class basculaResultFragment extends Fragment{
         super.onActivityResult(requestCode, resultCode, data);
 
         if(requestCode == CAMERA_REQUEST_CODE && resultCode == Activity.RESULT_OK){
-
+            if(uriImagenAltaCalidad == null){
+                Toast.makeText(getActivity(), "Por favor mantenga la orientación de la cámara al hacer la foto.", Toast.LENGTH_LONG).show();
+                return;
+            }
             inputFoto.setScaleType(ImageView.ScaleType.FIT_XY);
 
             // First decode with inJustDecodeBounds=true to check dimensions

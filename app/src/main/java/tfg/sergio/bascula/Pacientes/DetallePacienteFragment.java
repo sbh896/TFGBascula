@@ -285,7 +285,6 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                     public void onClick(DialogInterface dialog, int which) {
                         Alerta al = new Alerta();
                         al.fechaInicio = alertDate;
-                        al.mail = 0;
                         al.periodica = periodico;
                         al.comentario = inputComent.getText() != null ? inputComent.getText().toString() : "";
                         al.codigoPaciente = key;

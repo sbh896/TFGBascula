@@ -6,6 +6,7 @@ import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -174,7 +175,8 @@ public class AniadirPacienteFragment extends Fragment {
                 //Verificación de permisos
                 verifyStoragePermissions(getActivity());
                 uriImagenAltaCalidad = generateTimeStampPhotoFileUri();
-
+                getActivity().setRequestedOrientation(getActivity().getResources().getConfiguration().orientation);
+                imageBitmap= null;
                 Intent camera_intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 camera_intent.putExtra(MediaStore.EXTRA_OUTPUT,uriImagenAltaCalidad);
                 startActivityForResult(camera_intent,CAMERA_REQUEST_CODE);
@@ -395,6 +397,7 @@ public class AniadirPacienteFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
 
         if(requestCode == CAMERA_REQUEST_CODE && resultCode == Activity.RESULT_OK){
 
@@ -404,7 +407,10 @@ public class AniadirPacienteFragment extends Fragment {
             // First decode with inJustDecodeBounds=true to check dimensions
             final BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
-
+            if(uriImagenAltaCalidad == null){
+                Toast.makeText(getActivity(), "Por favor mantenga la orientación de la cámara al hacer la foto.", Toast.LENGTH_LONG).show();
+                return;
+            }
             // Decode bitmap with inSampleSize set
             options.inJustDecodeBounds = false;
             InputStream imageStream = null;
@@ -453,7 +459,6 @@ public class AniadirPacienteFragment extends Fragment {
         return rotatedImg;
     }
     //endregion
-
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
