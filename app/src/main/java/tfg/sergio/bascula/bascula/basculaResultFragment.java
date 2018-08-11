@@ -268,7 +268,7 @@ public class basculaResultFragment extends Fragment{
         cancelar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getFragmentManager().popBackStack();
+                getFragmentManager().popBackStackImmediate("detalle",0);
             }
         });
         aceptar.setOnClickListener(new View.OnClickListener() {
@@ -320,7 +320,7 @@ public class basculaResultFragment extends Fragment{
                 }
                 //Actualización de referencia de último registro de paciente
                 try {
-                    mDatabase2.child(key).child("ultimoRegistro").setValue(id);
+                    mDatabase2.child(key).child("CodigoUltimoRegistro").setValue(id);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -387,7 +387,8 @@ public class basculaResultFragment extends Fragment{
 
                     }
                 });
-                getFragmentManager().popBackStackImmediate();
+
+                getFragmentManager().popBackStackImmediate("detalle",0);
 
             }
         });

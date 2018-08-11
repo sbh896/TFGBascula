@@ -36,6 +36,7 @@ import java.util.Locale;
 import tfg.sergio.bascula.Adapters.AdapterAlertaCalendadrio;
 import tfg.sergio.bascula.Models.Alerta;
 import tfg.sergio.bascula.Models.ElementoListadoAlerta;
+import tfg.sergio.bascula.Models.MesesAnno;
 import tfg.sergio.bascula.Models.Paciente;
 import tfg.sergio.bascula.Models.RegistroPaciente;
 import tfg.sergio.bascula.R;
@@ -56,6 +57,7 @@ public class CalendarioFragment extends Fragment {
     private SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yy");
     private TextView tituloCalendario, alertaSinEventos;
 
+    MesesAnno meses = new MesesAnno();
 
     @Nullable
     @Override
@@ -83,19 +85,12 @@ public class CalendarioFragment extends Fragment {
         alertaSinEventos = view.findViewById(R.id.no_eventos);
         adapterAlertas = new AdapterAlertaCalendadrio(listaAlertaasAux, this.getActivity());
         recyclerAlertas.setAdapter(adapterAlertas);
+        tituloCalendario.setText(meses.mesesAnio.get(new Date().getMonth()).Nombre);
 
         calendar = view.findViewById(R.id.compactcalendar_view);
         calendar.setUseThreeLetterAbbreviation(true);
-        String fecha = "30/04/2018";
-        Date evento = null;
-        try {
-            evento = df.parse(fecha);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        long time = evento.getTime();
-        Event ev1 = new Event(Color.RED,time,"dia de prueba");
-        calendar.addEvent(ev1);
+
+
         calendar.setListener(new CompactCalendarView.CompactCalendarViewListener() {
             @Override
             public void onDayClick(Date dateClicked) {
@@ -130,6 +125,9 @@ public class CalendarioFragment extends Fragment {
                             cal.add(Calendar.DATE,7);
                         }
                     }
+                    else if(ela.alerta.periodica == 0){
+                        listaAlertaasAux.add(ela);
+                    }
                 }
                 if(listaAlertaasAux.size() == 0){
                     alertaSinEventos.setVisibility(View.VISIBLE);
@@ -142,7 +140,7 @@ public class CalendarioFragment extends Fragment {
 
             @Override
             public void onMonthScroll(Date firstDayOfNewMonth) {
-                tituloCalendario.setText(formatoFecha.format(firstDayOfNewMonth));
+                tituloCalendario.setText(meses.mesesAnio.get(firstDayOfNewMonth.getMonth()).Nombre);
             }
         });
 
@@ -166,7 +164,6 @@ public class CalendarioFragment extends Fragment {
                     final Alerta alerta = child.getValue(Alerta.class);
                     final String alertaKey = child.getKey();
                     String stralert = formatter.format(alerta.fechaInicio);
-
                     Date fechaHoy = new Date();
                     int mesAlerta = alerta.fechaInicio.getMonth();
                     int diaHoy = fechaHoy.getDay();
@@ -201,6 +198,11 @@ public class CalendarioFragment extends Fragment {
                             }
                             cal.add(Calendar.MONTH,1);
                         }
+                    }
+                    else if (alerta.periodica == 0){
+                        Event ev1 = new Event(Color.RED,cal.getTime().getTime(),"dia de prueba");
+                        calendar.addEvent(ev1);
+
                     }
 
                     if (alerta.codigoPaciente != null) {

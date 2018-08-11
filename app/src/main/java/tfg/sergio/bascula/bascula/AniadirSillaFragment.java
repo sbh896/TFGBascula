@@ -59,6 +59,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 
+import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 import tfg.sergio.bascula.MainActivity;
 import tfg.sergio.bascula.Models.Paciente;
 import tfg.sergio.bascula.Models.Silla;
@@ -81,7 +82,7 @@ public class AniadirSillaFragment extends Fragment {
     private static final UUID NOTIFY_UID = UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
     private static final String BASCULA_MAC = "30:AE:A4:06:55:16";
     private EditText inputModelo, inputPeso;
-    private Button inputGuardar;
+    private FloatingTextButton inputGuardar;
     private boolean conectado = false;
 
     //almacenamiento firebase

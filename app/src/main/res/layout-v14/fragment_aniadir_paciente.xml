@@ -174,18 +174,7 @@
             app:floating_title_color="@color/white"
             app:floating_background_color="@color/Green"
             android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:padding="30dp">
-        </ru.dimorinny.floatingtextbutton.FloatingTextButton>
-        <ru.dimorinny.floatingtextbutton.FloatingTextButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:floating_title="Cancelar"
-            app:floating_title_color="@color/white"
-            app:floating_background_color="@color/red"
-            android:layout_toLeftOf="@id/btn_guardar"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
+            android:layout_centerHorizontal="true"
             android:padding="30dp">
         </ru.dimorinny.floatingtextbutton.FloatingTextButton>
     </RelativeLayout>

@@ -134,7 +134,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                     args.putString("key",key);
                     Fragment modificarPacienteFragment = new ModificarPacienteFragment();
                     modificarPacienteFragment.setArguments(args);
-                    ft.addToBackStack("detallePaciente");
+                    ft.addToBackStack("detalle");
                     ft.replace(R.id.pacientes_screen,modificarPacienteFragment);
                     ft.commit();
                 }

@@ -319,7 +319,7 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
                 progressBar.setVisibility(View.INVISIBLE);
                 FragmentManager fm = getFragmentManager();
                 FragmentTransaction ft = fm.beginTransaction();
-                ft.addToBackStack("bascula");
+                ft.addToBackStack(null);
                 bundle.putDouble("peso",peso);
                 bundle.putDouble("altura",altura);
                 bundle.putParcelable("paciente",paciente_final);
@@ -347,6 +347,12 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
     private void enviarMensaje(String msg){
         //Mostramos ventana de espera y bloqueamos acciones del usuario
         progressDialog.show();
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                progressDialog.dismiss();
+            }
+        }, 5000);
         BluetoothGattCharacteristic characteristic = BluetoothUtils.findEchoCharacteristic(mGatt);
         if (characteristic == null) {
             disconnectGattServer();
@@ -367,12 +373,7 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
         boolean success = mGatt.writeCharacteristic(characteristic);
 
         //Se establece un timeout para que  en caso de no obtener respuesta se rehabilite la pantalla.
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                progressDialog.dismiss();
-            }
-        }, 5000);
+
 
     }
 

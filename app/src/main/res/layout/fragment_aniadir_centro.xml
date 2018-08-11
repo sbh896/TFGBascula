@@ -71,14 +71,16 @@
                 android:textColor="@android:color/black"
                 android:textColorHint="@android:color/black" />
         </android.support.design.widget.TextInputLayout>
-
-        <Button
-            android:id="@+id/btn_guardar"
-            android:text="@string/guardar"
+        <ru.dimorinny.floatingtextbutton.FloatingTextButton
             android:layout_width="wrap_content"
+            android:id="@+id/btn_guardar"
             android:layout_height="wrap_content"
-            android:gravity="center"
+            app:floating_title="Guardar"
+            app:floating_title_color="@color/white"
+            app:floating_background_color="@color/Green"
+            android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:layout_below="@id/imagen_centro"/>
+            android:padding="30dp">
+        </ru.dimorinny.floatingtextbutton.FloatingTextButton>
     </RelativeLayout>
 </android.support.constraint.ConstraintLayout>

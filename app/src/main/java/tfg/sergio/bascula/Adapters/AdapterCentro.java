@@ -246,7 +246,7 @@ public class AdapterCentro extends RecyclerView.Adapter<AdapterCentro.CentrosVie
 
     private void borrarCentro(Centro centro){
         //obtenemos todos los pacientes del centro
-        Query firebaseSearchQuery = mDatabasePacientes.orderByChild("centro").startAt(centro.Id).endAt(centro.Id+ "\uf8ff");
+        Query firebaseSearchQuery = mDatabasePacientes.orderByChild("codigoCentro").startAt(centro.Id).endAt(centro.Id+ "\uf8ff");
         firebaseSearchQuery.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

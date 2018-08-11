@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity
                     mGatt.disconnect();
                     mGatt.close();
                 }
-                getSupportFragmentManager().popBackStack();
+                getSupportFragmentManager().popBackStackImmediate();
 
             }
         }

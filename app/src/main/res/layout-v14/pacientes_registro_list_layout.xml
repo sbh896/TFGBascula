@@ -24,6 +24,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1.45"
         android:orientation="horizontal"
+        android:layout_marginTop="20dp"
         >
         <TextView android:id="@+id/title_nombre"
             android:layout_width="wrap_content"
@@ -58,24 +59,6 @@
             android:layout_alignTop="@id/title_fecha"
             android:paddingLeft="15dp"/>
 
-
-        <TextView
-            android:id="@+id/title_peso"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Peso: "
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:layout_below="@+id/title_fecha"
-            android:paddingLeft="15dp"/>
-
-        <TextView
-            android:id="@+id/title_imc"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="IMC: "
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:layout_below="@+id/title_peso"
-            android:paddingLeft="15dp"/>
 
 
     </RelativeLayout>

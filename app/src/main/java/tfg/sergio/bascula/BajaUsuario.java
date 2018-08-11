@@ -16,15 +16,17 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-public class Login extends AppCompatActivity {
+public class BajaUsuario extends AppCompatActivity {
     private EditText inputMail, inputPass;
     private FirebaseAuth auth;
     private ProgressBar progressBar;
-    private Button btnLogin, btnRegistrar, btnReset, btnBaja;
+    private Button btnBaja;
     private static final String TAG = "EmailPassword";
 
     @Override
@@ -35,16 +37,9 @@ public class Login extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         auth = FirebaseAuth.getInstance();
 
-        if(auth.getCurrentUser() != null){
-            FirebaseUser user = auth.getCurrentUser();
-            Toast.makeText(getApplicationContext(), "Sesión recuperada" + user.getEmail(), Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(Login.this, MainActivity.class));
-            finish();
-        }
-
         // Obtenemos elementos UI
 
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_baja_usuario);
 
         //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 
@@ -53,64 +48,47 @@ public class Login extends AppCompatActivity {
         inputMail = (EditText) findViewById(R.id.email);
         inputPass = (EditText) findViewById(R.id.password);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        btnRegistrar = (Button) findViewById(R.id.btn_signup);
-        btnLogin = (Button) findViewById(R.id.btn_login);
-        btnBaja = findViewById(R.id.btn_baja);
+        btnBaja = (Button) findViewById(R.id.btn_baja);
 
-        btnRegistrar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(Login.this, Registro.class));
-            }
-        });
 
         btnBaja.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(Login.this, BajaUsuario.class));
-            }
-        });
-
-        btnLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String email = inputMail.getText().toString();
-                String pass = inputPass.getText().toString();
+                final String email = inputMail.getText().toString();
+                final String pass = inputPass.getText().toString();
                 if (TextUtils.isEmpty(email)) {
-                    Toast.makeText(getApplicationContext(), "Enter email address!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Introduzca un email", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 if (TextUtils.isEmpty(pass)) {
-                    Toast.makeText(getApplicationContext(), "Enter password!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Introduzca una contraseña", Toast.LENGTH_SHORT).show();
                     return;
-
                 }
 
                 //Realizamos la autenticación empleando firebase
                 auth.signInWithEmailAndPassword(email, pass)
-                        .addOnCompleteListener(Login.this, new OnCompleteListener<AuthResult>() {
+                        .addOnCompleteListener(BajaUsuario.this, new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 if (task.isSuccessful()) {
                                     // Sign in success, update UI with the signed-in user's information
-                                    Log.d(TAG, "signInWithEmail:success");
                                     FirebaseUser user = auth.getCurrentUser();
-                                    startActivity(new Intent(Login.this, MainActivity.class));
+                                    user.delete()
+                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+                                                    if (task.isSuccessful()) {
+                                                        Toast.makeText(getApplicationContext(), "Cuenta de usuario borrada.", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                }
+                                            });
                                     finish();
-
-
-
-                                    //updateUI(user);
                                 } else {
                                     // If sign in fails, display a message to the user.
-                                    Log.w(TAG, "signInWithEmail:failure", task.getException());
-                                    Toast.makeText(Login.this, "Authentication failed.",
+                                    Toast.makeText(BajaUsuario.this, "Usuario o contraseña incorrectos",
                                             Toast.LENGTH_SHORT).show();
-                                    //updateUI(null);
                                 }
-
-                                // ...
                             }
                         });
             }

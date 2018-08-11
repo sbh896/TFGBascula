@@ -16,12 +16,16 @@
             android:layout_weight="1.7">
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:layout_height="55dp"
+                android:textColor="@color/black"
+                android:textSize="25dp"
                 android:id="@+id/title_calendario"/>
             <com.github.sundeepk.compactcalendarview.CompactCalendarView
                 xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:id="@+id/compactcalendar_view"
                 android:layout_width="fill_parent"
+                android:layout_marginTop="60dp"
                 android:paddingRight="10dp"
                 android:paddingLeft="10dp"
                 android:layout_height="wrap_content"
