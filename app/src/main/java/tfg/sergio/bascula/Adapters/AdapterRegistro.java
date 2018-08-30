@@ -47,6 +47,9 @@ public class AdapterRegistro extends RecyclerView.Adapter<AdapterRegistro.Pacien
         final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yy");
 
         final ElementoListadoPaciente paciente = pacientes.get(position);
+        if(paciente == null ){
+            return;
+        }
         holder.paciente_nombre.setText(paciente.paciente.getNombre());
         holder.paciente_fecha.setText(paciente.registroPaciente == null ? "-":formatter.format(paciente.registroPaciente.getFecha()));
         //            //cargar Imagen
