@@ -88,7 +88,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
     private ImageView out_perfil;
     private DatabaseReference mDatabase;
     private DatabaseReference mDatabaseRegs, mDatabaseAlertas, mDatabaseSillas;
-    private FloatingTextButton pesarButton, configAlertButton, deleteAlertButton;
+    private FloatingTextButton pesarButton, configAlertButton;
     private ArrayList<RegistroPaciente> registros = new ArrayList<>();
     private StorageReference mStorage;
     int estado;
@@ -134,7 +134,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                     args.putString("key",key);
                     Fragment modificarPacienteFragment = new ModificarPacienteFragment();
                     modificarPacienteFragment.setArguments(args);
-                    ft.addToBackStack("detalle");
+                    ft.addToBackStack("detallePaciente");
                     ft.replace(R.id.pacientes_screen,modificarPacienteFragment);
                     ft.commit();
                 }
@@ -169,11 +169,11 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         out_perfil = view.findViewById(R.id.foto_perfil);
         pesarButton = view.findViewById(R.id.btn_pesar);
         configAlertButton = view.findViewById(R.id.btn_alert);
-        deleteAlertButton = view.findViewById(R.id.btn_delete_alert);
         mChart = (LineChart) view.findViewById(R.id.peso_grafica);
         mChart.setOnChartGestureListener(this);
         mChart.setOnChartValueSelectedListener(this);
         mChart.setDrawGridBackground(false);
+        out_nombre.setElevation(100);
         setDatosPaciente(paciente_final);
         obtenerRegistros();
 
@@ -215,13 +215,6 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                 fechaAlerta.setText(fecha);
             }
         };
-
-        deleteAlertButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                eliminarAlertas(null);
-            }
-        });
 
         configAlertButton.setOnClickListener(new View.OnClickListener() {
 
@@ -288,7 +281,8 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                         al.periodica = periodico;
                         al.comentario = inputComent.getText() != null ? inputComent.getText().toString() : "";
                         al.codigoPaciente = key;
-                        eliminarAlertas(al);
+                        String id = mDatabaseAlertas.push().getKey();
+                        mDatabaseAlertas.child(id).setValue(al);
                         dialog.dismiss();
                     }
                 });
@@ -305,21 +299,6 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         builder.setPositiveButton("Sí", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-
-                Query firebaseSearchQuery2 = mDatabaseRegs.orderByChild("codigoPaciente").startAt(key).endAt(key + "\uf8ff");
-                firebaseSearchQuery2.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        for(DataSnapshot child : dataSnapshot.getChildren()){
-                            mDatabaseRegs.child(child.getKey()).removeValue();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
                 mDatabase.child(key).removeValue();
                 dialogInterface.dismiss();
                 FragmentManager fm = getFragmentManager();
@@ -380,7 +359,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
 
     }
 
-    private void mostrarSeleccionSilla(Silla silla){
+    private void mostrarSeleccionSilla(final Silla silla){
         LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         final View layout = inflater.inflate(R.layout.seleccion_silla_layout,null);
 
@@ -421,6 +400,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
                 bundle.putDouble("altura",altura_paciente);
                 bundle.putString("centro",centro);
                 bundle.putParcelable("paciente", paciente_final);
+                bundle.putDouble("silla",silla.peso);
                 bundle.putString("nombre", paciente_final.getNombre());
                 Fragment fragment = new basculaFragment();
                 fragment.setArguments(bundle);
@@ -453,32 +433,6 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         // display the pop-up in the center
         pw.showAtLocation(layout, Gravity.CENTER, 0, 0);
     }
-
-
-    private void eliminarAlertas(final Alerta alerta){
-        Query firebaseSearchQuery = mDatabaseAlertas.orderByChild("codigoPaciente").equalTo(key);
-
-        firebaseSearchQuery.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for(DataSnapshot child : dataSnapshot.getChildren()){
-
-                    Alerta alertaEliminar = (Alerta) child.getValue(Alerta.class);
-                    mDatabaseAlertas.child(child.getKey()).removeValue();
-                }
-                if(alerta != null){
-                    String id = mDatabaseAlertas.push().getKey();
-                    mDatabaseAlertas.child(id).setValue(alerta);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
     private void obtenerRegistros(){
         final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
         Query firebaseSearchQuery = mDatabaseRegs.orderByChild("codigoPaciente").equalTo(key);

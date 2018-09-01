@@ -77,10 +77,10 @@ public class AniadirSillaFragment extends Fragment {
     private static final int REQUEST_ENABLE_BT = 1;
     private static final int REQUEST_FINE_LOCATION = 3;
     private static final int SCAN_PERIOD = 2000;
-    private static final UUID SERVICE_UUID = UUID.fromString("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
-    private static final UUID CHARACTERISTIC_UUID = UUID.fromString("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
-    private static final UUID NOTIFY_UID = UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
-    private static final String BASCULA_MAC = "30:AE:A4:06:55:16";
+    private UUID SERVICE_UUID;
+    private UUID CHARACTERISTIC_UUID;
+    private UUID NOTIFY_UID;
+    private String BASCULA_MAC;
     private EditText inputModelo, inputPeso;
     private FloatingTextButton inputGuardar;
     private boolean conectado = false;
@@ -115,7 +115,12 @@ public class AniadirSillaFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+
         super.onViewCreated(view, savedInstanceState);
+        BASCULA_MAC = getString(R.string.bascula_mac);
+        SERVICE_UUID = UUID.fromString(getString(R.string.service_uuid));
+        CHARACTERISTIC_UUID = UUID.fromString(getString(R.string.characteristic_uuid));
+        NOTIFY_UID = UUID.fromString(getString(R.string.notify_uuid));
         BluetoothManager bluetoothManager = (BluetoothManager) getActivity().getSystemService(Context.BLUETOOTH_SERVICE);
         mBluettothAdapter = bluetoothManager.getAdapter();
 

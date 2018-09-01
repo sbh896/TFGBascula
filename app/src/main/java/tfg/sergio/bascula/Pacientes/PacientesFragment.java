@@ -101,7 +101,6 @@ public class PacientesFragment extends Fragment {
                 AniadirPacienteFragment fragment = new AniadirPacienteFragment();
                 ft.replace(R.id.pacientes_screen,fragment);
                 ft.commit();
-                Toast.makeText(getActivity(), "new one", Toast.LENGTH_SHORT).show();
 
 
             }

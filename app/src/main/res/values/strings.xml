@@ -66,4 +66,8 @@
         <item>Femenino</item>
     </string-array>
     <string name="rutaFotoPaciente">Fotos_pacientes</string>
+    <string name="service_uuid">6e400001-b5a3-f393-e0a9-e50e24dcca9e</string>
+    <string name="characteristic_uuid">6e400002-b5a3-f393-e0a9-e50e24dcca9e</string>
+    <string name="notify_uuid">6e400003-b5a3-f393-e0a9-e50e24dcca9e</string>
+    <string name="bascula_mac">30:AE:A4:06:55:16</string>
 </resources>

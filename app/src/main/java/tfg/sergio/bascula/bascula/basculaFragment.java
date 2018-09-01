@@ -43,6 +43,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.view.menu.ActionMenuItem;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -127,10 +129,10 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
     private static final int REQUEST_ENABLE_BT = 1;
     private static final int REQUEST_FINE_LOCATION = 3;
     private static final int SCAN_PERIOD = 2000;
-    private static final UUID SERVICE_UUID = UUID.fromString("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
-    private static final UUID CHARACTERISTIC_UUID = UUID.fromString("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
-    private static final UUID NOTIFY_UID = UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
-    private static final String BASCULA_MAC = "30:AE:A4:06:55:16";
+    private UUID SERVICE_UUID;
+    private UUID CHARACTERISTIC_UUID;
+    private UUID NOTIFY_UID;
+    private String BASCULA_MAC;
 
     private BluetoothGattCharacteristic pruebacharac;
     private BluetoothGattDescriptor descPrueba;
@@ -145,6 +147,7 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
     private FloatingTextButton ftb_continuar;
     private double peso = 0;
     private double altura =0;
+    private double pesoSilla = 0;
     private double altura_original =0;
     private int tipoMedicion = 0; //0 peso, 1 altura
 
@@ -158,7 +161,14 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
         checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
         startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
         viewHandler = new Handler();
+        setHasOptionsMenu(true);
         return inflater.inflate(R.layout.fragment_bascula, null);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        menu.clear();
     }
 
     @Override
@@ -167,7 +177,10 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
             return;
         }
         this.view = view;
-
+        BASCULA_MAC = getString(R.string.bascula_mac);
+        SERVICE_UUID = UUID.fromString(getString(R.string.service_uuid));
+        CHARACTERISTIC_UUID = UUID.fromString(getString(R.string.characteristic_uuid));
+        NOTIFY_UID = UUID.fromString(getString(R.string.notify_uuid));
         BluetoothManager bluetoothManager = (BluetoothManager) getActivity().getSystemService(Context.BLUETOOTH_SERVICE);
         mBluettothAdapter = bluetoothManager.getAdapter();
         mDatabase = FirebaseDatabase.getInstance().getReference("registros");
@@ -195,12 +208,14 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
         resultAltura =  view.findViewById(R.id.result_altura);
         resultBascula = view.findViewById(R.id.txt_result_bascula);
 
+
         bundle = getArguments();
         key = bundle.getString("key");
         paciente_final = bundle.getParcelable("paciente");
         estado = bundle.getInt("estado");
         centro = bundle.getString("centro");
         nombre = bundle.getString("nombre");
+        pesoSilla = bundle.getDouble("silla");
         altura_original = bundle.getDouble("altura");
         add = view.findViewById(R.id.nuevoPeso);
         if(Configuration.ORIENTATION_LANDSCAPE == getActivity().getResources().getConfiguration().orientation){
@@ -232,7 +247,7 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
             @Override
             public void onClick(View view) {
                 altura=altura_original;
-                setResult(String.format("%.2f",altura));
+                setResult(String.format("%.2f" + "m",altura));
             }
         });
         inputTipoMedida.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -256,7 +271,7 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
                     resultAltura.setText(String.format("%.2f", altura_original));
                     tipoMedicion = 1;
                     resultBascula.setVisibility(View.VISIBLE);
-                    resultBascula.setText(String.format("%.2f", altura));
+                    resultBascula.setText(String.format("%.2f" + "m", altura));
 
 
                 }else{
@@ -276,7 +291,7 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
                     }
                     tare.setVisibility(View.VISIBLE);
                     resultBascula.setVisibility(View.VISIBLE);
-                    resultBascula.setText(String.format("%.2f", peso));
+                    resultBascula.setText(String.format("%.2f" + "kg", peso));
 
                 }
                 ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
@@ -299,9 +314,11 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
                 if(mConnected){
                     switch (tipoMedicion){
                         case 0:
+                            progressDialog.setTitle("Pesando");
                             enviarMensaje("P");
                             break;
                         case 1:
+                            progressDialog.setTitle("Midiendo");
                             enviarMensaje("M");
                             break;
                     }
@@ -551,12 +568,12 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
             }else{
                 switch (tipoMedicion){
                     case 0:
-                            peso = Double.parseDouble(message);
+                            peso = Double.parseDouble(message) - pesoSilla;
                             setResult(String.format("%.2f" + "kg", peso));
                         break;
                     case 1:
                             altura = Double.parseDouble(message);
-                            setResult(String.format("%.2f", altura));
+                            setResult(String.format("%.2f" + "m", altura));
                         break;
                 }
             }
