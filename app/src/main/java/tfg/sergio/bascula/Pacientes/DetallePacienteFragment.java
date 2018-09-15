@@ -77,7 +77,7 @@ import tfg.sergio.bascula.bascula.AniadirSillaFragment;
 import tfg.sergio.bascula.bascula.basculaFragment;
 
 /**
- * Created by yeyo on 05/03/2018.
+ * Created by Sergio Barrado on 05/03/2018.
  */
 
 public class DetallePacienteFragment extends Fragment implements OnChartGestureListener,

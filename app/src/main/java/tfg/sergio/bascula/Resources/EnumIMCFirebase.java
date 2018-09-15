@@ -1,7 +1,7 @@
 package tfg.sergio.bascula.Resources;
 
 /**
- * Created by yeyo on 24/03/2018.
+ * Created by Sergio Barrado on 24/03/2018.
  */
 
 public enum EnumIMCFirebase {

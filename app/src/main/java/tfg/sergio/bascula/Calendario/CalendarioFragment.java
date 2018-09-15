@@ -42,7 +42,7 @@ import tfg.sergio.bascula.Models.RegistroPaciente;
 import tfg.sergio.bascula.R;
 
 /**
- * Created by yeyo on 28/04/2018.
+ * Created by Sergio Barrado on 28/04/2018.
  */
 
 public class CalendarioFragment extends Fragment {

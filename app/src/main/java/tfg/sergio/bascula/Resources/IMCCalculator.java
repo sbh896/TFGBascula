@@ -3,7 +3,7 @@ package tfg.sergio.bascula.Resources;
 import java.util.Arrays;
 
 /**
- * Created by yeyo on 18/03/2018.
+ * Created by Sergio Barrado on 18/03/2018.
  */
 
 public class IMCCalculator {

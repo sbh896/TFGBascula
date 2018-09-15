@@ -14,7 +14,7 @@ import tfg.sergio.bascula.Models.ElementoListadoAlerta;
 import tfg.sergio.bascula.R;
 
 /**
- * Created by yeyo on 24/03/2018.
+ * Created by Sergio Barrado on 24/03/2018.
  */
 
 public class AdapterAlerta extends RecyclerView.Adapter<AdapterAlerta.PacientesViewHolder>{

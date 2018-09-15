@@ -78,7 +78,7 @@ import tfg.sergio.bascula.Resources.EnumIMCFirebase;
 import tfg.sergio.bascula.Resources.IMCCalculator;
 
 /**
- * Created by yeyo on 15/04/2018.
+ * Created by Sergio Barrado on 15/04/2018.
  */
 
 public class basculaResultFragment extends Fragment{

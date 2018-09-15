@@ -54,7 +54,7 @@ import tfg.sergio.bascula.Models.PacientesMesCentro;
 import tfg.sergio.bascula.R;
 
 /**
- * Created by yeyo on 24/03/2018.
+ * Created by Sergio Barrado on 24/03/2018.
  */
 
 public class ModificarCentroFragment extends Fragment {

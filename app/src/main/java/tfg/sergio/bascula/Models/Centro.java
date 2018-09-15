@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Created by yeyo on 04/03/2018.
+ * Created by Sergio Barrado on 04/03/2018.
  */
 
 public class Centro implements Parcelable{

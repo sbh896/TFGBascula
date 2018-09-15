@@ -39,7 +39,7 @@ import tfg.sergio.bascula.Resources.EnumIMC;
 import tfg.sergio.bascula.Resources.IMCCalculator;
 
 /**
- * Created by yeyo on 25/02/2018.
+ * Created by Sergio Barrado on 25/02/2018.
  */
 
 public class PacientesFragment extends Fragment {

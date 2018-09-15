@@ -22,7 +22,7 @@ import tfg.sergio.bascula.Pacientes.DetallePacienteFragment;
 import tfg.sergio.bascula.R;
 
 /**
- * Created by yeyo on 24/03/2018.
+ * Created by Sergio Barrado on 24/03/2018.
  */
 
 public class AdapterPaciente extends RecyclerView.Adapter<AdapterPaciente.PacientesViewHolder>{

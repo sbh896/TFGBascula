@@ -32,7 +32,7 @@ import tfg.sergio.bascula.Models.Centro;
 import tfg.sergio.bascula.R;
 
 /**
- * Created by yeyo on 25/02/2018.
+ * Created by Sergio Barrado on 25/02/2018.
  */
 
 public class CentrosFragment extends Fragment {

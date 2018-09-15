@@ -1,7 +1,7 @@
 package tfg.sergio.bascula.Resources;
 
 /**
- * Created by yeyo on 05/05/2018.
+ * Created by Sergio Barrado on 05/05/2018.
  */
 import android.graphics.Canvas;
 import android.graphics.Color;

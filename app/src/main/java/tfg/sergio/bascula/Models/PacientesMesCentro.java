@@ -1,7 +1,7 @@
 package tfg.sergio.bascula.Models;
 
 /**
- * Created by yeyo on 25/03/2018.
+ * Created by Sergio Barrado on 25/03/2018.
  */
 
 public class PacientesMesCentro {

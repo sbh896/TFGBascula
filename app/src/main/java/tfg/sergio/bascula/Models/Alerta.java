@@ -3,7 +3,7 @@ package tfg.sergio.bascula.Models;
 import java.util.Date;
 
 /**
- * Created by yeyo on 01/05/2018.
+ * Created by Sergio Barrado on 01/05/2018.
  */
 
 public class Alerta {

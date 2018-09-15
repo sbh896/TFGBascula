@@ -3,7 +3,7 @@ package tfg.sergio.bascula.Models;
 import java.util.ArrayList;
 
 /**
- * Created by yeyo on 13/04/2018.
+ * Created by Sergio Barrado on 13/04/2018.
  */
 
 public class MesesAnno {

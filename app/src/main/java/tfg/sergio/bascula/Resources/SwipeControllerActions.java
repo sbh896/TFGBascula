@@ -1,7 +1,7 @@
 package tfg.sergio.bascula.Resources;
 
 /**
- * Created by yeyo on 05/05/2018.
+ * Created by Sergio Barrado on 05/05/2018.
  */
 
 public class SwipeControllerActions {

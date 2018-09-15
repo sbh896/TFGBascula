@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Created by yeyo on 16/06/2018.
+ * Created by Sergio Barrado on 16/06/2018.
  */
 
 public class BluetoothUtils {

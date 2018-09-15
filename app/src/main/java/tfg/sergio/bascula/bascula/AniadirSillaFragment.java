@@ -69,7 +69,7 @@ import tfg.sergio.bascula.Resources.BluetoothUtils;
 import tfg.sergio.bascula.Resources.FixedDatePicker;
 
 /**
- * Created by yeyo on 06/06/2018.
+ * Created by Sergio Barrado on 06/06/2018.
  */
 
 public class AniadirSillaFragment extends Fragment {

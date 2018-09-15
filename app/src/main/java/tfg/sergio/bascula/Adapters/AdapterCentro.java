@@ -64,7 +64,7 @@ import tfg.sergio.bascula.R;
 import tfg.sergio.bascula.Registro;
 
 /**
- * Created by yeyo on 24/03/2018.
+ * Created by Sergio Barrado on 24/03/2018.
  */
 
 public class AdapterCentro extends RecyclerView.Adapter<AdapterCentro.CentrosViewHolder>{
