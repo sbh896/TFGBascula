@@ -344,7 +344,6 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
                 fragment.setArguments(bundle);
                 ft.replace(R.id.pacientes_screen,fragment);
                 ft.commit();
-                Toast.makeText(getActivity(), "new one", Toast.LENGTH_SHORT).show();
             }
         });
 

@@ -9,6 +9,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -31,6 +33,7 @@ import java.util.List;
 
 import tfg.sergio.bascula.Adapters.AdapterPaciente;
 import tfg.sergio.bascula.Models.Centro;
+import tfg.sergio.bascula.Models.ElementoListadoAlerta;
 import tfg.sergio.bascula.Models.ElementoListadoPaciente;
 import tfg.sergio.bascula.Models.Paciente;
 import tfg.sergio.bascula.Models.RegistroPaciente;
@@ -58,7 +61,14 @@ public class PacientesFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
         return inflater.inflate(R.layout.fragment_pacientes, null);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        menu.clear();
     }
 
     @Override
@@ -249,7 +259,11 @@ public class PacientesFragment extends Fragment {
                 elp.paciente = pac;
                 elp.registroPaciente = reg;
                 elp.key = key;
-                if(!elementos.contains(elp)){
+                ArrayList<String>keys = new ArrayList<>();
+                for(ElementoListadoPaciente elpaux : elementos){
+                    keys.add(elpaux.key);
+                }
+                if(!elementos.contains(elp) && !keys.contains(key)){
                     elementos.add(elp);
                     adapter.notifyDataSetChanged();
                 }

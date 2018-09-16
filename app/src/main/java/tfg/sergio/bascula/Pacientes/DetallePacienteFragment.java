@@ -88,7 +88,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
     private ImageView out_perfil;
     private DatabaseReference mDatabase;
     private DatabaseReference mDatabaseRegs, mDatabaseAlertas, mDatabaseSillas;
-    private FloatingTextButton pesarButton, configAlertButton;
+    private FloatingTextButton pesarButton, configAlertButton, deleteAlertButton;
     private ArrayList<RegistroPaciente> registros = new ArrayList<>();
     private StorageReference mStorage;
     int estado;
@@ -169,6 +169,7 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         out_perfil = view.findViewById(R.id.foto_perfil);
         pesarButton = view.findViewById(R.id.btn_pesar);
         configAlertButton = view.findViewById(R.id.btn_alert);
+        deleteAlertButton = view.findViewById(R.id.btn_delete_alert);
         mChart = (LineChart) view.findViewById(R.id.peso_grafica);
         mChart.setOnChartGestureListener(this);
         mChart.setOnChartValueSelectedListener(this);
@@ -176,6 +177,26 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
         out_nombre.setElevation(100);
         setDatosPaciente(paciente_final);
         obtenerRegistros();
+
+        deleteAlertButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mDatabaseAlertas.orderByChild("codigoPaciente").startAt(key).endAt(key + "\uf8ff").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for(DataSnapshot child : dataSnapshot.getChildren()){
+                            Alerta alerta = child.getValue(Alerta.class);
+                            mDatabaseAlertas.child(child.getKey()).removeValue();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        });
 
         pesarButton.setOnClickListener(new View.OnClickListener() {
             @Override

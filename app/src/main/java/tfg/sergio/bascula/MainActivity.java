@@ -40,6 +40,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -74,6 +75,7 @@ public class MainActivity extends AppCompatActivity
     private DatabaseReference mDatabaseCentros, mDatabaseDatosMes, mDatabaseRegistros, mDatabasePacientes, mDatabaseAlertas;
     private List<PacientesMesCentro> pmCentros = new ArrayList<>();
     private RecyclerView listaRegistros;
+    private SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yy");
 
     private ArrayList<Centro> centros = new ArrayList<>();
     private int NumObesidad = 0;
@@ -260,7 +262,16 @@ public class MainActivity extends AppCompatActivity
 
                     final Alerta alerta = child.getValue(Alerta.class);
                     final String alertaKey = child.getKey();
-
+                    Date fechaHoy = new Date();
+                    Date fechaAlerta = null;
+                    try {
+                        fechaAlerta = formatter.parse(formatter.format(alerta.fechaInicio));
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    if(fechaAlerta.before(fechaHoy)){
+                        return;
+                    }
 
                     if (alerta.codigoPaciente != null) {
                         Query firebaseSearchQuery = mDatabaseRegistros.orderByChild("StrFecha");//.startAt(search).endAt(search + "\uf8ff");
