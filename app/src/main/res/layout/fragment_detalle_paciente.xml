@@ -58,7 +58,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Edad"
+                                android:text="F. Nac."
                                 android:textSize="20sp"
                                 />
                             <TextView

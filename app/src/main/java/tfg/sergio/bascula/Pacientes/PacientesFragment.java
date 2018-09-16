@@ -139,7 +139,11 @@ public class PacientesFragment extends Fragment {
 
 
         };
-        centros.add(new Centro("-1","Centro"));
+        Centro first = new Centro("-1","Centro");
+        if(!centros.contains(first)){
+           centros.add(first);
+        }
+       // centros.add(new Centro("-1","Centro"));
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         sp_centros.setAdapter(arrayAdapter);

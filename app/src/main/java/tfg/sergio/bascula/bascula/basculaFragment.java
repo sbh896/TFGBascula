@@ -573,6 +573,7 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
                         break;
                     case 1:
                             altura = Double.parseDouble(message);
+                            altura = (altura/1000) - 0.4;
                             setResult(String.format("%.2f" + "m", altura));
                         break;
                 }

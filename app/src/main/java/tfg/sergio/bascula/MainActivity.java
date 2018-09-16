@@ -568,6 +568,9 @@ public class MainActivity extends AppCompatActivity
                                 if (pac != null) {
                                     elp.paciente = pac;
                                 }
+                                else if (pac == null){
+                                    return;
+                                }
                                 elp.key = key;
                                 addElement(elp);
                             }

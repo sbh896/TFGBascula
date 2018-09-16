@@ -17,6 +17,7 @@ import com.squareup.picasso.Picasso;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
+import tfg.sergio.bascula.MainActivity;
 import tfg.sergio.bascula.Models.ElementoListadoPaciente;
 import tfg.sergio.bascula.Pacientes.DetallePacienteFragment;
 import tfg.sergio.bascula.R;
@@ -47,7 +48,7 @@ public class AdapterRegistro extends RecyclerView.Adapter<AdapterRegistro.Pacien
         final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yy");
 
         final ElementoListadoPaciente paciente = pacientes.get(position);
-        if(paciente == null ){
+        if(paciente == null || paciente.paciente == null){
             return;
         }
         holder.paciente_nombre.setText(paciente.paciente.getNombre());
@@ -58,6 +59,9 @@ public class AdapterRegistro extends RecyclerView.Adapter<AdapterRegistro.Pacien
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(ctx.getClass().getName().equals("tfg.sergio.bascula.MainActivity")){
+                    return;
+                }
                 FragmentManager fm =  ((AppCompatActivity)ctx).getSupportFragmentManager();
                 FragmentTransaction ft = fm.beginTransaction();
                 ft.addToBackStack("pacientes");

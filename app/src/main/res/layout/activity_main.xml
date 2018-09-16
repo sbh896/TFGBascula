@@ -117,7 +117,8 @@
                     android:layout_height="match_parent"
                     android:layout_below="@+id/titleRecicler"
                     android:layout_gravity="left"
-                    android:layout_marginTop="28dp">
+                    android:layout_marginTop="28dp"
+                    android:clickable="false">
                 </android.support.v7.widget.RecyclerView>
 
             </RelativeLayout>
