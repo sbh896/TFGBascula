@@ -583,6 +583,13 @@ public class MainActivity extends AppCompatActivity
                                     return;
                                 }
                                 elp.key = key;
+                                ArrayList<String>keys = new ArrayList<>();
+                                for(ElementoListadoPaciente elpaux : elementos){
+                                    keys.add(elpaux.key);
+                                }
+                                if(keys.contains(key)){
+                                    return;
+                                }
                                 addElement(elp);
                             }
 
