@@ -69,6 +69,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 import java.security.PrivateKey;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -86,6 +87,7 @@ import java.util.TimerTask;
 import java.util.UUID;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
+import tfg.sergio.bascula.Base.BaseFragment;
 import tfg.sergio.bascula.MainActivity;
 import tfg.sergio.bascula.Manifest;
 import tfg.sergio.bascula.Models.Centro;
@@ -105,7 +107,7 @@ import tfg.sergio.bascula.Resources.IMCCalculator;
  * Created by sergio on 12/03/2018.
  */
 
-public class basculaFragment extends Fragment implements TextToSpeech.OnInitListener, TextToSpeech.OnUtteranceCompletedListener {
+public class basculaFragment extends BaseFragment implements TextToSpeech.OnInitListener, TextToSpeech.OnUtteranceCompletedListener{
     private static final int MY_DATA_CHECK_CODE = 5;
     private static final int BLUETOOTH_CODE = 2;
     private Button add, tare;
@@ -151,7 +153,7 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
     private double altura_original =0;
     private int tipoMedicion = 0; //0 peso, 1 altura
 
-
+    private boolean reintentar = true;
     ProgressBar progressBar;
 
     @Nullable
@@ -239,6 +241,9 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
         builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+                if(mGatt != null){
+                    mGatt.close();
+                }
                 getFragmentManager().popBackStackImmediate();
             }
         });
@@ -342,6 +347,9 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
                 bundle.putParcelable("paciente",paciente_final);
                 basculaResultFragment fragment = new basculaResultFragment();
                 fragment.setArguments(bundle);
+                if(mGatt != null){
+                    mGatt.close();
+                }
                 ft.replace(R.id.pacientes_screen,fragment);
                 ft.commit();
             }
@@ -353,9 +361,13 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
                 enviarMensaje("T");
             }
         });
-        progressDialogDisp.show();
         if(comprobarPermisos()){
+            progressDialogDisp.show();
+
             escanear();
+        }
+        else{
+            mConnected = true;
         }
         super.onViewCreated(view, savedInstanceState);
     }
@@ -426,12 +438,17 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
             public void run() {
                 if (mScanning && mBluettothAdapter != null && mBluettothAdapter.isEnabled() && mBluetoothLeScanner != null) {
                     mBluetoothLeScanner.stopScan(mScanCallback);
+                    mScanCallback = null;
+                    mScanning = false;
+                    mHandler = null;
                     scanComplete();
                 }
+                else{
 
-                mScanCallback = null;
-                mScanning = false;
-                mHandler = null;
+                    progressDialogDisp.dismiss();
+                    AlertDialog alert = builder.create();
+                    alert.show();
+                }
             }
         }, 10000);
 
@@ -499,14 +516,19 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
             if(deviceAddress.equals(BASCULA_MAC)){
                 device = mScanResults.get(deviceAddress);
                 connectDevice(device);
+                reintentar = false;
                 habla("Por favor, colócate sobre la báscula y pulsa el botón.");
                 progressDialogDisp.dismiss();
             }
         }
-        if(device == null){
+        if(device == null && !reintentar){
+
             progressDialogDisp.dismiss();
             AlertDialog alert = builder.create();
             alert.show();
+        }else if(reintentar == true){
+            reintentar = false;
+            escanear();
         }
     }
 
@@ -602,6 +624,9 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
             mGatt.disconnect();
             mGatt.close();
         }
+        AlertDialog alert = builder.create();
+        alert.show();
+
     }
 
     public void reconnectGattServer(BluetoothDevice device){
@@ -669,7 +694,9 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
             }else{
                 Toast.makeText(getActivity(), "Por favor active la ubicación e inténtelo de nuevo.", Toast.LENGTH_SHORT).show();
                 progressDialogDisp.dismiss();
-                getFragmentManager().popBackStackImmediate();
+                if(mGatt != null){
+                    mGatt.close();
+                }                getFragmentManager().popBackStackImmediate();
             }
         }
     }
@@ -692,6 +719,10 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
             if (resultCode == Activity.RESULT_CANCELED) {
                 Toast.makeText(getActivity(), "Por favor active el bluetooth e inténtelo de nuevo.", Toast.LENGTH_SHORT).show();
                 progressDialogDisp.dismiss();
+                if(mGatt != null){
+                    mGatt.close();
+                }
+
                 getFragmentManager().popBackStackImmediate();
             }
             else if(resultCode == Activity.RESULT_OK){
@@ -734,6 +765,25 @@ public class basculaFragment extends Fragment implements TextToSpeech.OnInitList
         super.onDestroy();
         if(mTts!=null){
             mTts.shutdown(); //mTts is your TextToSpeech Object
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(mGatt != null){
+            try {
+                // BluetoothGatt gatt
+                final Method refresh = mGatt.getClass().getMethod("refresh");
+                if (refresh != null) {
+                    refresh.invoke(mGatt);
+                }
+            } catch (Exception e)
+            {
+                // Log it
+            }
+            mGatt.disconnect();
+            mGatt.close();
+            mGatt = null;
         }
     }
 }

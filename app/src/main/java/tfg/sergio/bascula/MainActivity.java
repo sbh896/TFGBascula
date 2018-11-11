@@ -47,6 +47,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import tfg.sergio.bascula.Base.BaseFragment;
 import tfg.sergio.bascula.Calendario.CalendarioFragment;
 import tfg.sergio.bascula.Centros.CentrosFragment;
 import tfg.sergio.bascula.Adapters.AdapterAlerta;
@@ -148,6 +149,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -157,19 +159,25 @@ public class MainActivity extends AppCompatActivity
                 super.onBackPressed();
                 //additional code
             } else {
-                if(mGatt != null){
-                    mGatt.disconnect();
-                    mGatt.close();
-                }
+                tellFragments();
                 getSupportFragmentManager().popBackStackImmediate();
 
             }
         }
     }
 
+    private void tellFragments(){
+        List<Fragment> fragments = getSupportFragmentManager().getFragments();
+        for(Fragment f : fragments){
+            if(f != null && f instanceof BaseFragment)
+                ((BaseFragment)f).onBackPressed();
+        }
+    }
+
     public void setGatt(BluetoothGatt gatt){
         mGatt = gatt;
     }
+
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
