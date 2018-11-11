@@ -697,9 +697,9 @@ public class DetallePacienteFragment extends Fragment implements OnChartGestureL
             hDensity = 800;
         }
 
-        altura.setText("Altura: "+ registroSeleccionado.getAltura());
-        peso.setText("Peso: " + registroSeleccionado.getPeso());
-        imc.setText("IMC: " + registroSeleccionado.getIMC());
+        altura.setText("Altura: "+ String.format("%.2f", registroSeleccionado.getAltura()));
+        peso.setText("Peso: " + String.format("%.2f", registroSeleccionado.getPeso()));
+        imc.setText("IMC: " + String.format("%.2f", registroSeleccionado.getIMC()));
         fecha.setText(formatter.format(registroSeleccionado.getFecha()));
         float density=getActivity().getResources().getDisplayMetrics().density;
         final PopupWindow pw = new PopupWindow(layout, (int)density*600, (int)density*hDensity, true);

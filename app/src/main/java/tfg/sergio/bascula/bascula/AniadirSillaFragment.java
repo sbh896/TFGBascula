@@ -84,6 +84,7 @@ public class AniadirSillaFragment extends Fragment {
     private EditText inputModelo, inputPeso;
     private FloatingTextButton inputGuardar;
     private boolean conectado = false;
+    private boolean reintentar = true;
 
     //almacenamiento firebase
     private DatabaseReference mDatabaseSillas, mDatabasePacientes;
@@ -150,6 +151,8 @@ public class AniadirSillaFragment extends Fragment {
                 Random r = new Random();
                 if(mConnected){
                     enviarMensaje("P");
+                }else{
+                    disconnectGattServer();
                 }
             }
         });
@@ -213,9 +216,12 @@ public class AniadirSillaFragment extends Fragment {
         progressDialog.setTitle("Pesando");
         progressDialog.setMessage("Por favor espere...");
         progressDialog.setCancelable(false);
-        progressDialogDisp.show();
         if(comprobarPermisos()){
+            progressDialogDisp.show();
             escanear();
+        }
+        else{
+            mConnected = true;
         }
     }
 
@@ -255,7 +261,7 @@ public class AniadirSillaFragment extends Fragment {
     private void escanear(){
         BluetoothManager manager = (BluetoothManager) getActivity().getSystemService(Context.BLUETOOTH_SERVICE);
         assert manager != null;
-        List<BluetoothDevice> adsf = manager.getConnectedDevices(BluetoothProfile.GATT);
+        List<BluetoothDevice> adsf = manager.getConnectedDevices(BluetoothProfile.GATT_SERVER);
         for (BluetoothDevice dev:adsf)
         {
             if(dev.getAddress().equals(BASCULA_MAC) && mGatt == null){
@@ -282,12 +288,17 @@ public class AniadirSillaFragment extends Fragment {
             public void run() {
                 if (mScanning && mBluettothAdapter != null && mBluettothAdapter.isEnabled() && mBluetoothLeScanner != null) {
                     mBluetoothLeScanner.stopScan(mScanCallback);
+                    mScanCallback = null;
+                    mScanning = false;
+                    mHandler = null;
                     scanComplete();
                 }
+                else{
 
-                mScanCallback = null;
-                mScanning = false;
-                mHandler = null;
+                    progressDialogDisp.dismiss();
+                    AlertDialog alert = builder.create();
+                    alert.show();
+                }
             }
         }, 10000);
 
@@ -355,13 +366,18 @@ public class AniadirSillaFragment extends Fragment {
             if(deviceAddress.equals(BASCULA_MAC)){
                 device = mScanResults.get(deviceAddress);
                 connectDevice(device);
+                reintentar = false;
                 progressDialogDisp.dismiss();
             }
         }
-        if(device == null){
+        if(device == null && !reintentar){
+
             progressDialogDisp.dismiss();
-            AlertDialog alert = builderError.create();
+            AlertDialog alert = builder.create();
             alert.show();
+        }else if(reintentar == true){
+            reintentar = false;
+            escanear();
         }
     }
 
@@ -446,6 +462,8 @@ public class AniadirSillaFragment extends Fragment {
             mGatt.disconnect();
             mGatt.close();
         }
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
     public void reconnectGattServer(BluetoothDevice device){
@@ -496,7 +514,6 @@ public class AniadirSillaFragment extends Fragment {
                 Toast.makeText(getActivity(), "Por favor active la ubicación e inténtelo de nuevo.", Toast.LENGTH_SHORT).show();
                 progressDialogDisp.dismiss();
                 getFragmentManager().popBackStackImmediate();
-                disconnectGattServer();
             }
         }
     }

@@ -410,7 +410,8 @@ public class basculaFragment extends BaseFragment implements TextToSpeech.OnInit
     private void escanear(){
         BluetoothManager manager = (BluetoothManager) getActivity().getSystemService(Context.BLUETOOTH_SERVICE);
         assert manager != null;
-        List<BluetoothDevice>adsf = manager.getConnectedDevices(BluetoothProfile.GATT);
+
+        List<BluetoothDevice>adsf = manager.getConnectedDevices(BluetoothProfile.GATT_SERVER);
         for (BluetoothDevice dev:adsf)
         {
             if(dev.getAddress().equals(BASCULA_MAC) && mGatt == null){
@@ -638,6 +639,12 @@ public class basculaFragment extends BaseFragment implements TextToSpeech.OnInit
         }
         mGatt = device.connectGatt(getActivity(), false, gattClientCallback);
         ((MainActivity)getActivity()).setGatt(mGatt);
+        if (mGatt == null) {
+            mGatt.disconnect();
+            mGatt.close();
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
     }
 
     private void enableCharacteristicNotification(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
@@ -770,7 +777,7 @@ public class basculaFragment extends BaseFragment implements TextToSpeech.OnInit
 
     @Override
     public void onBackPressed() {
-        if(mGatt != null){
+        /*if(mGatt != null){
             try {
                 // BluetoothGatt gatt
                 final Method refresh = mGatt.getClass().getMethod("refresh");
@@ -784,6 +791,6 @@ public class basculaFragment extends BaseFragment implements TextToSpeech.OnInit
             mGatt.disconnect();
             mGatt.close();
             mGatt = null;
-        }
+        }*/
     }
 }
