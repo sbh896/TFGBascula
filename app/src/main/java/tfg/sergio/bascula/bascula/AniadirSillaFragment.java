@@ -199,7 +199,6 @@ public class AniadirSillaFragment extends Fragment {
 
                     mDatabasePacientes.child(pacienteOriginal.getId()).setValue(pacienteOriginal);
                     FragmentManager fm = getFragmentManager();
-                    disconnectGattServer();
                     fm.popBackStack();
 
                 }
@@ -446,7 +445,6 @@ public class AniadirSillaFragment extends Fragment {
     private void connectDevice(BluetoothDevice device) {
         AniadirSillaFragment.GattClientCallback gattClientCallback = new AniadirSillaFragment.GattClientCallback();
         mGatt = device.connectGatt(getActivity(), false, gattClientCallback);
-        ((MainActivity)getActivity()).setGatt(mGatt);
         progressDialogDisp.dismiss();
     }
 
@@ -474,7 +472,6 @@ public class AniadirSillaFragment extends Fragment {
             mGatt.close();
         }
         mGatt = device.connectGatt(getActivity(), false, gattClientCallback);
-        ((MainActivity)getActivity()).setGatt(mGatt);
     }
 
     private void enableCharacteristicNotification(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
@@ -533,7 +530,6 @@ public class AniadirSillaFragment extends Fragment {
                 Toast.makeText(getActivity(), "Por favor active el bluetooth e inténtelo de nuevo.", Toast.LENGTH_SHORT).show();
                 progressDialogDisp.dismiss();
                 getFragmentManager().popBackStackImmediate();
-                disconnectGattServer();
             }
             else if(resultCode == Activity.RESULT_OK){
                 escanear();

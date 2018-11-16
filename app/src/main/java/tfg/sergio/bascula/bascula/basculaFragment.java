@@ -242,7 +242,7 @@ public class basculaFragment extends BaseFragment implements TextToSpeech.OnInit
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 if(mGatt != null){
-                    mGatt.close();
+                    disconnectGattServer();
                 }
                 getFragmentManager().popBackStackImmediate();
             }
@@ -347,9 +347,6 @@ public class basculaFragment extends BaseFragment implements TextToSpeech.OnInit
                 bundle.putParcelable("paciente",paciente_final);
                 basculaResultFragment fragment = new basculaResultFragment();
                 fragment.setArguments(bundle);
-                if(mGatt != null){
-                    mGatt.close();
-                }
                 ft.replace(R.id.pacientes_screen,fragment);
                 ft.commit();
             }
@@ -410,7 +407,6 @@ public class basculaFragment extends BaseFragment implements TextToSpeech.OnInit
     private void escanear(){
         BluetoothManager manager = (BluetoothManager) getActivity().getSystemService(Context.BLUETOOTH_SERVICE);
         assert manager != null;
-
         List<BluetoothDevice>adsf = manager.getConnectedDevices(BluetoothProfile.GATT_SERVER);
         for (BluetoothDevice dev:adsf)
         {
@@ -423,13 +419,16 @@ public class basculaFragment extends BaseFragment implements TextToSpeech.OnInit
             }
         }
 
-
         List<ScanFilter> filters = new ArrayList<>();
         ScanSettings settings = new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER)
                 .build();
         mScanResults = new HashMap<>();
         mScanCallback = new BtleScanCallback(mScanResults);
+        if(reintentar == false){
+             BluetoothManager bluetoothManager = (BluetoothManager) getActivity().getSystemService(Context.BLUETOOTH_SERVICE);
+            mBluettothAdapter = bluetoothManager.getAdapter();
+        }
         mBluetoothLeScanner = mBluettothAdapter.getBluetoothLeScanner();
         mBluetoothLeScanner.startScan(filters,settings,mScanCallback);
         mScanning = true;
@@ -591,11 +590,14 @@ public class basculaFragment extends BaseFragment implements TextToSpeech.OnInit
                 switch (tipoMedicion){
                     case 0:
                             peso = Double.parseDouble(message) - pesoSilla;
+                            if(peso < 0){
+                                peso = 0;
+                            }
                             setResult(String.format("%.2f" + "kg", peso));
                         break;
                     case 1:
                             altura = Double.parseDouble(message);
-                            altura = (altura/1000) - 0.4;
+                            altura = (altura/1000);
                             setResult(String.format("%.2f" + "m", altura));
                         break;
                 }
@@ -608,7 +610,6 @@ public class basculaFragment extends BaseFragment implements TextToSpeech.OnInit
     private void connectDevice(BluetoothDevice device) {
         GattClientCallback gattClientCallback = new GattClientCallback();
         mGatt = device.connectGatt(getActivity(), false, gattClientCallback);
-        ((MainActivity)getActivity()).setGatt(mGatt);
         progressDialogDisp.dismiss();
     }
 
@@ -638,7 +639,6 @@ public class basculaFragment extends BaseFragment implements TextToSpeech.OnInit
             mGatt.close();
         }
         mGatt = device.connectGatt(getActivity(), false, gattClientCallback);
-        ((MainActivity)getActivity()).setGatt(mGatt);
         if (mGatt == null) {
             mGatt.disconnect();
             mGatt.close();
@@ -697,13 +697,13 @@ public class basculaFragment extends BaseFragment implements TextToSpeech.OnInit
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if(requestCode == REQUEST_FINE_LOCATION){
             if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                progressDialogDisp.show();
                 escanear();
             }else{
                 Toast.makeText(getActivity(), "Por favor active la ubicación e inténtelo de nuevo.", Toast.LENGTH_SHORT).show();
                 progressDialogDisp.dismiss();
-                if(mGatt != null){
-                    mGatt.close();
-                }                getFragmentManager().popBackStackImmediate();
+
+                getFragmentManager().popBackStackImmediate();
             }
         }
     }
@@ -726,13 +726,11 @@ public class basculaFragment extends BaseFragment implements TextToSpeech.OnInit
             if (resultCode == Activity.RESULT_CANCELED) {
                 Toast.makeText(getActivity(), "Por favor active el bluetooth e inténtelo de nuevo.", Toast.LENGTH_SHORT).show();
                 progressDialogDisp.dismiss();
-                if(mGatt != null){
-                    mGatt.close();
-                }
-
                 getFragmentManager().popBackStackImmediate();
             }
             else if(resultCode == Activity.RESULT_OK){
+                progressDialogDisp.show();
+
                 escanear();
             }
         }
